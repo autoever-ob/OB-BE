@@ -17,7 +17,16 @@ public enum SuccessStatus {
     SEND_HEALTH_SUCCESS(HttpStatus.OK,"서버 상태 OK"),
 
 
-    WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공");
+    WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
+    SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "매물 리스트 조회 성공"),
+
+    /**
+     * 201
+     */
+
+    SEND_CAR_CREATE_SUCCESS(HttpStatus.CREATED, "매물 생성 성공");
+
+
     private final HttpStatus httpStatus;
     private final String message;
 

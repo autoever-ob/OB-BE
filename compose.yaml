@@ -1,10 +1,27 @@
+version: '3.8'
+
 services:
   mysql:
-    image: 'mysql:latest'
+    image: mysql:latest
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=verysecret
+      - MYSQL_USER=myuser
     ports:
-      - '3306'
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  campick:
+    build: ./
+    env_file:
+      - .env
+    platform: linux/amd64
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:

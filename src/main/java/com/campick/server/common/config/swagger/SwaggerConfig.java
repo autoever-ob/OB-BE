@@ -14,10 +14,9 @@ public class SwaggerConfig {
     public OpenAPI baseOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Campick Secondhand Camping Car API")
+                        .title("캠픽")
                         .description("REST API documentation for Campick server")
                         .version("0.0.1")
-                        .license(new License().name("MIT"))
                         .contact(new Contact().name("Campick Team"))
                 );
     }

@@ -19,6 +19,8 @@ public enum SuccessStatus {
 
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
     SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "매물 리스트 조회 성공"),
+    SEND_EMAIL_VERIFICATION_CODE_SUCCESS(HttpStatus.OK, "이메일 전송 성공"),
+    SEND_EMAIL_VERIFICATION_SUCCESS(HttpStatus.OK, "이메일 검증 성공"),
 
     /**
      * 201

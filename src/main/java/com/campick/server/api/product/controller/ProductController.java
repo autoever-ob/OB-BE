@@ -1,11 +1,12 @@
 package com.campick.server.api.product.controller;
 
+import com.campick.server.api.product.dto.AllProductResponseDto;
+import com.campick.server.api.product.dto.ProductCreateRequestDto;
 import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -15,8 +16,14 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
+    @PostMapping
+    public ResponseEntity<Long> createProduct(@RequestBody ProductCreateRequestDto dto) {
+        Long productId = productService.createProduct(dto);
+        return ResponseEntity.ok(productId);
+    }
+
     @GetMapping
-    public List<Product> getProducts() {
+    public List<AllProductResponseDto> getProducts() {
         return productService.findAll();
     }
 }

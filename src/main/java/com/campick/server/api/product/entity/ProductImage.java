@@ -26,7 +26,4 @@ public class ProductImage {
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 }

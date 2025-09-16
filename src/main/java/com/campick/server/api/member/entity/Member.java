@@ -4,6 +4,7 @@ import com.campick.server.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Table(name = "member")
@@ -48,4 +49,22 @@ public class Member extends BaseTimeEntity {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+
+    private String refreshToken;
+    private LocalDateTime refreshTokenExpiration;
+
+    public void updateRefreshToken(String refreshToken, long expireMs) {
+        this.refreshToken = refreshToken;
+        this.refreshTokenExpiration = LocalDateTime.now().plus(Duration.ofMillis(expireMs));
+    }
+
+
+    //닉네임 변경
+    public void updateNickname(String nickname) { this.nickname = nickname; }
+
+    // 비밀번호 변경
+    public void updatePassword(String password) { this.password = password; }
+
+    // 프로필 이미지 변경
+    public void updateProfileImage(String profileImage) { this.profileImage = profileImage;}
 }

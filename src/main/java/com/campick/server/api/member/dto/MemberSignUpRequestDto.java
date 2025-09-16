@@ -22,16 +22,23 @@ public class MemberSignUpRequestDto {
     private String email;
     
     @NotBlank(message = "비밀번호를 입력해주세요.")
-    // 추후 추가
-//    @Pattern(
-//            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$",
-//            message = "비밀번호는 영문 대소문자, 숫자, 특수문자를 포함해 8자 이상이어야 합니다."
-//    )
+    @Pattern(
+            regexp = "^[0-9]{6,}$",
+            message = "비밀번호는 숫자 6자리 이상이어야 합니다."
+    )
     private String password;
+
+    @NotBlank(message = "비밀번호 확인을 입력해주세요.")
+    @Pattern(
+            regexp = "^[0-9]{6,}$",
+            message = "비밀번호 확인은 숫자 6자리 이상이어야 합니다."
+    )
+    private String checkedPassword;
     
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Size(min = 2, max = 10, message = "닉네임은 2자 이상 10자 이하여야 합니다.")
     private String nickname;
+
     
     @NotBlank(message = "휴대폰 번호를 입력해주세요.")
     @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$",
@@ -46,7 +53,7 @@ public class MemberSignUpRequestDto {
                 .nickname(nickname)
                 .mobileNumber(mobileNumber)
                 .role(Role.ROLE_USER)
-                .profileImage(null) // 추후 이미지 추가시에
+                .profileImage("") // 추후 이미지 추가시에
                 .description(null)
                 .deletedAt(null)
                 .isDeleted(false)

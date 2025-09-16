@@ -1,8 +1,6 @@
 package com.campick.server.api.member.controller;
 
-import com.campick.server.api.member.dto.EmailVerificationCodeRequestDto;
-import com.campick.server.api.member.dto.EmailVerificationRequestDto;
-import com.campick.server.api.member.dto.MemberSignUpRequestDto;
+import com.campick.server.api.member.dto.*;
 import com.campick.server.api.member.service.EmailService;
 import com.campick.server.api.member.service.MemberService;
 import com.campick.server.common.exception.BadRequestException;
@@ -12,6 +10,8 @@ import com.campick.server.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,19 +32,34 @@ public class MemberController {
     private final MemberService memberService;
     private final EmailService emailService;
 
-//    @Operation(summary = "이메일 회원가입 API", description = "회원 정보를 받아 회원가입 합니다.")
-//    @PostMapping("/signup")
-//    public ResponseEntity<ApiResponse<Void>> signUp(@Valid @RequestBody MemberSignUpRequestDto requestDto){
-//        memberService.signUp(requestDto);
-//        return ApiResponse.success_only(SuccessStatus.SEND_REGISTER_SUCCESS);
-//    }
-//
-//    @Operation(summary = "이메일 회원가입 API", description = "회원 정보를 받아 회원가입 합니다.")
-//    @PostMapping("/login")
-//    public ResponseEntity<ApiResponse<Void>> login(@Valid @RequestBody MemberSignUpRequestDto requestDto){
-//        memberService.signUp(requestDto);
-//        return ApiResponse.success_only(SuccessStatus.SEND_REGISTER_SUCCESS);
-//    }
+@Operation(
+            summary = "이메일 회원가입 API", description = "회원정보를 받아 사용자를 등록합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원가입 성공")
+    })
+    @PostMapping("/signup")
+    public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody MemberSignUpRequestDto requestDto) {
+        memberService.signUp(requestDto);
+        return ApiResponse.success_only(SuccessStatus.SEND_REGISTER_SUCCESS);
+    }
+
+    @Operation(
+            summary = "이메일 로그인 API", description = "이메일과 비밀번호로 로그인 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "로그인 성공")
+    })
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
+        MemberLoginResponseDto loginResponseDto = memberService.login(requestDto);
+
+        Cookie cookie = new Cookie("refresh", loginResponseDto.getRefreshToken());
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(cookie);
+
+        return ApiResponse.success(SuccessStatus.SEND_LOGIN_SUCCESS,loginResponseDto);
+    }
 
     @Operation(
             summary = "이메일 인증코드 발송 API",

@@ -1,6 +1,7 @@
 package com.campick.server.api.car.entity;
 
-
+import com.campick.server.api.engine.entity.Engine;
+import com.campick.server.api.model.entity.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,14 @@ import lombok.*;
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Column(name = "car_id")
+    private Long id;
 
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "model_id", nullable = false)
+    private Model model;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "engine_id", nullable = false)
+    private Engine engine;
 }

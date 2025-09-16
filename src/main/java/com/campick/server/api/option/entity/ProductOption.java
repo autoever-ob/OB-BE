@@ -10,10 +10,11 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class ProductionOption {
+public class ProductOption {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_option_id")
-    private String id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
@@ -21,8 +22,8 @@ public class ProductionOption {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "option_id", nullable = false)
-    private Option option;
+    private CarOption carOption;
 
-    @Column(name = "is_equiped", nullable = false)
-    private Boolean isEquiped;
+    @Column(name = "is_equipped", nullable = false)
+    private Boolean isEquipped;
 }

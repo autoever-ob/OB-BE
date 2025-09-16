@@ -57,9 +57,6 @@ public class Product {
     @Column(name = "status", nullable = false)
     private ProductStatus status;
 
-    @Column(name = "options")
-    private String options;
-
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 }

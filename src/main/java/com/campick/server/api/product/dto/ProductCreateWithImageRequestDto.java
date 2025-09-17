@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProductCreateWithImageRequestDto {
     private String mileage;          // 주행거리
     private String vehicleType;      // 차종

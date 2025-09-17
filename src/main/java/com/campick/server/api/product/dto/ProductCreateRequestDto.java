@@ -1,8 +1,5 @@
 package com.campick.server.api.product.dto;
 
-import com.campick.server.api.car.entity.Car;
-import com.campick.server.api.member.entity.Member;
-import com.campick.server.api.product.entity.Product;
 import lombok.*;
 
 import java.util.List;
@@ -20,9 +17,7 @@ public class ProductCreateRequestDto {
     private String plateHash;        // 차량번호
     private String title;            // 제목
     private String description;      // 설명
-    private String mainProductImageUrl; // 메인 이미지
 
-    private List<String> productImageUrl; // 차량 이미지 URL 목록
     private List<OptionDTO> option;       // 옵션 리스트
 
     @Getter

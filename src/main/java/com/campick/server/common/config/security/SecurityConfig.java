@@ -55,7 +55,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "http://localhost:8080",
-                "http://**"
+                "http://3.34.181.216:8080"
                 //! 추후 도메인 주소 삽입
         ));
         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));

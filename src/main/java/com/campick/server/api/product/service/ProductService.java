@@ -22,11 +22,13 @@ import com.campick.server.api.type.entity.Type;
 import com.campick.server.api.type.entity.VehicleTypeName;
 import com.campick.server.api.type.repository.TypeRepository;
 import com.campick.server.common.exception.BadRequestException;
+import com.campick.server.common.storage.FirebaseStorageService;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,9 +45,10 @@ public class ProductService {
     private final CarRepository carRepository;
     private final TypeRepository typeRepository;
     private final MemberRepository memberRepository;
+    private final FirebaseStorageService firebaseStorageService;
 
     @Transactional
-    public Long createProduct(ProductCreateRequestDto dto) {
+    public Long createProduct(ProductCreateRequestDto dto, List<MultipartFile> images, MultipartFile mainImage) throws IOException {
         VehicleTypeName vehicleTypeName;
         try {
             vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
@@ -76,23 +79,24 @@ public class ProductService {
                 .build();
         productRepository.save(product);
 
-        // 이미지 저장
-        for (String imageUrl : dto.getProductImageUrl()) {
-            ProductImage image;
+        // 메인 이미지 저장
+        String mainImageUrl = firebaseStorageService.uploadProductImage(product.getId(), mainImage);
+        ProductImage mainProductImage = ProductImage.builder()
+                .product(product)
+                .imageUrl(mainImageUrl)
+                .isThumbnail(true)
+                .build();
+        productImageRepository.save(mainProductImage);
 
-            if (Objects.equals(imageUrl, dto.getMainProductImageUrl())) {
-                image = ProductImage.builder()
-                        .product(product)
-                        .imageUrl(imageUrl)
-                        .isThumbnail(true)
-                        .build();
-            } else {
-                image = ProductImage.builder()
-                        .product(product)
-                        .imageUrl(imageUrl)
-                        .isThumbnail(false)
-                        .build();
-            }
+
+        // 나머지 이미지 저장
+        for (MultipartFile imageFile : images) {
+            String imageUrl = firebaseStorageService.uploadProductImage(product.getId(), imageFile);
+            ProductImage image = ProductImage.builder()
+                    .product(product)
+                    .imageUrl(imageUrl)
+                    .isThumbnail(false)
+                    .build();
             productImageRepository.save(image);
         }
 

@@ -1,11 +1,15 @@
 package com.campick.server.api.member.entity;
 
+import com.campick.server.api.dealer.entity.Dealer;
+import com.campick.server.api.review.entity.Review;
 import com.campick.server.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "member")
 @Entity
@@ -49,6 +53,19 @@ public class Member extends BaseTimeEntity {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dealer_id")
+    private Dealer dealer;
+
+    // 내가 작성한 리뷰들
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> writtenReviews = new ArrayList<>();
+
+    // 내가 받은 리뷰들
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> receivedReviews = new ArrayList<>();
 
     private String refreshToken;
     private LocalDateTime refreshTokenExpiration;

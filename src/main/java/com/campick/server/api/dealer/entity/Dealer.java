@@ -1,6 +1,8 @@
 package com.campick.server.api.dealer.entity;
 
+import com.campick.server.api.dealership.entity.DealerShip;
 import com.campick.server.api.member.entity.Member;
+import com.campick.server.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Dealer {
+public class Dealer extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "dealer_id")
@@ -25,4 +27,8 @@ public class Dealer {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Member user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="dealership_id")
+    private DealerShip dealerShip;
 }

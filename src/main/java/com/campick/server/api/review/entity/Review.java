@@ -18,10 +18,17 @@ public class Review extends BaseTimeEntity {
     @Column(name = "review_id")
     private Long id;
 
+    //!TODO 추후 조인을 줄이는 방향성
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "author_id", nullable = false)
+    private Member author;
 
+     //!TODO 추후 조인을 줄이는 방향성
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_id", nullable = false)
+    private Member target;
+
+    //!TODO 추후 조인을 줄이는 방향성
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;

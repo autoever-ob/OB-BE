@@ -75,7 +75,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 인증코드 발송 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "올바른 이메일 형식이 아닙니다."),
     })
-    @PostMapping("/verify-email")
+    @PostMapping("/verification")
     public ResponseEntity<ApiResponse<Void>> getEmailVerification(@Valid @RequestBody EmailVerificationRequestDto emailVerificationRequestDto) {
         LocalDateTime requestedAt = LocalDateTime.now();
         String email = emailVerificationRequestDto.getEmail();
@@ -97,7 +97,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 코드 인증 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "이메일 인증코드가 올바르지 않습니다."),
     })
-    @PostMapping("/verification-email-code")
+    @PostMapping("/validation")
     public ResponseEntity<ApiResponse<Void>> verificationByCode(@RequestBody EmailVerificationCodeRequestDto emailVerificationCodeRequestDto) {
         LocalDateTime requestedAt = LocalDateTime.now();
         emailService.verifyEmail(emailVerificationCodeRequestDto.getCode(), requestedAt);
@@ -145,7 +145,7 @@ public class MemberController {
 
     // 마이페이지 프로필 이미지 변경
     @Operation(summary = "프로필 이미지 변경 API", description = "사용자의 프로필 이미지를 변경합니다.")
-    @PatchMapping(value = "/profile-image", consumes = {"multipart/form-data"})
+    @PatchMapping(value = "/image", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<String>> updateProfileImage(
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal SecurityMember securityMember
@@ -156,7 +156,7 @@ public class MemberController {
 
     // 회원 정보 조회
     @Operation(summary = "회원정보 조회 API", description = "회원 정보를 조회합니다.")
-    @GetMapping("/user-info")
+    @GetMapping("/info")
     public ResponseEntity<ApiResponse<MemberResponseDto>> getMemberInfo(@AuthenticationPrincipal SecurityMember securityMember) {
         MemberResponseDto memberResponseDto = memberService.getMemberById(securityMember.getId());
         return ApiResponse.success(SuccessStatus.SEND_LOGIN_SUCCESS, memberResponseDto);
@@ -164,7 +164,7 @@ public class MemberController {
 
     // 특정 회원 정보 조회
     @Operation(summary = "특정 회원 정보 조회", description = "ID를 이용해 회원 정보를 조회합니다.")
-    @GetMapping("user-info/{id}")
+    @GetMapping("info/{id}")
     public ResponseEntity<ApiResponse<MemberResponseDto>> getMemberById(@PathVariable Long id) {
         MemberResponseDto dto = memberService.getMemberById(id);
         return ApiResponse.success(SuccessStatus.SEND_FOLLOWING_LIST_SUCCESS, dto);

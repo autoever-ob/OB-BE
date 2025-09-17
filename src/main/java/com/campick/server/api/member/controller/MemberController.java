@@ -75,7 +75,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 인증코드 발송 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "올바른 이메일 형식이 아닙니다."),
     })
-    @PostMapping("/verification")
+    @PostMapping("/email/send")
     public ResponseEntity<ApiResponse<Void>> getEmailVerification(@Valid @RequestBody EmailVerificationRequestDto emailVerificationRequestDto) {
         LocalDateTime requestedAt = LocalDateTime.now();
         String email = emailVerificationRequestDto.getEmail();
@@ -97,7 +97,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 코드 인증 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "이메일 인증코드가 올바르지 않습니다."),
     })
-    @PostMapping("/validation")
+    @PostMapping("/email/verify")
     public ResponseEntity<ApiResponse<Void>> verificationByCode(@RequestBody EmailVerificationCodeRequestDto emailVerificationCodeRequestDto) {
         LocalDateTime requestedAt = LocalDateTime.now();
         emailService.verifyEmail(emailVerificationCodeRequestDto.getCode(), requestedAt);

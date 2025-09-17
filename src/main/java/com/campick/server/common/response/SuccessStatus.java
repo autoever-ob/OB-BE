@@ -18,13 +18,15 @@ public enum SuccessStatus {
 
 
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
-    SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "매물 리스트 조회 성공"),
+    SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "자동차 리스트 조회 성공"),
+    SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
 
     /**
      * 201
      */
 
-    SEND_CAR_CREATE_SUCCESS(HttpStatus.CREATED, "매물 생성 성공");
+    SEND_CAR_CREATE_SUCCESS(HttpStatus.CREATED, "자동차 생성 성공"),
+    SEND_PRODUCT_CREATE_SUCCESS(HttpStatus.CREATED, "매물 생성 성공");
 
 
     private final HttpStatus httpStatus;

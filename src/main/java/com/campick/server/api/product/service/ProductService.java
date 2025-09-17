@@ -12,6 +12,7 @@ import com.campick.server.api.option.repository.CarOptionRepository;
 import com.campick.server.api.option.repository.ProductOptionRepository;
 import com.campick.server.api.product.dto.AllProductResponseDto;
 import com.campick.server.api.product.dto.ProductCreateRequestDto;
+import com.campick.server.api.product.dto.ProductCreateWithImageRequestDto;
 import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.entity.ProductImage;
 import com.campick.server.api.product.entity.ProductStatus;
@@ -34,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -48,7 +50,85 @@ public class ProductService {
     private final FirebaseStorageService firebaseStorageService;
 
     @Transactional
-    public Long createProduct(ProductCreateRequestDto dto, List<MultipartFile> images, MultipartFile mainImage) throws IOException {
+    public Long createProduct(ProductCreateRequestDto dto) {
+        VehicleTypeName vehicleTypeName;
+        try {
+            vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid vehicle type: " + dto.getVehicleType());
+        }
+        Type type = typeRepository.findBytypeName(vehicleTypeName);
+
+        Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
+
+        Car car = carRepository.findByModel(model);
+
+        Member member = memberRepository.findById(1L)
+                .orElseThrow(() -> new BadRequestException("Member not found"));
+
+        Product product = Product.builder()
+                .member(member)
+                .car(car)
+                .title(dto.getTitle())
+                .cost(Integer.parseInt(dto.getPrice()))
+                .mileage(Integer.parseInt(dto.getMileage()))
+                .description(dto.getDescription())
+                .plateHash(dto.getPlateHash())
+                .location(dto.getLocation())
+                .type(ProductType.SELLING) // 딜러/유저 구분 필요
+                .status(ProductStatus.AVAILABLE)
+                .isDeleted(false)
+                .build();
+        productRepository.save(product);
+
+        // 이미지 저장
+        for (String imageUrl : dto.getProductImageUrl()) {
+            ProductImage image;
+
+            if (Objects.equals(imageUrl, dto.getMainProductImageUrl())) {
+                image = ProductImage.builder()
+                        .product(product)
+                        .imageUrl(imageUrl)
+                        .isThumbnail(true)
+                        .build();
+            } else {
+                image = ProductImage.builder()
+                        .product(product)
+                        .imageUrl(imageUrl)
+                        .isThumbnail(false)
+                        .build();
+            }
+            productImageRepository.save(image);
+        }
+
+
+        // 옵션 저장
+        for (ProductCreateRequestDto.OptionDTO optionDto : dto.getOption()) {
+            Optional<CarOption> existingOption = carOptionRepository.findByName(optionDto.getOptionName());
+
+            CarOption carOption;
+            if (existingOption.isPresent()) {
+                carOption = existingOption.get();
+            } else {
+                carOption = CarOption.builder()
+                        .name(optionDto.getOptionName())
+                        .build();
+                carOptionRepository.save(carOption);
+            }
+
+            ProductOption option = ProductOption.builder()
+                    .product(product)
+                    .carOption(carOption)
+                    .isEquipped(optionDto.getIsInclude())
+                    .build();
+            productOptionRepository.save(option);
+        }
+
+        return product.getId();
+    }
+
+    @Transactional
+    public Long createProductWithImages(ProductCreateWithImageRequestDto dto, List<MultipartFile> images, MultipartFile mainImage) throws IOException {
         VehicleTypeName vehicleTypeName;
         try {
             vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
@@ -149,4 +229,5 @@ public class ProductService {
                 })
                 .collect(Collectors.toList());
     }
+
 }

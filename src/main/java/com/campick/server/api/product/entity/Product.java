@@ -1,10 +1,13 @@
 package com.campick.server.api.product.entity;
 
 import com.campick.server.api.car.entity.Car;
+import com.campick.server.api.favorite.entity.Favorite;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "product")
@@ -25,6 +28,12 @@ public class Product extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductImage> images;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<Favorite> likes;
 
     @Column(name = "title", nullable = false)
     private String title;

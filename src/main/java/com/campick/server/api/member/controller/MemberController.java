@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @RequestMapping("/api/member")
@@ -210,6 +211,12 @@ public class MemberController {
     public ResponseEntity<ApiResponse<Boolean>> checkNicknameDuplicate(@RequestParam String nickname) {
         boolean isDuplicate = memberService.isNicknameDuplicate(nickname);
         return ApiResponse.success(SuccessStatus.CHECK_NICKNAME_DUPLICATE, isDuplicate);
+    }
+
+    @Operation(summary = "내가 팔고 있는 매물 조회", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
+    public ResponseEntity<ApiResponse<List<MemberProductResponseDto>>> getMemberProducts(
+            @AuthenticationPrincipal SecurityMember securityMember){
+        List<MemberProductResponseDto> products = memberService.getMemberProducts(securityMember.getId());
     }
 
 }

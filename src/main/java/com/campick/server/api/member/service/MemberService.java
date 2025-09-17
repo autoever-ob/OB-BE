@@ -8,6 +8,8 @@ import com.campick.server.api.member.dto.*;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.entity.Role;
 import com.campick.server.api.member.repository.MemberRepository;
+import com.campick.server.api.product.entity.Product;
+import com.campick.server.api.product.repository.ProductRepository;
 import com.campick.server.api.review.entity.Review;
 import com.campick.server.api.review.repository.ReviewRepository;
 import com.campick.server.common.exception.BadRequestException;
@@ -41,6 +43,7 @@ public class MemberService {
     private final FirebaseStorageService firebaseStorageService;
     private final DealershipRepository dealershipRepository;
     private final DealerRepository dealerRepository;
+    private final ProductRepository productRepository;
 
     @Transactional
     public void signUp(MemberSignUpRequestDto requestDto) {
@@ -193,7 +196,22 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
     public MemberResponseDto getMemberById(Long id) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-        java.util.List<Review> reviews = reviewRepository.findByTargetIdWithAuthor(id);
+        List<Review> reviews = reviewRepository.findByTargetIdWithAuthor(id);
         return MemberResponseDto.of(member, reviews);
+    }
+
+
+    // N + 1 문제를 한번 스스로 생각해보기
+    public List<MemberProductResponseDto> getMemberProducts(Long id) {
+
+        Member member = memberRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(()-> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        // 레포에서 데이터를 받아온다
+        // 하지만 여러번의 조인으로 인해서 N+1 문제가 발생해 성능 위기가 발생할 수 있다.
+        // JPQL을 사용해서 FETCH JOIN으로 가능한 모든 ROW와 이와 연관된 테이블들의 정보 뷰를 만들어내어 N+1 문제를 제거
+        List<Product> products = productRepository.findByMemberIdWithCar(id);
+
+        return
     }
 }

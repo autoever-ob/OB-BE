@@ -27,10 +27,10 @@ public class AllProductResponseDto {
     @JsonProperty("thumbNail")
     private String thumbNail;
     @JsonProperty("productId")
-    private String productId;
+    private Long productId;
     @JsonProperty("status")
     private String status;
-    //private Boolean isLiked;
-    //private Long likeCount; 로그인 되고 나면 추가
+    private Boolean isLiked;
+    private Integer likeCount; //로그인 되고 나면 추가
 
 }

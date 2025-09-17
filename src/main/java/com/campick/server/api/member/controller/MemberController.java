@@ -13,14 +13,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @RequestMapping("/api/member")
@@ -31,6 +31,33 @@ public class MemberController {
 
     private final MemberService memberService;
     private final EmailService emailService;
+
+    //MOCK
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<UserMock.UserResponseDto>> getProfile() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_PROFILE_SUCCESS, UserMock.getUserInfo());
+    }
+
+    @GetMapping("/sold")
+    public ResponseEntity<ApiResponse<Page<MySoldMock.ProductDto>>> getMySoldProducts() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_SOLD_SUCCESS, MySoldMock.getMyProducts());
+    }
+
+    @GetMapping("/selling")
+    public ResponseEntity<ApiResponse<Page<MySellMock.SellProductDto>>> getMySellingProducts() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_SELL_SUCCESS, MySellMock.getMyProducts());
+    }
+
+    @GetMapping("/bought")
+    public ResponseEntity<ApiResponse<Page<MyBoughtMock.Product>>> getMyBoughtProducts() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_BOUGHT_SUCCESS, MyBoughtMock.getPurchasedProducts());
+    }
+
+    @GetMapping("/review/{userId}")
+    public ResponseEntity<ApiResponse<Page<MyReviewMock.Review>>> getReviews() {
+        return ApiResponse.success(SuccessStatus.SEND_REVIEW_SUCCESS, MyReviewMock.getReviews());
+    }
+
 
 //    @Operation(summary = "이메일 회원가입 API", description = "회원 정보를 받아 회원가입 합니다.")
 //    @PostMapping("/signup")

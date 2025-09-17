@@ -3,6 +3,8 @@ package com.campick.server.api.product.controller;
 import com.campick.server.api.product.dto.AllProductResponseDto;
 import com.campick.server.api.product.dto.ProductCreateRequestDto;
 import com.campick.server.api.product.service.ProductService;
+import com.campick.server.common.response.ApiResponse;
+import com.campick.server.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,16 +20,23 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
+    public ResponseEntity<ApiResponse<Long>> createProduct(@RequestBody ProductCreateRequestDto dto) {
+        Long productId = productService.createProduct(dto);
+        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_CREATE_SUCCESS, productId);
+
+    }
+  
+    @PostMapping("createwithimages",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Long> createProduct(@RequestPart("dto") ProductCreateRequestDto dto,
                                               @RequestPart("images") List<MultipartFile> images,
                                               @RequestPart("mainImage") MultipartFile mainImage) throws IOException {
         Long productId = productService.createProduct(dto, images, mainImage);
         return ResponseEntity.ok(productId);
-    }
 
     @GetMapping
-    public List<AllProductResponseDto> getProducts() {
-        return productService.findAll();
+    public ResponseEntity<ApiResponse<List<AllProductResponseDto>>> getProducts() {
+        List<AllProductResponseDto> productsList = productService.findAll();
+        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_LIST_SUCCESS, productsList);
     }
 }

@@ -95,7 +95,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/member/login", "/api/member/signup", "/api/member/reissue", "/api/member/logout","/v3/api-docs/**",
-                                "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/health", "/api-doc").permitAll() // 회원, 스웨거 허가
+                                "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/health", "/api-doc",
+                                "/api/member/verify-email","/api/member/verification-email-code"
+                        ).permitAll() // 회원, 스웨거 허가
                         .anyRequest().authenticated()
                 );
 

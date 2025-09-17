@@ -71,7 +71,10 @@ public class MemberService {
                     .user(member)
                     .dealerShip(dealerShip)
                     .build();
-            dealerRepository.save(dealer);
+            Dealer savedDealer = dealerRepository.save(dealer);
+
+            member.assignDealer(savedDealer);
+            memberRepository.save(member);
         }
     }
 

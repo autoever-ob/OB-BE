@@ -60,10 +60,12 @@ public class Member extends BaseTimeEntity {
     private Dealer dealer;
 
     // 내가 작성한 리뷰들
+    @Builder.Default // 객체에 대해서는 Builder을 써주는 게 좋음
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> writtenReviews = new ArrayList<>();
 
     // 내가 받은 리뷰들
+    @Builder.Default
     @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> receivedReviews = new ArrayList<>();
 
@@ -84,4 +86,9 @@ public class Member extends BaseTimeEntity {
 
     // 프로필 이미지 변경
     public void updateProfileImage(String profileImage) { this.profileImage = profileImage;}
+
+    // 딜러 연관관계 설정 (멤버 -> 딜러)
+    public void assignDealer(Dealer dealer) {
+        this.dealer = dealer;
+    }
 }

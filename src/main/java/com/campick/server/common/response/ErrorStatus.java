@@ -22,6 +22,7 @@ public enum ErrorStatus {
     INVALID_PASSWORD_EXCEPTION(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다."),
     VALIDATION_EMAIL_FORMAT_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
     WRONG_EMAIL_VERIFICATION_CODE_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 인증 코드가 일치하지 않습니다."),
+    EMPTY_FILE_EXCEPTION(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다."),
 
     /**
      * 401 UNAUTHORIZED
@@ -29,6 +30,11 @@ public enum ErrorStatus {
     USER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"인증되지 않은 사용자입니다."),
     EXPIRED_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED,"만료된 토큰입니다."),
     UNAUTHORIZED_EMAIL_VERIFICATION_CODE_EXCEPTION(HttpStatus.UNAUTHORIZED, "만료된 이메일 인증코드 입니다"),
+    MALFORMED_ACCESS_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "유효하지 않은 액세스 토큰입니다."),
+    MALFORMED_REFRESH_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED,  "리프래시 토큰이 존재하지 않습니다."),
+    REFRESH_TOKEN_NOT_EQUAL(HttpStatus.UNAUTHORIZED,  "리프래시 토큰이 일치하지 않습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "리프래시 토큰이 만료되었습니다."),
 
     /**
      * 403 FORBIDDEN
@@ -41,7 +47,6 @@ public enum ErrorStatus {
     NOT_LOGIN_EXCEPTION(HttpStatus.NOT_FOUND,"로그인이 필요합니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
-
 
 
     /**

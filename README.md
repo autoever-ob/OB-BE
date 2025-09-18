@@ -4,7 +4,7 @@
 
 이 프로젝트에는 Swagger(OpenAPI) 문서화가 springdoc-openapi를 통해 포함되어 있습니다.
 
-- Swagger UI: [https://campick.shop/swagger-ui/index.html#](https://campick.shop/swagger-ui/index.html#)
+- Swagger UI: https://campick.shop/swagger-ui/index.html#
 - OpenAPI JSON: https://campick.shop/v3/api-docs
 
 설정

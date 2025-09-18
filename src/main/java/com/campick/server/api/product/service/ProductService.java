@@ -127,30 +127,6 @@ public class ProductService {
         return product.getId();
     }
 
-//    @Transactional
-//    public List<AllProductResponseDto> findAll() {
-//        List<Product> products = productRepository.findAll();
-//
-//        return products.stream()
-//                .map(product -> {
-//                    String thumbnailUrl = productImageRepository
-//                            .findByProductAndIsThumbnailTrue(product)
-//                            .getImageUrl();
-//
-//                    return new AllProductResponseDto(
-//                            product.getTitle(),
-//                            product.getCost().toString(),
-//                            product.getMileage().toString(),
-//                            product.getLocation(),
-//                            product.getCreatedAt(),
-//                            thumbnailUrl,
-//                            product.getId().toString(),
-//                            product.getStatus().toString()
-//                    );
-//                })
-//                .collect(Collectors.toList());
-//    }
-  
     @Transactional
     public Long createProductWithImages(ProductCreateWithImageRequestDto dto, List<MultipartFile> images, MultipartFile mainImage) throws IOException {
         VehicleTypeName vehicleTypeName;
@@ -247,7 +223,7 @@ public class ProductService {
                             product.getLocation(),
                             product.getCreatedAt(),
                             thumbnailUrl,
-                            product.getId().toString(),
+                            product.getId(),
                             product.getStatus().toString()
                     );
                 })

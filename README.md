@@ -13,3 +13,5 @@
 - 라이브러리: org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0
 
 개발 시 보안 설정을 사용하는 경우, Swagger 리소스 경로(`/v3/api-docs/**`, `/swagger-ui/**`, `/swagger-ui.html`)에 대한 접근을 허용해야 합니다.
+
+배포완료

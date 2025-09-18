@@ -210,7 +210,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
 
         // 멤버가 존재하는지 확인
         if(memberRepository.findByIdAndIsDeletedFalse(id).isEmpty()) {
-            throw new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage());
+            throw new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage());
         }
 
         // 레포에서 데이터를 받아온다
@@ -231,7 +231,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
     public List<TransactionResponseDto> getMemberBought(Long buyerId) {
         // 멤버가 존재하는지 확인
         Member buyer = memberRepository.findById(buyerId).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage())
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
         );
 
         //! TODO N + 1은 추후에 풀어보기 ( 복습 )
@@ -246,7 +246,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
     public List<TransactionResponseDto> getMemberSold(Long sellerId) {
         // 멤버가 존재하는지 확인
         Member seller = memberRepository.findById(sellerId).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage())
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
         );
 
         List<Transaction> transactions = transactionRepository.findTransactionsBySeller(seller);

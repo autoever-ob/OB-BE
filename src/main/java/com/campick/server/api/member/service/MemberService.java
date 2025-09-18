@@ -106,7 +106,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         Long memberId = jwtUtil.getId(refreshToken);
 
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
 
         member.updateRefreshToken(null, 0L);
     }
@@ -127,7 +127,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         }
 
         Member targetMember = memberRepository.findByEmailAndIsDeletedFalse(email)
-                .orElseThrow(()-> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(()-> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
 
 
         String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
@@ -174,7 +174,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         String role = jwtUtil.getRole(refresh);
 
         Member member = memberRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
 
         if (!refresh.equals(member.getRefreshToken())) {
             throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_EQUAL.getMessage());
@@ -192,7 +192,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
 
     public MemberResponseDto getMemberById(Long id) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
         java.util.List<Review> reviews = reviewRepository.findByTargetIdWithAuthor(id);
         return MemberResponseDto.of(member, reviews);
     }

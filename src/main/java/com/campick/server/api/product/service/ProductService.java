@@ -67,11 +67,12 @@ public class ProductService {
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
         Product product = Product.builder()
-                .member(member)
+                .seller(member)
                 .car(car)
                 .title(dto.getTitle())
                 .cost(Integer.parseInt(dto.getPrice()))
                 .mileage(Integer.parseInt(dto.getMileage()))
+                .generation(2017)
                 .description(dto.getDescription())
                 .plateHash(dto.getPlateHash())
                 .location(dto.getLocation())
@@ -145,11 +146,12 @@ public class ProductService {
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
         Product product = Product.builder()
-                .member(member)
+                .seller(member)
                 .car(car)
                 .title(dto.getTitle())
                 .cost(Integer.parseInt(dto.getPrice()))
                 .mileage(Integer.parseInt(dto.getMileage()))
+                .generation(2017)
                 .description(dto.getDescription())
                 .plateHash(dto.getPlateHash())
                 .location(dto.getLocation())

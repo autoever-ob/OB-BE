@@ -6,6 +6,7 @@ import com.campick.server.api.product.dto.ProductCreateWithImageRequestDto;
 import com.campick.server.api.product.service.ProductService;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> createProduct(@RequestBody ProductCreateRequestDto dto) {
@@ -34,14 +36,8 @@ public class ProductController {
         return ApiResponse.success(SuccessStatus.SEND_PRODUCT_CREATE_SUCCESS, productId);
 
     }
-  
-    @PostMapping(name="create-with-images",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Long> createProductWithImages(@RequestPart("dto") ProductCreateWithImageRequestDto dto,
-                                              @RequestPart("images") List<MultipartFile> images,
-                                              @RequestPart("mainImage") MultipartFile mainImage) throws IOException {
-        Long productId = productService.createProductWithImages(dto, images, mainImage);
-        return ResponseEntity.ok(productId);
-    }
+
+
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AllProductResponseDto>>> getProducts() {

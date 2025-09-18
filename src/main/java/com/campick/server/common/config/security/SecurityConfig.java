@@ -55,8 +55,9 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "http://localhost:8080",
-                "http://3.34.181.216:8080"
+                "http://3.34.181.216:8080",
                 //! 추후 도메인 주소 삽입
+                "http://campick.shop"
         ));
         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
@@ -95,7 +96,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/member/login", "/api/member/signup", "/api/member/reissue", "/api/member/logout","/v3/api-docs/**",
-                                "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/health", "/api-doc",
+                                "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/health", "/api-doc", "/h2-console/**",
                                 "/api/member/email/**", "/api/member/info/*","api/member/check/**",
                                 //! TODO /api/product 는 일단 개발을 위해 전부 열어놓음
                                 "/api/product/**",

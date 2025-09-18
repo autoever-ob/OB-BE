@@ -8,4 +8,4 @@ FROM --platform=linux/arm64 openjdk:17-slim
 WORKDIR /app
 COPY --from=build /app/build/libs/app.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
-EXPOSE 8080
+EXPOSE 443

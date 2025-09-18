@@ -44,6 +44,9 @@ public class SwaggerConfig {
         SecurityRequirement accessTokenRequirement = new SecurityRequirement().addList(accessTokenHeader);
         SecurityRequirement refreshTokenRequirement = new SecurityRequirement().addList(refreshTokenHeader);
 
+        Server server = new Server();
+        server.setUrl("https://campick.shop");
+
         return new OpenAPI()
                 .info(new Info()
                         .title("캠픽")
@@ -54,6 +57,7 @@ public class SwaggerConfig {
                 .components(new Components()
                         .addSecuritySchemes(accessTokenHeader, accessTokenScheme)
                         .addSecuritySchemes(refreshTokenHeader, refreshTokenScheme))
+                .addServersItem(server)
                 .addSecurityItem(accessTokenRequirement)
                 .addSecurityItem(refreshTokenRequirement);
     }

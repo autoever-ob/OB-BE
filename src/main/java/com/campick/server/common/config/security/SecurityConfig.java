@@ -57,7 +57,7 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 "http://3.34.181.216:8080",
                 //! 추후 도메인 주소 삽입
-                "http://campick.shop"
+                "https://campick.shop"
         ));
         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));

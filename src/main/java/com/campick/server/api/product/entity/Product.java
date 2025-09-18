@@ -22,8 +22,8 @@ public class Product extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "seller_id", nullable = false)
+    private Member seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id", nullable = false)
@@ -43,6 +43,9 @@ public class Product extends BaseTimeEntity {
 
     @Column(name = "mileage", nullable = false)
     private Integer mileage;
+
+    @Column(name = "generation", nullable = false)
+    private Integer generation;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;

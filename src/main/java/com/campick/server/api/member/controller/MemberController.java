@@ -214,9 +214,32 @@ public class MemberController {
     }
 
     @Operation(summary = "내가 팔고 있는 매물 조회", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
-    public ResponseEntity<ApiResponse<List<MemberProductResponseDto>>> getMemberProducts(
+    @GetMapping("/product/all")
+    public ResponseEntity<ApiResponse<List<ProductAvailableSummaryDto>>> getMemberProducts(
             @AuthenticationPrincipal SecurityMember securityMember){
-        List<MemberProductResponseDto> products = memberService.getMemberProducts(securityMember.getId());
+        List<ProductAvailableSummaryDto> memberProductsIsAvailable = memberService.getMemberProducts(securityMember.getId());
+
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
+    }
+
+
+    // 기록 부분
+    @Operation(summary = "내가 판 매물 조회", description = "사용자가 판 매물 기록을 봅니다")
+    @GetMapping("/product/sold")
+    public ResponseEntity<ApiResponse<List<TransactionResponseDto>>> getMemberSold(
+            @AuthenticationPrincipal SecurityMember securityMember){
+        List<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberSold(securityMember.getId());
+
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
+    }
+
+    @Operation(summary = "내가 산 매물 조회", description = "사용자가 산 매물 기록을 봅니다")
+    @GetMapping("/product/bought")
+    public ResponseEntity<ApiResponse<List<TransactionResponseDto>>> getMemberBought(
+            @AuthenticationPrincipal SecurityMember securityMember){
+        List<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberBought(securityMember.getId());
+
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
     }
 
 }

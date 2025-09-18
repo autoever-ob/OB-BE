@@ -67,7 +67,7 @@ public class DataInitializer {
             return;
         }
 
-        String rawPassword = "Passw0rd!";
+        String rawPassword = "123456";
         String encoded = passwordEncoder.encode(rawPassword);
 
         List<Member> members = new ArrayList<>();
@@ -136,11 +136,12 @@ public class DataInitializer {
             for (int i = 1; i <= 10; i++) {
                 Car car = cars.get(carIndex.getAndIncrement() % cars.size());
                 Product product = Product.builder()
-                        .member(member)
+                        .seller(member)
                         .car(car)
                         .title(member.getNickname() + "'s Camping Car - " + i)
                         .cost(10000000 + (i * 1000000))
                         .mileage(50000 + (i * 1000))
+                        .generation(2017)
                         .description("A very nice camping car for sale. Well-maintained and ready for adventure.")
                         .plateHash(UUID.randomUUID().toString().substring(0, 8)) // Simplified hash
                         .exteriorColor("White")
@@ -153,6 +154,34 @@ public class DataInitializer {
                 productRepository.save(product);
             }
         }
+
+        // Create multiple sold products to simulate purchases
+        if (members.size() > 1) {
+            for (int i = 0; i < 3; i++) {
+                Member seller = members.get(i % members.size());
+                Member buyer = members.get((i + 1) % members.size());
+                Car car = cars.get(i % cars.size());
+
+                Product soldProduct = Product.builder()
+                        .seller(seller)
+                        .car(car)
+                        .title(seller.getNickname() + "'s Sold Camping Car " + (i + 1))
+                        .cost(12000000 + (i * 1000000))
+                        .mileage(55000 + (i * 5000))
+                        .generation(2018)
+                        .description("This camping car was sold to " + buyer.getNickname() + ".")
+                        .plateHash(UUID.randomUUID().toString().substring(0, 8))
+                        .exteriorColor("Silver")
+                        .interiorColor("Grey")
+                        .location("Busan")
+                        .type(ProductType.SELLING)
+                        .status(ProductStatus.SOLD)
+                        .isDeleted(false)
+                        .build();
+                productRepository.save(soldProduct);
+            }
+        }
+
         log.info("Seed data inserted: {} products created.", productRepository.count());
     }
 

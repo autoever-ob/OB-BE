@@ -9,9 +9,12 @@ import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.entity.Role;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.product.entity.Product;
+import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.product.repository.ProductRepository;
 import com.campick.server.api.review.entity.Review;
 import com.campick.server.api.review.repository.ReviewRepository;
+import com.campick.server.api.transaction.entity.Transaction;
+import com.campick.server.api.transaction.repository.TransactionRepository;
 import com.campick.server.common.exception.BadRequestException;
 import com.campick.server.common.exception.NotFoundException;
 import com.campick.server.common.exception.UnauthorizedException;
@@ -44,6 +47,7 @@ public class MemberService {
     private final DealershipRepository dealershipRepository;
     private final DealerRepository dealerRepository;
     private final ProductRepository productRepository;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public void signUp(MemberSignUpRequestDto requestDto) {
@@ -204,8 +208,10 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
     // N + 1 문제를 한번 스스로 생각해보기
     public List<ProductAvailableSummaryDto> getMemberProducts(Long id) {
 
-        Member member = memberRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(()-> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+        // 멤버가 존재하는지 확인
+        if(memberRepository.findByIdAndIsDeletedFalse(id).isEmpty()) {
+            throw new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage());
+        }
 
         // 레포에서 데이터를 받아온다
         // 하지만 여러번의 조인으로 인해서 N+1 문제가 발생해 성능 위기가 발생할 수 있다.
@@ -213,6 +219,39 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         List<Product> products = productRepository.findProductByMemberIdWithDetails(id);
 
         // 찾아왔으면 원하는 값에 알맞게 채워줌
-        return ProductAvailableSummaryDto.from(products)
+        // 여러개의 products를 하나씩 보내면서 Dto를 만든다
+        // 원래는 배열로 가능하나 Stream으로 편리하게 가능
+        List<ProductAvailableSummaryDto> summaryDtos = products.stream()
+                .map(ProductAvailableSummaryDto::from)
+                .toList();
+        return summaryDtos;
+    }
+
+    // 내가 샀으니깐 판 사람의 id를 가지고 조회할게
+    public List<TransactionResponseDto> getMemberBought(Long buyerId) {
+        // 멤버가 존재하는지 확인
+        Member buyer = memberRepository.findById(buyerId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage())
+        );
+
+        //! TODO N + 1은 추후에 풀어보기 ( 복습 )
+        List<Transaction> transactions = transactionRepository.findTransactionsByBuyer(buyer);
+
+        return transactions.stream()
+                .map(TransactionResponseDto::from)
+                .toList();
+    }
+
+    // 내가 판
+    public List<TransactionResponseDto> getMemberSold(Long sellerId) {
+        // 멤버가 존재하는지 확인
+        Member seller = memberRepository.findById(sellerId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage())
+        );
+
+        List<Transaction> transactions = transactionRepository.findTransactionsBySeller(seller);
+        return transactions.stream()
+                .map(TransactionResponseDto::from)
+                .toList();
     }
 }

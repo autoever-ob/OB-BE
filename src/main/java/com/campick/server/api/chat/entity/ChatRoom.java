@@ -36,14 +36,14 @@ public class ChatRoom extends BaseTimeEntity {
     private LocalDateTime createdAt;
 
     @Column(name = "is_reviewed")
-    private Boolean isReviewed;
+    private Boolean isReviewed = false;
 
     @Column(name = "is_sold")
-    private Boolean isSold;
+    private Boolean isSold = false;
 
     @Column(name = "is_seller_out")
-    private Boolean isSellerOut;
+    private Boolean isSellerOut = false;
 
     @Column(name = "is_buyer_out")
-    private String isBuyerOut;
+    private Boolean isBuyerOut = false;
 }

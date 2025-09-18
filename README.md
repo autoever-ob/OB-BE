@@ -4,8 +4,8 @@
 
 이 프로젝트에는 Swagger(OpenAPI) 문서화가 springdoc-openapi를 통해 포함되어 있습니다.
 
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- OpenAPI JSON: http://localhost:8080/v3/api-docs
+- Swagger UI: [https://campick.shop/swagger-ui.html#](https://campick.shop/swagger-ui/index.html#)
+- OpenAPI JSON: https://campick.shop/v3/api-docs
 
 설정
 - Spring Boot: 3.5.5

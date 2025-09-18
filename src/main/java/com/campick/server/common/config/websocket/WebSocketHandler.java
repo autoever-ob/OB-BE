@@ -1,5 +1,11 @@
 package com.campick.server.common.config.websocket;
 
+import com.campick.server.api.chat.service.ChatService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -8,34 +14,44 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Component
+@RequiredArgsConstructor
+@Slf4j
 public class WebSocketHandler extends TextWebSocketHandler {
-
-    private final ConcurrentHashMap<String, WebSocketSession> activeSessions = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper;
+    private final ConcurrentHashMap<Long, WebSocketSession> activeSessions = new ConcurrentHashMap<>();
+    private final ChatService chatService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        String userId = getUserId(session);
+        Long userId = getUserId(session);
         activeSessions.put(userId, session);
         System.out.println("웹소켓 연결: " + session.getId());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("클라이언트 메시지: " + message.getPayload());
-        // 1. 메시지 파싱 (예: JSON → DTO)
-        String payload = message.getPayload(); // 클라이언트가 전송한 메시지
+        String payload = message.getPayload();
+        System.out.println("클라이언트 메시지: " + payload);
 
+        JsonNode jsonNode = objectMapper.readTree(payload);
+        String event = jsonNode.get("type").asText();
+        JsonNode data = jsonNode.get("data");
 
-
-        // 모든 세션에 메시지 브로드캐스트
-        for (WebSocketSession s : activeSessions.values()) {
-            s.sendMessage(new TextMessage("서버에서 응답: " + message.getPayload()));
+        switch (event) {
+            case "chat_message":
+                chatService.handleChatMessage(data);
+                break;
+            default:
+                log.warn("Unknown event: {}", event);
         }
+
+
     }
 
     // 예시: 세션에서 사용자 ID 가져오기
-    private String getUserId(WebSocketSession session) {
-        return (String) session.getAttributes().get("userId");
+    private Long getUserId(WebSocketSession session) {
+        return (Long) session.getAttributes().get("userId");
     }
 
     @Override

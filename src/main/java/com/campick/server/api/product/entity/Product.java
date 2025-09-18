@@ -8,7 +8,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "product")
-@Getter
+@Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -20,11 +20,14 @@ public class Product extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private Member seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
+
+    @Column(name = "generation", nullable = false)
+    private Integer generation;
 
     @Column(name = "title", nullable = false)
     private String title;

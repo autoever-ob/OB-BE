@@ -35,9 +35,13 @@ public enum SuccessStatus {
     SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "자동차 리스트 조회 성공"),
     SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
     SEND_PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "매물 상세 조회 성공"),
+    SEND_PRODUCT_UPDATE_SUCCESS(HttpStatus.OK, "매물 수정 성공"),
+    SEND_PRODUCT_DELETE_SUCCESS(HttpStatus.OK, "매물 삭제 성공"),
     SEND_CHAT_CREATED(HttpStatus.OK, "채팅방 생성 성공"),
     SEND_EMAIL_VERIFICATION_CODE_SUCCESS(HttpStatus.OK, "이메일 전송 성공"),
     SEND_EMAIL_VERIFICATION_SUCCESS(HttpStatus.OK, "이메일 검증 성공"),
+
+    UPLOAD_PRODUCT_IMAGE_SUCCESS(HttpStatus.OK, "매물 사진 등록 성공"),
 
     /**
      * 201

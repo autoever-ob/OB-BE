@@ -23,6 +23,7 @@ public enum ErrorStatus {
     VALIDATION_EMAIL_FORMAT_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
     WRONG_EMAIL_VERIFICATION_CODE_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 인증 코드가 일치하지 않습니다."),
     EMPTY_FILE_EXCEPTION(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다."),
+    INVALID_VEHICLE_TYPE(HttpStatus.BAD_REQUEST, "존재하지 않는 캠핑카 타입입니다."),
 
     /**
      * 401 UNAUTHORIZED

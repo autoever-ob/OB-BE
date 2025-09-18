@@ -1,8 +1,8 @@
 package com.campick.server.api.product.controller;
 
 import com.campick.server.api.product.dto.AllProductResponseDto;
-import com.campick.server.api.product.dto.ProductCreateRequestDto;
-import com.campick.server.api.product.dto.ProductCreateWithImageRequestDto;
+import com.campick.server.api.product.dto.ProductCreateReqDto;
+import com.campick.server.api.product.dto.ProductUpdateReqDto;
 import com.campick.server.api.product.service.ProductService;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
@@ -10,16 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -29,20 +24,11 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createProduct(@RequestBody ProductCreateRequestDto dto) {
-        Long productId = productService.createProduct(dto);
-        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_CREATE_SUCCESS, productId);
-
-    }
-  
-    @PostMapping(name="create-with-images",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Long> createProductWithImages(@RequestPart("dto") ProductCreateWithImageRequestDto dto,
-                                              @RequestPart("images") List<MultipartFile> images,
-                                              @RequestPart("mainImage") MultipartFile mainImage) throws IOException {
-        Long productId = productService.createProductWithImages(dto, images, mainImage);
-        return ResponseEntity.ok(productId);
+    public ResponseEntity<ApiResponse<Long>> createProduct(@RequestBody ProductCreateReqDto dto) {
+        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_CREATE_SUCCESS, productService.createProduct(dto));
     }
 
+    // Mock
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AllProductResponseDto>>> getProducts() {
         //MOCK
@@ -82,8 +68,20 @@ public class ProductController {
 //        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_LIST_SUCCESS, productsList);
     }
 
+    // Mock
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<CarDetailMock.CarDetailResponseDto>> getCarDetail() {
         return ApiResponse.success(SuccessStatus.SEND_PRODUCT_DETAIL_SUCCESS, CarDetailMock.getCarDetail());
+    }
+
+    @PatchMapping("/{productId}")
+    public ResponseEntity<ApiResponse<Long>> updateProduct(@RequestBody ProductUpdateReqDto dto, @PathVariable Long productId) {
+        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_UPDATE_SUCCESS, productService.updateProduct(productId, dto));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteProduct() {
+        productService.deleteProduct();
+        return ApiResponse.success_only(SuccessStatus.SEND_PRODUCT_DELETE_SUCCESS);
     }
 }

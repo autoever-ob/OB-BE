@@ -98,8 +98,8 @@ public class SecurityConfig {
                                 "/api/member/login", "/api/member/signup", "/api/member/reissue", "/api/member/logout","/v3/api-docs/**",
                                 "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/health", "/api-doc", "/h2-console/**",
                                 "/api/member/email/**", "/api/member/info/*","api/member/check/**",
-                                //! TODO /api/products 는 일단 개발을 위해 전부 열어놓음
-                                "/api/products/**",
+                                //! TODO /api/product 는 일단 개발을 위해 전부 열어놓음
+                                "/api/product/**",
                                 //! TODO /api/chat도 일단 개발을 위해 전부 열어놓음
                                 "/api/chat/**"
                         ).permitAll() // 회원, 스웨거 허가

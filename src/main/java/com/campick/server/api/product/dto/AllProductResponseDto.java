@@ -27,10 +27,20 @@ public class AllProductResponseDto {
     @JsonProperty("thumbNail")
     private String thumbNail;
     @JsonProperty("productId")
-    private String productId;
+    private Long productId;
     @JsonProperty("status")
     private String status;
-    //private Boolean isLiked;
-    //private Long likeCount; 로그인 되고 나면 추가
+    private Boolean isLiked;
+    private Integer likeCount; //로그인 되고 나면 추가
 
+    public AllProductResponseDto(String title, String price, String mileage, String location, LocalDateTime createdAt, String thumbnailUrl, Long productId, String status) {
+        this.title = title;
+        this.price = price;
+        this.mileage = mileage;
+        this.location = location;
+        this.createdAt = createdAt;
+        this.thumbNail = thumbnailUrl;
+        this.productId = productId;
+        this.status = status;
+    }
 }

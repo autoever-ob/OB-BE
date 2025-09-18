@@ -16,7 +16,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,32 @@ public class MemberController {
 
     private final MemberService memberService;
     private final EmailService emailService;
+
+    //MOCK
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<UserMock.UserResponseDto>> getProfile() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_PROFILE_SUCCESS, UserMock.getUserInfo());
+    }
+
+    @GetMapping("/sold")
+    public ResponseEntity<ApiResponse<Page<MySoldMock.ProductDto>>> getMySoldProducts() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_SOLD_SUCCESS, MySoldMock.getMyProducts());
+    }
+
+    @GetMapping("/selling")
+    public ResponseEntity<ApiResponse<Page<MySellMock.SellProductDto>>> getMySellingProducts() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_SELL_SUCCESS, MySellMock.getMyProducts());
+    }
+
+    @GetMapping("/bought")
+    public ResponseEntity<ApiResponse<Page<MyBoughtMock.Product>>> getMyBoughtProducts() {
+        return ApiResponse.success(SuccessStatus.SEND_MY_BOUGHT_SUCCESS, MyBoughtMock.getPurchasedProducts());
+    }
+
+    @GetMapping("/review/{userId}")
+    public ResponseEntity<ApiResponse<Page<MyReviewMock.Review>>> getReviews() {
+        return ApiResponse.success(SuccessStatus.SEND_REVIEW_SUCCESS, MyReviewMock.getReviews());
+    }
 
 @Operation(
             summary = "이메일 회원가입 API", description = "회원정보를 받아 사용자를 등록합니다.")

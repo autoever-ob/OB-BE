@@ -225,11 +225,10 @@ public class ProductService {
                             product.getLocation(),
                             product.getCreatedAt(),
                             thumbnailUrl,
-                            product.getId().toString(),
+                            product.getId(),
                             product.getStatus().toString()
                     );
                 })
                 .collect(Collectors.toList());
     }
-
 }

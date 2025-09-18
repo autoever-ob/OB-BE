@@ -15,6 +15,13 @@ public enum SuccessStatus {
     SEND_REGISTER_SUCCESS(HttpStatus.OK,"회원가입 성공"),
     SEND_LOGIN_SUCCESS(HttpStatus.OK, "로그인 성공"),
     SEND_HEALTH_SUCCESS(HttpStatus.OK,"서버 상태 OK"),
+
+    SEND_MY_PROFILE_SUCCESS(HttpStatus.OK, "내 정보 조회 성공"),
+    SEND_MY_SOLD_SUCCESS(HttpStatus.OK, "내가 판 매물 조회 성공"),
+    SEND_MY_BOUGHT_SUCCESS(HttpStatus.OK, "내가 산 매물 조회 성공"),
+    SEND_MY_SELL_SUCCESS(HttpStatus.OK, "내가 팔고 있는 매물 조회 성공"),
+    SEND_REVIEW_SUCCESS(HttpStatus.OK, "리뷰 조회 성공"),
+
     LOGOUT_SUCCESS(HttpStatus.OK,"로그아웃 성공"),
     CHECK_EMAIL_DUPLICATE(HttpStatus.OK, "이메일 중복 검사 결과입니다."),
     CHECK_NICKNAME_DUPLICATE(HttpStatus.OK, "닉네임 중복 검사 결과입니다."),
@@ -27,6 +34,8 @@ public enum SuccessStatus {
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
     SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "자동차 리스트 조회 성공"),
     SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
+    SEND_PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "매물 상세 조회 성공"),
+    SEND_CHAT_CREATED(HttpStatus.OK, "채팅방 생성 성공"),
     SEND_EMAIL_VERIFICATION_CODE_SUCCESS(HttpStatus.OK, "이메일 전송 성공"),
     SEND_EMAIL_VERIFICATION_SUCCESS(HttpStatus.OK, "이메일 검증 성공"),
     SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS(HttpStatus.OK, "내가 팔고 있는 매물 목록 전송 성공."),

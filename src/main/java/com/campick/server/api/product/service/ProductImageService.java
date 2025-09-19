@@ -1,6 +1,5 @@
 package com.campick.server.api.product.service;
 
-import com.campick.server.api.product.dto.ProductImageReqDto;
 import com.campick.server.common.storage.FirebaseStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +14,9 @@ import java.util.List;
 public class ProductImageService {
     private final FirebaseStorageService firebaseStorageService;
 
-    public List<String> uploadImage(ProductImageReqDto dto) throws IOException {
+    public List<String> uploadImage(List<MultipartFile> files) throws IOException {
         List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : dto.getFiles()) {
+        for (MultipartFile file : files) {
             imageUrls.add(firebaseStorageService.uploadProductImage(file));
         }
 

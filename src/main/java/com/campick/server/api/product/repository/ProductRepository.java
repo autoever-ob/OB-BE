@@ -34,4 +34,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findProductByMemberIdWithDetails(@Param("memberId") Long memberId);
 
     List<Product> findProductsBySellerAndStatus(Member buyer, ProductStatus productStatus);
+
+    Product findTopByOrderByCreatedAtDesc();
+    Product findTopByOrderByLikeCountDesc();
 }

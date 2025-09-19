@@ -102,7 +102,7 @@ public class SecurityConfig {
                                 "/api/member/email/**", "/api/member/info/*","api/member/check/**",
 
                                 //! TODO /api/chat도 일단 개발을 위해 전부 열어놓음
-                                "/api/chat/**"
+                                "/api/chat/**", "/ws/**"
                         ).permitAll() // 회원, 스웨거 허가
                         //! TODO /api/product 는 일단 개발을 위해 전부 열어놓음
                         .requestMatchers("/api/product/**").permitAll()

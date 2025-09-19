@@ -1,13 +1,10 @@
 package com.campick.server.api.member.controller;
 
 import com.campick.server.api.member.dto.*;
-import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.service.EmailService;
 import com.campick.server.api.member.service.MemberService;
 import com.campick.server.common.config.security.SecurityMember;
-import com.campick.server.common.exception.BadRequestException;
 import com.campick.server.common.response.ApiResponse;
-import com.campick.server.common.response.ErrorStatus;
 import com.campick.server.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,17 +13,15 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 
 @RequestMapping("/api/member")
@@ -56,12 +51,14 @@ public class MemberController {
     })
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<MemberLoginResponseDto>> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
-        MemberLoginResponseDto loginResponseDto = memberService.login(requestDto);
+        Map<String, Object> result = memberService.login(requestDto);
+        MemberLoginResponseDto loginResponseDto = (MemberLoginResponseDto) result.get("loginResponseDto");
+        String refreshToken = (String) result.get("refreshToken");
 
-        Cookie cookie = new Cookie("refresh", loginResponseDto.getRefreshToken());
+        Cookie cookie = new Cookie("refresh", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 7);
+        cookie.setMaxAge(60 * 60 * 24 * 30);
         response.addCookie(cookie);
 
         return ApiResponse.success(SuccessStatus.SEND_LOGIN_SUCCESS,loginResponseDto);
@@ -190,15 +187,20 @@ public class MemberController {
                 }
             }
         }
-        MemberLoginResponseDto dto = memberService.reissueToken(refresh);
 
-        Cookie newRefreshCookie = new Cookie("refresh", dto.getRefreshToken());
+
+        Map<String,Object> result = memberService.reissueToken(refresh);
+        MemberLoginResponseDto memberLoginResponseDto =
+                (MemberLoginResponseDto) result.get("loginResponseDto");
+        String newRefreshToken = (String) result.get("refreshToken");
+
+        Cookie newRefreshCookie = new Cookie("refresh", newRefreshToken);
         newRefreshCookie.setHttpOnly(true);
         newRefreshCookie.setPath("/");
-        newRefreshCookie.setMaxAge(60 * 60 * 24 * 7);
+        newRefreshCookie.setMaxAge(60 * 60 * 24 * 30);
         response.addCookie(newRefreshCookie);
 
-        return ApiResponse.success(SuccessStatus.REISSUE_SUCCESS, dto);
+        return ApiResponse.success(SuccessStatus.REISSUE_SUCCESS, memberLoginResponseDto);
     }
 
     @Operation(summary = "이메일 중복 검사", description = "입력한 이메일이 중복되는지 확인합니다.")

@@ -1,6 +1,7 @@
 package com.campick.server.api.member.dto;
 
 import com.campick.server.api.product.entity.ProductImage;
+import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.transaction.entity.Transaction;
 import com.campick.server.api.transaction.entity.TransactionType;
 import com.campick.server.common.entity.BaseTimeEntity;
@@ -24,7 +25,7 @@ public class TransactionResponseDto extends BaseTimeEntity {
     private Integer mileage;
     private String location;
     private List<String> thumbnailUrls;
-    private TransactionType transactionType;
+    private ProductStatus status;
     private LocalDateTime createdAt;
 
     public static TransactionResponseDto from(Transaction transaction) {
@@ -44,7 +45,6 @@ public class TransactionResponseDto extends BaseTimeEntity {
                 .mileage(transaction.getProduct().getMileage())
                 .location(transaction.getProduct().getLocation())
                 .thumbnailUrls(thumbnailUrl)
-                .transactionType(transaction.getType())
                 .createdAt(transaction.getCreatedAt())
                 .build();
     }

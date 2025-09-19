@@ -6,10 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class MemberLoginResponseDto {
-
     private String accessToken;
-    private String refreshToken;
-
-
-
+    private Long memberId;
+    private Long dealerId;
+    private String profileImageUrl;
+    private String profileThumbnailUrl;
 }

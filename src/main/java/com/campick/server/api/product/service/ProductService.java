@@ -10,9 +10,7 @@ import com.campick.server.api.option.entity.CarOption;
 import com.campick.server.api.option.entity.ProductOption;
 import com.campick.server.api.option.repository.CarOptionRepository;
 import com.campick.server.api.option.repository.ProductOptionRepository;
-import com.campick.server.api.product.dto.AllProductResponseDto;
-import com.campick.server.api.product.dto.ProductCreateRequestDto;
-import com.campick.server.api.product.dto.ProductCreateWithImageRequestDto;
+import com.campick.server.api.product.dto.*;
 import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.entity.ProductImage;
 import com.campick.server.api.product.entity.ProductStatus;
@@ -23,15 +21,14 @@ import com.campick.server.api.type.entity.Type;
 import com.campick.server.api.type.entity.VehicleTypeName;
 import com.campick.server.api.type.repository.TypeRepository;
 import com.campick.server.common.exception.BadRequestException;
+import com.campick.server.common.exception.NotFoundException;
+import com.campick.server.common.response.ErrorStatus;
 import com.campick.server.common.storage.FirebaseStorageService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -48,9 +45,10 @@ public class ProductService {
     private final TypeRepository typeRepository;
     private final MemberRepository memberRepository;
     private final FirebaseStorageService firebaseStorageService;
+    private final ProductImageService productImageService;
 
     @Transactional
-    public Long createProduct(ProductCreateRequestDto dto) {
+    public Long createProduct(ProductCreateReqDto dto) {
         VehicleTypeName vehicleTypeName;
         try {
             vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
@@ -66,13 +64,25 @@ public class ProductService {
         Member member = memberRepository.findById(1L)
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
-        Product product = Product.builder()
+        Product product = ProductDtoToEntity(member, car, dto);
+        productRepository.save(product);
+
+        // 이미지 저장 - 5장 초과인지 백에서도 검사해야 함?
+        saveImages(product, dto.getMainProductImageUrl(), dto.getProductImageUrl());
+        // 옵션 저장
+        saveOptions(product, dto.getOption());
+
+        return product.getId();
+    }
+
+    private Product ProductDtoToEntity(Member member, Car car, ProductCreateReqDto dto) {
+        return Product.builder()
                 .seller(member)
                 .car(car)
                 .title(dto.getTitle())
+                .generation(dto.getGeneration())
                 .cost(Integer.parseInt(dto.getPrice()))
                 .mileage(Integer.parseInt(dto.getMileage()))
-                .generation(2017)
                 .description(dto.getDescription())
                 .plateHash(dto.getPlateHash())
                 .location(dto.getLocation())
@@ -80,31 +90,10 @@ public class ProductService {
                 .status(ProductStatus.AVAILABLE)
                 .isDeleted(false)
                 .build();
-        productRepository.save(product);
+    }
 
-        // 이미지 저장
-        for (String imageUrl : dto.getProductImageUrl()) {
-            ProductImage image;
-
-            if (Objects.equals(imageUrl, dto.getMainProductImageUrl())) {
-                image = ProductImage.builder()
-                        .product(product)
-                        .imageUrl(imageUrl)
-                        .isThumbnail(true)
-                        .build();
-            } else {
-                image = ProductImage.builder()
-                        .product(product)
-                        .imageUrl(imageUrl)
-                        .isThumbnail(false)
-                        .build();
-            }
-            productImageRepository.save(image);
-        }
-
-
-        // 옵션 저장
-        for (ProductCreateRequestDto.OptionDTO optionDto : dto.getOption()) {
+    private void saveOptions(Product product, List<OptionDto> options) {
+        for (OptionDto optionDto : options) {
             Optional<CarOption> existingOption = carOptionRepository.findByName(optionDto.getOptionName());
 
             CarOption carOption;
@@ -124,56 +113,19 @@ public class ProductService {
                     .build();
             productOptionRepository.save(option);
         }
-
-        return product.getId();
     }
 
-    @Transactional
-    public Long createProductWithImages(ProductCreateWithImageRequestDto dto, List<MultipartFile> images, MultipartFile mainImage) throws IOException {
-        VehicleTypeName vehicleTypeName;
-        try {
-            vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid vehicle type: " + dto.getVehicleType());
-        }
-        Type type = typeRepository.findBytypeName(vehicleTypeName);
-
-        Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
-
-        Car car = carRepository.findByModel(model);
-
-        Member member = memberRepository.findById(1L)
-                .orElseThrow(() -> new BadRequestException("Member not found"));
-
-        Product product = Product.builder()
-                .seller(member)
-                .car(car)
-                .title(dto.getTitle())
-                .cost(Integer.parseInt(dto.getPrice()))
-                .mileage(Integer.parseInt(dto.getMileage()))
-                .generation(2017)
-                .description(dto.getDescription())
-                .plateHash(dto.getPlateHash())
-                .location(dto.getLocation())
-                .type(ProductType.SELLING) // 딜러/유저 구분 필요
-                .status(ProductStatus.AVAILABLE)
-                .isDeleted(false)
-                .build();
-        productRepository.save(product);
-
-        // 메인 이미지 저장
-        String mainImageUrl = firebaseStorageService.uploadProductImage(product.getId(), mainImage);
-        ProductImage mainProductImage = ProductImage.builder()
+    private void saveImages(Product product, String main, List<String> images) {
+        // 썸네일
+        ProductImage thumbnail = ProductImage.builder()
                 .product(product)
-                .imageUrl(mainImageUrl)
+                .imageUrl(main)
                 .isThumbnail(true)
                 .build();
-        productImageRepository.save(mainProductImage);
+        productImageRepository.save(thumbnail);
 
-
-        // 나머지 이미지 저장
-        for (MultipartFile imageFile : images) {
-            String imageUrl = firebaseStorageService.uploadProductImage(product.getId(), imageFile);
+        // 나머지 사진들
+        for (String imageUrl : images) {
             ProductImage image = ProductImage.builder()
                     .product(product)
                     .imageUrl(imageUrl)
@@ -181,31 +133,112 @@ public class ProductService {
                     .build();
             productImageRepository.save(image);
         }
+    }
 
-
-        // 옵션 저장
-        for (ProductCreateRequestDto.OptionDTO optionDto : dto.getOption()) {
-            Optional<CarOption> existingOption = carOptionRepository.findByName(optionDto.getOptionName());
-
-            CarOption carOption;
-            if (existingOption.isPresent()) {
-                carOption = existingOption.get();
-            } else {
-                carOption = CarOption.builder()
-                        .name(optionDto.getOptionName())
-                        .build();
-                carOptionRepository.save(carOption);
-            }
-
-            ProductOption option = ProductOption.builder()
+    private void saveImagesWithoutThumbnail(Product product, List<String> images) {
+        for (String imageUrl : images) {
+            ProductImage image = ProductImage.builder()
                     .product(product)
-                    .carOption(carOption)
-                    .isEquipped(optionDto.getIsInclude())
+                    .imageUrl(imageUrl)
+                    .isThumbnail(false)
                     .build();
-            productOptionRepository.save(option);
+            productImageRepository.save(image);
         }
+    }
 
-        return product.getId();
+    public Long updateProduct(Long productId, ProductUpdateReqDto dto) {
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
+        );
+
+        VehicleTypeName vehicleTypeName;
+        try {
+            vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(ErrorStatus.INVALID_VEHICLE_TYPE.getMessage() + dto.getVehicleType());
+        }
+        Type type = typeRepository.findBytypeName(vehicleTypeName);
+
+        Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
+
+        Car car = carRepository.findByModel(model);
+
+        // 남이 수정하는 경우 막아야 하나? 요청한 유저랑 기존 셀러랑 비교해서
+        Member member = memberRepository.findById(1L)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
+
+        updateProductStrings(product, car, dto);
+
+        updateProductImages(product, dto.getMainProductImageUrl(), dto.getProductImageUrl());
+
+        updateProductOptions(product, dto.getOption());
+
+        return productId;
+    }
+
+    private void updateProductOptions(Product product, List<OptionDto> newOptions) {
+        List<ProductOption> existingOption = productOptionRepository.findAllByProduct(product);
+        List<String> existingOptionName = existingOption.stream().map(ProductOption::getCarOption)
+                .map(CarOption::getName).toList();
+        List<String> newOptionNames = newOptions.stream().map(OptionDto::getOptionName).toList();
+
+        List<ProductOption> toDelete = existingOption.stream().filter(
+                opt -> !newOptionNames.contains(opt.getCarOption().getName())
+        ).toList();
+
+        List<OptionDto> toAdd = newOptions.stream().filter(
+                newOpt -> !existingOptionName.contains(newOpt.getOptionName())
+        ).toList();
+
+        productOptionRepository.deleteAll(toDelete);
+
+        if (!toAdd.isEmpty())
+            saveOptions(product, toAdd);
+    }
+
+    private void updateProductStrings(Product product, Car car, ProductUpdateReqDto dto) {
+        product.setTitle(dto.getTitle());
+        product.setDescription(dto.getDescription());
+        product.setPlateHash(dto.getPlateHash());
+        product.setLocation(dto.getLocation());
+        product.setGeneration(dto.getGeneration());
+        product.setCost(Integer.parseInt(dto.getPrice()));
+        product.setMileage(Integer.parseInt(dto.getMileage()));
+        product.setCar(car);
+        productRepository.save(product);
+    }
+
+    private void updateProductImages(Product product, String thumbnailUrl, List<String> imageUrls) {
+        // 이거 너무 구린데 아이디어 제안 받습니다.
+        List<ProductImage> existingImage = productImageRepository.findAllByProduct(product);
+        List<String> existingImageUrls = existingImage.stream().map(ProductImage::getImageUrl).toList();
+
+        // 새로 들어온 것과 다르다는 건 지워졌다는 것. 지움
+        List<ProductImage> toDelete = existingImage.stream()
+                .filter(img -> !imageUrls.contains(img.getImageUrl()))
+                .toList();
+        productImageRepository.deleteAll(toDelete);
+
+        // 기존에 없는 이미지 주소
+        List<String> toAdd = imageUrls.stream()
+                .filter(img -> !existingImageUrls.contains(img))
+                .toList();
+
+        if (!toAdd.isEmpty()) {
+            if (toAdd.contains(thumbnailUrl))
+                saveImages(product, thumbnailUrl, toAdd);
+            else
+                saveImagesWithoutThumbnail(product, toAdd);
+        }
+    }
+
+    public void deleteProduct(Long productId) {
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
+        );
+
+        product.setIsDeleted(true);
+        productRepository.save(product);
     }
 
     @Transactional

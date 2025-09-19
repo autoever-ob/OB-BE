@@ -5,9 +5,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Getter @Setter
 @NoArgsConstructor
 public class ProductImageReqDto {
-    private Long productId;
-    private MultipartFile file;
+    private List<MultipartFile> files;
 }

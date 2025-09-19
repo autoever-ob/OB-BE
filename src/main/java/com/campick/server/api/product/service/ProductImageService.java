@@ -7,13 +7,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ProductImageService {
     private final FirebaseStorageService firebaseStorageService;
 
-    public String uploadImage(ProductImageReqDto dto) throws IOException {
-        return firebaseStorageService.uploadProductImage(dto.getProductId(), dto.getFile());
+    public List<String> uploadImage(ProductImageReqDto dto) throws IOException {
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile file : dto.getFiles()) {
+            imageUrls.add(firebaseStorageService.uploadProductImage(file));
+        }
+
+        return imageUrls;
     }
 }

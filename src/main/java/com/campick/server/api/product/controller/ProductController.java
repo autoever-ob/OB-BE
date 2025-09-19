@@ -79,9 +79,9 @@ public class ProductController {
         return ApiResponse.success(SuccessStatus.SEND_PRODUCT_UPDATE_SUCCESS, productService.updateProduct(productId, dto));
     }
 
-    @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> deleteProduct() {
-        productService.deleteProduct();
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId) {
+        productService.deleteProduct(productId);
         return ApiResponse.success_only(SuccessStatus.SEND_PRODUCT_DELETE_SUCCESS);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/product/image")
@@ -18,7 +19,7 @@ public class ProductImageController {
     private final ProductImageService productImageService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<String>> upload(@RequestBody ProductImageReqDto dto) throws IOException {
+    public ResponseEntity<ApiResponse<List<String>>> upload(@RequestBody ProductImageReqDto dto) throws IOException {
         return ApiResponse.success(SuccessStatus.UPLOAD_PRODUCT_IMAGE_SUCCESS, productImageService.uploadImage(dto));
     }
 }

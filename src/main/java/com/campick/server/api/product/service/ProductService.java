@@ -137,6 +137,17 @@ public class ProductService {
         }
     }
 
+    private void saveImagesWithoutThumbnail(Product product, List<String> images) {
+        for (String imageUrl : images) {
+            ProductImage image = ProductImage.builder()
+                    .product(product)
+                    .imageUrl(imageUrl)
+                    .isThumbnail(false)
+                    .build();
+            productImageRepository.save(image);
+        }
+    }
+
     public Long updateProduct(Long productId, ProductUpdateReqDto dto) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
@@ -162,7 +173,29 @@ public class ProductService {
 
         updateProductImages(product, dto.getMainProductImageUrl(), dto.getProductImageUrl());
 
-        updateProductOptions(productId);
+        updateProductOptions(product, dto.getOption());
+
+        return productId;
+    }
+
+    private void updateProductOptions(Product product, List<OptionDto> newOptions) {
+        List<ProductOption> existingOption = productOptionRepository.findAllByProduct(product);
+        List<String> existingOptionName = existingOption.stream().map(ProductOption::getCarOption)
+                .map(CarOption::getName).toList();
+        List<String> newOptionNames = newOptions.stream().map(OptionDto::getOptionName).toList();
+
+        List<ProductOption> toDelete = existingOption.stream().filter(
+                opt -> !newOptionNames.contains(opt.getCarOption().getName())
+        ).toList();
+
+        List<OptionDto> toAdd = newOptions.stream().filter(
+                newOpt -> !existingOptionName.contains(newOpt.getOptionName())
+        ).toList();
+
+        productOptionRepository.deleteAll(toDelete);
+
+        if (!toAdd.isEmpty())
+            saveOptions(product, toAdd);
     }
 
     private void updateProductStrings(Product product, Car car, ProductUpdateReqDto dto) {
@@ -199,6 +232,15 @@ public class ProductService {
             else
                 saveImagesWithoutThumbnail(product, toAdd);
         }
+    }
+
+    public void deleteProduct(Long productId) {
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
+        );
+
+        product.setIsDeleted(true);
+        productRepository.save(product);
     }
 
     @Transactional

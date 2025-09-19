@@ -64,7 +64,7 @@ public class ChatService {
     public ChatStartResDto startChatRoom(ChatRoomReqDto chatRoomReqDto, Long userId) {
         Product product = productRepository.findById(chatRoomReqDto.getProductId()).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage()));
-        Member seller = product.getMember();
+        Member seller = product.getSeller();
         Member buyer = memberRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
         ChatRoom chatRoom = ChatRoom.builder()

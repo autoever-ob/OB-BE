@@ -17,7 +17,7 @@ import java.util.List;
 public class ProductImageController {
     private final ProductImageService productImageService;
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<List<String>>> upload(@RequestPart("files") List<MultipartFile> files) throws IOException {
         return ApiResponse.success(SuccessStatus.UPLOAD_PRODUCT_IMAGE_SUCCESS, productImageService.uploadImage(files));
     }

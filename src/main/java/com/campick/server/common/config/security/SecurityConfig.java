@@ -5,6 +5,7 @@ import com.campick.server.common.jwt.JWTFilter;
 import com.campick.server.common.jwt.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -98,11 +100,12 @@ public class SecurityConfig {
                                 "/api/member/login", "/api/member/signup", "/api/member/reissue", "/api/member/logout","/v3/api-docs/**",
                                 "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/health", "/api-doc", "/h2-console/**",
                                 "/api/member/email/**", "/api/member/info/*","api/member/check/**",
-                                //! TODO /api/product 는 일단 개발을 위해 전부 열어놓음
-                                "/api/product/**",
+
                                 //! TODO /api/chat도 일단 개발을 위해 전부 열어놓음
                                 "/api/chat/**"
                         ).permitAll() // 회원, 스웨거 허가
+                        //! TODO /api/product 는 일단 개발을 위해 전부 열어놓음
+                        .requestMatchers("/api/product/**").permitAll()
                         .anyRequest().authenticated()
                 );
 

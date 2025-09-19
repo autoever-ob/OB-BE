@@ -38,32 +38,6 @@ public class MemberController {
     private final MemberService memberService;
     private final EmailService emailService;
 
-    //MOCK
-    @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<UserMock.UserResponseDto>> getProfile() {
-        return ApiResponse.success(SuccessStatus.SEND_MY_PROFILE_SUCCESS, UserMock.getUserInfo());
-    }
-
-    @GetMapping("/sold")
-    public ResponseEntity<ApiResponse<Page<MySoldMock.ProductDto>>> getMySoldProducts() {
-        return ApiResponse.success(SuccessStatus.SEND_MY_SOLD_SUCCESS, MySoldMock.getMyProducts());
-    }
-
-    @GetMapping("/selling")
-    public ResponseEntity<ApiResponse<Page<MySellMock.SellProductDto>>> getMySellingProducts() {
-        return ApiResponse.success(SuccessStatus.SEND_MY_SELL_SUCCESS, MySellMock.getMyProducts());
-    }
-
-    @GetMapping("/bought")
-    public ResponseEntity<ApiResponse<Page<MyBoughtMock.Product>>> getMyBoughtProducts() {
-        return ApiResponse.success(SuccessStatus.SEND_MY_BOUGHT_SUCCESS, MyBoughtMock.getPurchasedProducts());
-    }
-
-    @GetMapping("/review/{userId}")
-    public ResponseEntity<ApiResponse<Page<MyReviewMock.Review>>> getReviews() {
-        return ApiResponse.success(SuccessStatus.SEND_REVIEW_SUCCESS, MyReviewMock.getReviews());
-    }
-
 @Operation(
             summary = "이메일 회원가입 API", description = "회원정보를 받아 사용자를 등록합니다.")
     @ApiResponses({
@@ -241,8 +215,9 @@ public class MemberController {
         return ApiResponse.success(SuccessStatus.CHECK_NICKNAME_DUPLICATE, isDuplicate);
     }
 
-    @Operation(summary = "내가 팔고 있는 매물 조회", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
-    @GetMapping("/product/all")
+
+    @Operation(summary = "내 매물 중 팔거나 예약 중인 제품 리스트", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
+    @GetMapping("/product/sell-or-reserve")
     public ResponseEntity<ApiResponse<List<ProductAvailableSummaryDto>>> getMemberProducts(
             @AuthenticationPrincipal SecurityMember securityMember){
         List<ProductAvailableSummaryDto> memberProductsIsAvailable = memberService.getMemberProducts(securityMember.getId());

@@ -40,7 +40,7 @@ public class EmailService {
                 .ifPresent(emailVerificationRepository::delete);
 
 
-        // 랜덤한 6자리 코드 발생
+        // 랜덤한 7자리 코드 발생
         String code = generateCode();
         EmailVerification emailVerification = EmailVerification.builder()
                 .email(email)
@@ -61,14 +61,13 @@ public class EmailService {
 
     public String generateCode(){
         SecureRandom random = new SecureRandom();
-        StringBuilder sb = new StringBuilder(6);
+        StringBuilder sb = new StringBuilder(7);
 
         // 랜던함 값을 얻기 위한 A-Za-z0-9 문자열 중 하나 선택
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        for(int i=0; i < 6; i++){
+        for(int i=0; i < 7; i++){
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
-
         return sb.toString();
     }
 

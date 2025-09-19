@@ -38,6 +38,9 @@ public class Product extends BaseTimeEntity {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Favorite> likes;
 
+    @Column(name = "like_count")
+    private Integer likeCount = 0;
+
     @Column(name = "title", nullable = false)
     private String title;
 

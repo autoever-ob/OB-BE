@@ -242,7 +242,7 @@ public class ProductService {
     }
 
     @Transactional
-    public List<AllProductResponseDto> findAll() {
+    public List<ProductResDto> findAll() {
         List<Product> products = productRepository.findAll();
 
         return products.stream()
@@ -251,7 +251,7 @@ public class ProductService {
                             .findByProductAndIsThumbnailTrue(product)
                             .getImageUrl();
 
-                    return new AllProductResponseDto(
+                    return new ProductResDto(
                             product.getTitle(),
                             product.getCost().toString(),
                             product.getMileage().toString(),
@@ -263,5 +263,19 @@ public class ProductService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    public RecommendResDto getRecommend() {
+        Product newVehicle = productRepository.findTopByOrderByCreatedAtDesc();
+        Product hotVehicle = productRepository.findTopByOrderByLikeCountDesc();
+
+        ProductResDto newVehicleResDto = new ProductResDto();
+        ProductResDto hotVehicleResDto = new ProductResDto();
+
+        RecommendResDto recommendResDto = new RecommendResDto();
+        recommendResDto.setHotVehicle(hotVehicleResDto);
+        recommendResDto.setHotVehicle(newVehicleResDto);
+
+        return recommendResDto;
     }
 }

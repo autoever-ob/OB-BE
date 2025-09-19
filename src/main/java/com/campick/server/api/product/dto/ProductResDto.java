@@ -7,13 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AllProductResponseDto {
+public class ProductResDto {
     @JsonProperty("title")
     private String title;
     @JsonProperty("price")
@@ -33,7 +32,7 @@ public class AllProductResponseDto {
     private Boolean isLiked;
     private Integer likeCount; //로그인 되고 나면 추가
 
-    public AllProductResponseDto(String title, String price, String mileage, String location, LocalDateTime createdAt, String thumbnailUrl, Long productId, String status) {
+    public ProductResDto(String title, String price, String mileage, String location, LocalDateTime createdAt, String thumbnailUrl, Long productId, String status) {
         this.title = title;
         this.price = price;
         this.mileage = mileage;

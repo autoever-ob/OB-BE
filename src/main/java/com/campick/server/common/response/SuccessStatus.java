@@ -33,6 +33,7 @@ public enum SuccessStatus {
 
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
     SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "자동차 리스트 조회 성공"),
+    SEND_RECOMMEND_SUCCESS(HttpStatus.OK, "추천 매물 조회 성공"),
     SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
     SEND_PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "매물 상세 조회 성공"),
     SEND_PRODUCT_UPDATE_SUCCESS(HttpStatus.OK, "매물 수정 성공"),
@@ -43,6 +44,9 @@ public enum SuccessStatus {
     SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS(HttpStatus.OK, "내가 팔거나 예약 중인 매물 목록 전송 성공."),
 
     UPLOAD_PRODUCT_IMAGE_SUCCESS(HttpStatus.OK, "매물 사진 등록 성공"),
+
+    SEND_LOAD_CHATROOM(HttpStatus.OK, "채팅 상세 조회 성공"),
+    SEND_MY_CHATROOMS(HttpStatus.OK, "내 채팅방 조회 성공"),
 
     /**
      * 201

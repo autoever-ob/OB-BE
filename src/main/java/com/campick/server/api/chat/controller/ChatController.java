@@ -30,7 +30,7 @@ public class ChatController {
         //return ApiResponse.success(SuccessStatus.SEND_CHAT_CREATED, chatService.startChatRoom(chatRoomReqDto, userId));
     }
 
-    @PostMapping("/{chatRoomId}")
+    @GetMapping("/{chatRoomId}")
     public ResponseEntity<ApiResponse<ChatRoomResDto>> getChatRoom(@PathVariable Long chatRoomId) {
         ChatRoomResDto chatRoomResDto = new ChatRoomResDto();
 

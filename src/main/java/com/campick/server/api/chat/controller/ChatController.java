@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -51,15 +52,29 @@ public class ChatController {
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<MyChatResDto>> getMyChatRoom() {
         MyChatResDto myChatResDto = new MyChatResDto();
+        List<ChatListDto> chatRoom = new ArrayList<>();
 
-        myChatResDto.setChatRoomId(1L);
-        myChatResDto.setProductName("모터홈 스타렉스 오토");
-        myChatResDto.setNickname("김대환");
-        myChatResDto.setLastMessage("한번만 깎아주시면 안될까요");
-        myChatResDto.setLastMessageCreatedAt(LocalDateTime.now());
-        myChatResDto.setUnreadMessage(3);
+        ChatListDto chatListDto = new ChatListDto();
+        chatListDto.setChatRoomId(1L);
+        chatListDto.setProductName("모터홈 스타렉스 오토");
+        chatListDto.setNickname("김대환");
+        chatListDto.setLastMessage("한번만 깎아주시면 안될까요");
+        chatListDto.setLastMessageCreatedAt(LocalDateTime.now());
+        chatListDto.setUnreadMessage(3);
+
+        ChatListDto chatListDto2 = new ChatListDto();
+        chatListDto2.setChatRoomId(2L);
+        chatListDto2.setProductName("카라반 수동");
+        chatListDto2.setNickname("권육윤");
+        chatListDto2.setLastMessage("이거 수리 필요한 것 같은데 어떻게 생각하세요? 아니면 ㄴ어쩌아고나섲쩌고 긴메세지를 보내면 어떻게 될까하는 그런 긴 메시지입니다 별로 안 긴가?");
+        chatListDto2.setLastMessageCreatedAt(LocalDateTime.now());
+        chatListDto2.setUnreadMessage(1);
+
+        chatRoom.add(chatListDto);
+        chatRoom.add(chatListDto2);
+
+        myChatResDto.setChatRoom(chatRoom);
         myChatResDto.setTotalUnreadMessage(12);
-        myChatResDto.setIsActive(true);
 
         return ApiResponse.success(SuccessStatus.SEND_MY_CHATROOMS, myChatResDto);
     }

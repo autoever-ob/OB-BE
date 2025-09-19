@@ -45,7 +45,7 @@ public class EmailService {
         EmailVerification emailVerification = EmailVerification.builder()
                 .email(email)
                 .code(code)
-                .expirationTimeInMinutes(10)
+                .expirationTimeInSeconds(190)
                 .isVerified(false)
                 .build();
         emailVerificationRepository.save(emailVerification);
@@ -63,8 +63,8 @@ public class EmailService {
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder(7);
 
-        // 랜던함 값을 얻기 위한 A-Za-z0-9 문자열 중 하나 선택
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        // 랜던함 값을 얻기 위한 0-9 문자열 중 하나 선택
+        String chars = "0123456789";
         for(int i=0; i < 7; i++){
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }

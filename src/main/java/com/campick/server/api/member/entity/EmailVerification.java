@@ -22,20 +22,20 @@ public class EmailVerification extends BaseTimeEntity {
     private Long id;
     private String email;
     private String code;
-    private Integer expirationTimeInMinutes;
+    private Integer expirationTimeInSeconds;
 
     @Builder.Default
     private boolean isVerified = false;
 
 
     public boolean isExpired(LocalDateTime verifiedAt){
-        return verifiedAt.isAfter(this.createdAt.plusMinutes(this.expirationTimeInMinutes));
+        return verifiedAt.isAfter(this.createdAt.plusSeconds(this.expirationTimeInSeconds));
     }
 
     public void setIsVerified(boolean isVerified){ this.isVerified = isVerified;}
 
     public String generateCodeMessage(){
-        String formattedExpiredAt = this.createdAt.plusMinutes(this.expirationTimeInMinutes)
+        String formattedExpiredAt = this.createdAt.plusSeconds(this.expirationTimeInSeconds - 10)
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         return String.format(

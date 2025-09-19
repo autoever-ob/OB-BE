@@ -15,13 +15,18 @@ public class MemberHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) throws Exception {
 
+        System.out.println("inside beforeHandshake");
+
         if (request instanceof ServletServerHttpRequest servletRequest) {
             String path = servletRequest.getServletRequest().getRequestURI();
+            System.out.println("path: " + path);
             if (path.matches("/ws/\\w+")) {
-                String userId = path.replace("/ws/", "");
+                Long userId = Long.valueOf(path.replace("/ws/", ""));
+                System.out.println(userId);
                 attributes.put("userId", userId);
             } else {
                 // 형식이 안 맞으면 연결 거부
+                System.out.println("false");
                 return false;
             }
         }

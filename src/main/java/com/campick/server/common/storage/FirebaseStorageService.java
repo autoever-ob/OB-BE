@@ -35,15 +35,14 @@ public class FirebaseStorageService {
         return String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));
     }
 
-    public String uploadProductImage(Long productId, MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            throw new IOException("Empty file");
-        }
+    public String uploadProductImage(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty())
+            throw new BadRequestException(ErrorStatus.EMPTY_FILE_EXCEPTION.getMessage());
 
         String ext = extractExtension(file.getOriginalFilename());
         String randomName = UUID.randomUUID().toString();
-        String objectName = String.format("products/%d/%s%s", productId, randomName, ext);
-        String thumbnailObjectName = String.format("products/%d/thumbnails/%s%s", productId, randomName, ext);
+        String objectName = String.format("products/%s%s", randomName, ext);
+        String thumbnailObjectName = String.format("products/thumbnails/%s%s", randomName, ext);
 
         // 파이어베이스에 접속하여 objectName 경로로 버킷 생성
         // 각각 경로, 비트열, 파일 확장자

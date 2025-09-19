@@ -5,18 +5,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter @Setter
 @NoArgsConstructor
 public class MyChatResDto {
-    private Long chatRoomId;
-    private String productName;
-    private String productThumbnail;
-    private String nickname;
-    private String profileImage;
-    private String lastMessage;
-    private LocalDateTime lastMessageCreatedAt;
-    private Integer unreadMessage;
+    private List<ChatListDto> chatRoom;
     private Integer totalUnreadMessage;
-    private Boolean isActive;
 }

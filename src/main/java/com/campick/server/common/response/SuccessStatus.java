@@ -45,6 +45,9 @@ public enum SuccessStatus {
 
     UPLOAD_PRODUCT_IMAGE_SUCCESS(HttpStatus.OK, "매물 사진 등록 성공"),
 
+    SEND_LOAD_CHATROOM(HttpStatus.OK, "채팅 상세 조회 성공"),
+    SEND_MY_CHATROOMS(HttpStatus.OK, "내 채팅방 조회 성공"),
+
     /**
      * 201
      */

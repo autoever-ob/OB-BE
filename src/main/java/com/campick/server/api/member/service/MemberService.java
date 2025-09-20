@@ -24,14 +24,14 @@ import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -97,7 +97,7 @@ public class MemberService {
 
         String accessToken = jwtUtil.createJwt("access", member.getId(), member.getRole().name(), ACCESS_TOKEN_EXPIRATION_MS);
 
-        // Redis에 Access Token 저장
+
         redisTemplate.opsForValue().set(ACCESS_TOKEN_PREFIX + member.getId(), accessToken, ACCESS_TOKEN_EXPIRATION_MS, TimeUnit.MILLISECONDS);
 
         return MemberLoginResponseDto.builder()
@@ -229,39 +229,89 @@ public class MemberService {
     }
 
 
-    public List<ProductAvailableSummaryDto> getMemberProducts(Long id) {
+    // N + 1 문제를 한번 스스로 생각해보기
+    public MemberProductListPageDto getMemberProducts(Long id, Pageable pageable) {
 
         if(memberRepository.findByIdAndIsDeletedFalse(id).isEmpty()) {
             throw new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage());
         }
 
-        List<Product> products = productRepository.findProductByMemberIdWithDetails(id);
-
-        return products.stream()
-                .map(ProductAvailableSummaryDto::from)
-                .toList();
+        // 레포에서 데이터를 받아온다
+        // 하지만 여러번의 조인으로 인해서 N+1 문제가 발생해 성능 위기가 발생할 수 있다.
+        // JPQL을 사용해서 FETCH JOIN으로 가능한 모든 ROW와 이와 연관된 테이블들의 정보 뷰를 만들어내어 N+1 문제를 제거
+        Page<Product> products = productRepository.findProductByMemberIdWithDetails(id, pageable);
+        Page<ProductAvailableSummaryDto> productAvailableSummaryDtos = products.map(ProductAvailableSummaryDto::from);
+        // 찾아왔으면 원하는 값에 알맞게 채워줌
+        // 여러개의 products를 하나씩 보내면서 Dto를 만든다
+        // 원래는 배열로 가능하나 Stream으로 편리하게 가능
+        return MemberProductListPageDto.builder()
+                .totalElements(productAvailableSummaryDtos.getTotalElements())
+                .totalPages(productAvailableSummaryDtos.getTotalPages())
+                .page(productAvailableSummaryDtos.getNumber())
+                .size(productAvailableSummaryDtos.getSize())
+                .isLast(productAvailableSummaryDtos.isLast())
+                .content(productAvailableSummaryDtos.getContent())
+                .build();
     }
 
-    public List<TransactionResponseDto> getMemberBought(Long buyerId) {
-        Member buyer = memberRepository.findByIdAndIsDeletedFalse(buyerId).orElseThrow(
+
+    // 내가 샀으니깐 판 사람의 id를 가지고 조회할게
+    public MemberTransactionListPageDto getMemberBought(Long buyerId, Pageable pageable) {
+        // 멤버가 존재하는지 확인
+        Member buyer = memberRepository.findById(buyerId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
         );
 
-        List<Transaction> transactions = transactionRepository.findTransactionsByBuyer(buyer);
+        //! TODO N + 1은 추후에 풀어보기 ( 복습 )
+        Page<Transaction> transactions = transactionRepository.findTransactionsByBuyer(buyer, pageable);
+        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "SOLD"));
 
-        return transactions.stream()
-                .map(TransactionResponseDto::from)
-                .toList();
+        return MemberTransactionListPageDto.builder()
+                .totalElements(transactionDtos.getTotalElements())
+                .totalPages(transactionDtos.getTotalPages())
+                .page(transactionDtos.getNumber())
+                .size(transactionDtos.getSize())
+                .isLast(transactionDtos.isLast())
+                .content(transactionDtos.getContent())
+                .build();
     }
 
-    public List<TransactionResponseDto> getMemberSold(Long sellerId) {
-        Member seller = memberRepository.findByIdAndIsDeletedFalse(sellerId).orElseThrow(
+    // 내가 판
+    public MemberTransactionListPageDto getMemberSold(Long sellerId, Pageable pageable) {
+        // 멤버가 존재하는지 확인
+        Member seller = memberRepository.findById(sellerId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
         );
 
-        List<Transaction> transactions = transactionRepository.findTransactionsBySeller(seller);
-        return transactions.stream()
-                .map(TransactionResponseDto::from)
-                .toList();
+        Page<Transaction> transactions = transactionRepository.findTransactionsBySeller(seller, pageable);
+        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "BUY"));
+
+        return MemberTransactionListPageDto.builder()
+                .totalElements(transactionDtos.getTotalElements())
+                .totalPages(transactionDtos.getTotalPages())
+                .page(transactionDtos.getNumber())
+                .size(transactionDtos.getSize())
+                .isLast(transactionDtos.isLast())
+                .content(transactionDtos.getContent())
+                .build();
+    }
+
+    public ReviewListPageDto getReviewById(Long memberId, Pageable pageable) {
+        // 멤버가 존재하는지 확인
+        memberRepository.findByIdAndIsDeletedFalse(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        Page<Review> reviews = reviewRepository.findByTargetIdWithAuthor(memberId, pageable);
+        Page<ReviewResponseDto> reviewResponseDtos = reviews.map(ReviewResponseDto::from);
+
+        return ReviewListPageDto.builder()
+                .totalElements(reviewResponseDtos.getTotalElements())
+                .totalPages(reviewResponseDtos.getTotalPages())
+                .page(reviewResponseDtos.getNumber())
+                .size(reviewResponseDtos.getSize())
+                .isLast(reviewResponseDtos.isLast())
+                .content(reviewResponseDtos.getContent())
+                .build();
     }
 }

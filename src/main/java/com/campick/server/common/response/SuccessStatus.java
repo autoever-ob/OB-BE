@@ -34,12 +34,22 @@ public enum SuccessStatus {
 
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
     SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "자동차 리스트 조회 성공"),
+    SEND_RECOMMEND_SUCCESS(HttpStatus.OK, "추천 매물 조회 성공"),
     SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
     SEND_PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "매물 상세 조회 성공"),
+    SEND_PRODUCT_UPDATE_SUCCESS(HttpStatus.OK, "매물 수정 성공"),
+    SEND_PRODUCT_DELETE_SUCCESS(HttpStatus.OK, "매물 삭제 성공"),
     SEND_CHAT_CREATED(HttpStatus.OK, "채팅방 생성 성공"),
     SEND_EMAIL_VERIFICATION_CODE_SUCCESS(HttpStatus.OK, "이메일 전송 성공"),
     SEND_EMAIL_VERIFICATION_SUCCESS(HttpStatus.OK, "이메일 검증 성공"),
     SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS(HttpStatus.OK, "내가 팔거나 예약 중인 매물 목록 전송 성공."),
+    SEND_MEMBER_SOLD_PRODUCTS_SUCCESS(HttpStatus.OK, "{memberId} 별 판 매물 조회 성공"),
+    SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS(HttpStatus.OK, "{memberId} 별 산 매물 조회 성공"),
+
+    UPLOAD_PRODUCT_IMAGE_SUCCESS(HttpStatus.OK, "매물 사진 등록 성공"),
+
+    SEND_LOAD_CHATROOM(HttpStatus.OK, "채팅 상세 조회 성공"),
+    SEND_MY_CHATROOMS(HttpStatus.OK, "내 채팅방 조회 성공"),
 
 
     /**

@@ -32,7 +32,7 @@ public class MemberResponseDto {
         return MemberResponseDto.builder()
                 .id(member.getId())
                 .nickname(member.getNickname())
-                .profileImage(member.getProfileImage())
+                .profileImage(member.getProfileImageUrl())
                 .description(member.getDescription())
                 .createdAt(member.getCreatedAt())
                 .rating(dealerRating)

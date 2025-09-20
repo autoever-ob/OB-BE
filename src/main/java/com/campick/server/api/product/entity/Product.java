@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "product")
-@Getter
+@Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -29,11 +29,17 @@ public class Product extends BaseTimeEntity {
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
 
+    @Column(name = "generation", nullable = false)
+    private Integer generation;
+
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductImage> images;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Favorite> likes;
+
+    @Column(name = "like_count")
+    private Integer likeCount = 0;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -43,9 +49,6 @@ public class Product extends BaseTimeEntity {
 
     @Column(name = "mileage", nullable = false)
     private Integer mileage;
-
-    @Column(name = "generation", nullable = false)
-    private Integer generation;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;

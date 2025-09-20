@@ -39,7 +39,7 @@ public class Member extends BaseTimeEntity {
     private Role role;
 
     @Column(name = "profile_image")
-    private String profileImage;
+    private String profileImageUrl;
 
     @Column(name = "description")
     private String description;
@@ -75,7 +75,7 @@ public class Member extends BaseTimeEntity {
     public void updatePassword(String password) { this.password = password; }
 
     // 프로필 이미지 변경
-    public void updateProfileImage(String profileImage) { this.profileImage = profileImage;}
+    public void updateProfileImage(String profileImageUrl) { this.profileImageUrl = profileImageUrl;}
 
     // 딜러 연관관계 설정 (멤버 -> 딜러)
     public void assignDealer(Dealer dealer) {

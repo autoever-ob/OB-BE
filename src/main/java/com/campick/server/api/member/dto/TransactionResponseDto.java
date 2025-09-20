@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @Builder
-public class TransactionResponseDto extends BaseTimeEntity {
+public class TransactionResponseDto  {
     private Long memberId;
     private Long productId;
     private String title;

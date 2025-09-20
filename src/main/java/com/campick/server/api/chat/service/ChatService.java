@@ -151,7 +151,7 @@ public class ChatService {
         chatRoomResDto.setSellerNickname(chatRoom.getSeller().getNickname());
         chatRoomResDto.setBuyerId(chatRoom.getBuyer().getId());
         chatRoomResDto.setBuyerNickname(chatRoom.getBuyer().getNickname());
-        chatRoomResDto.setSellerProfileImage(chatRoom.getSeller().getProfileImage());
+        chatRoomResDto.setSellerProfileImage(chatRoom.getSeller().getProfileImageUrl());
         chatRoomResDto.setSellerPhoneNumber(chatRoom.getSeller().getMobileNumber());
         chatRoomResDto.setProductId(chatRoom.getProduct().getId());
         chatRoomResDto.setProductTitle(chatRoom.getProduct().getTitle());

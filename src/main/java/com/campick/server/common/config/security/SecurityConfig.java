@@ -3,6 +3,7 @@ package com.campick.server.common.config.security;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.common.jwt.JWTFilter;
 import com.campick.server.common.jwt.JWTUtil;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -72,6 +73,8 @@ public class SecurityConfig {
         return urlBasedCorsConfigurationSource;
     }
 
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -106,6 +109,8 @@ public class SecurityConfig {
                         ).permitAll() // 회원, 스웨거 허가
                         //! TODO /api/product 는 일단 개발을 위해 전부 열어놓음
                         .requestMatchers("/api/product/**").permitAll()
+                        .requestMatchers("/api/member/product/sold/**","/api/member/product/bought/**","/api/member/product/sell-or-reserve/**").permitAll()
+                        .requestMatchers("/api/car", "/api/types","/api/reviews","/api/options/**","/api/models","/api/favorites","/api/engines","/api/dealers").permitAll()
                         .anyRequest().authenticated()
                 );
 

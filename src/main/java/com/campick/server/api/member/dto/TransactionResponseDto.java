@@ -1,8 +1,8 @@
 package com.campick.server.api.member.dto;
 
 import com.campick.server.api.product.entity.ProductImage;
+import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.transaction.entity.Transaction;
-import com.campick.server.api.transaction.entity.TransactionType;
 import com.campick.server.common.entity.BaseTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +14,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @Builder
-public class TransactionResponseDto extends BaseTimeEntity {
-    private Long transactionId;
+public class TransactionResponseDto  {
     private Long memberId;
     private Long productId;
     private String title;
@@ -24,10 +23,14 @@ public class TransactionResponseDto extends BaseTimeEntity {
     private Integer mileage;
     private String location;
     private List<String> thumbnailUrls;
-    private TransactionType transactionType;
+    private ProductStatus status;
     private LocalDateTime createdAt;
 
-    public static TransactionResponseDto from(Transaction transaction) {
+    public static TransactionResponseDto from(Transaction transaction, String soldOrbought) {
+
+        // 판 매물과 산 매물 동시에 하기 위한 작업
+        Long memberId = soldOrbought.equals("SOLD") ? transaction.getBuyer().getId() : transaction.getSeller().getId();
+
 
         // productId 기준으로 제품 사진 불러오기
         List<String> thumbnailUrl = transaction.getProduct().getImages().stream()
@@ -35,8 +38,7 @@ public class TransactionResponseDto extends BaseTimeEntity {
                 .toList();
 
         return TransactionResponseDto.builder()
-                .transactionId(transaction.getId())
-                .memberId(transaction.getBuyer().getId())
+                .memberId(memberId)
                 .productId(transaction.getProduct().getId())
                 .title(transaction.getProduct().getTitle())
                 .cost(transaction.getProduct().getCost())
@@ -44,7 +46,7 @@ public class TransactionResponseDto extends BaseTimeEntity {
                 .mileage(transaction.getProduct().getMileage())
                 .location(transaction.getProduct().getLocation())
                 .thumbnailUrls(thumbnailUrl)
-                .transactionType(transaction.getType())
+                .status(transaction.getProduct().getStatus())
                 .createdAt(transaction.getCreatedAt())
                 .build();
     }

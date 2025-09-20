@@ -1,13 +1,10 @@
 package com.campick.server.api.member.controller;
 
 import com.campick.server.api.member.dto.*;
-import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.service.EmailService;
 import com.campick.server.api.member.service.MemberService;
 import com.campick.server.common.config.security.SecurityMember;
-import com.campick.server.common.exception.BadRequestException;
 import com.campick.server.common.response.ApiResponse;
-import com.campick.server.common.response.ErrorStatus;
 import com.campick.server.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,17 +13,16 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 
 @RequestMapping("/api/member")
@@ -216,33 +212,42 @@ public class MemberController {
     }
 
 
-    @Operation(summary = "내 매물 중 팔거나 예약 중인 제품 리스트", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
-    @GetMapping("/product/sell-or-reserve")
-    public ResponseEntity<ApiResponse<List<ProductAvailableSummaryDto>>> getMemberProducts(
-            @AuthenticationPrincipal SecurityMember securityMember){
-        List<ProductAvailableSummaryDto> memberProductsIsAvailable = memberService.getMemberProducts(securityMember.getId());
+    @Operation(summary = "{memberId}별 매물 중 팔거나 예약 중인 제품 리스트", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
+    @GetMapping("/product/sell-or-reserve/{memberId}")
+    public ResponseEntity<ApiResponse<MemberProductListPageDto>> getMemberProducts(
+            @PathVariable Long memberId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        MemberProductListPageDto memberProductsIsAvailable = memberService.getMemberProducts(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
     }
 
 
     // 기록 부분
-    @Operation(summary = "내가 판 매물 조회", description = "사용자가 판 매물 기록을 봅니다")
-    @GetMapping("/product/sold")
-    public ResponseEntity<ApiResponse<List<TransactionResponseDto>>> getMemberSold(
-            @AuthenticationPrincipal SecurityMember securityMember){
-        List<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberSold(securityMember.getId());
+    @Operation(summary = "{memberId}별 판 매물 조회", description = "{memberId}별 판 매물 기록을 봅니다")
+    @GetMapping("/product/sold/{memberId}")
+    public ResponseEntity<ApiResponse<MemberTransactionListPageDto>> getMemberSold(
+            @PathVariable Long memberId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size){
+        Pageable pageable = PageRequest.of(page, size);
+        MemberTransactionListPageDto memberProductsIsAvailable = memberService.getMemberSold(memberId, pageable);
 
-        return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_SOLD_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
 
-    @Operation(summary = "내가 산 매물 조회", description = "사용자가 산 매물 기록을 봅니다")
-    @GetMapping("/product/bought")
-    public ResponseEntity<ApiResponse<List<TransactionResponseDto>>> getMemberBought(
-            @AuthenticationPrincipal SecurityMember securityMember){
-        List<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberBought(securityMember.getId());
+    @Operation(summary = "{memberId}별 산 매물 조회", description = "{memberId}별 산 매물 기록을 봅니다")
+    @GetMapping("/product/bought/{memberId}")
+    public ResponseEntity<ApiResponse<MemberTransactionListPageDto>> getMemberBought(
+            @PathVariable Long memberId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size){
+        Pageable pageable = PageRequest.of(page, size);
+        MemberTransactionListPageDto memberProductsIsAvailable = memberService.getMemberBought(memberId, pageable);
 
-        return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
 
 }

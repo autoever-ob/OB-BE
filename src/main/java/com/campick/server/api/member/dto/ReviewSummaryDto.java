@@ -24,7 +24,7 @@ public class ReviewSummaryDto {
                 .reviewId(review.getId())
                 .authorId(review.getAuthor().getId())
                 .nickname(review.getAuthor().getNickname())
-                .profileImage(review.getAuthor().getProfileImage())
+                .profileImage(review.getAuthor().getProfileImageUrl())
                 .content(review.getContent())
                 .rating(review.getRating())
                 .createdAt(review.getCreatedAt())

@@ -19,6 +19,9 @@ import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.product.entity.ProductType;
 import com.campick.server.api.product.repository.ProductRepository;
+import com.campick.server.api.transaction.entity.Transaction;
+import com.campick.server.api.transaction.entity.TransactionType;
+import com.campick.server.api.transaction.repository.TransactionRepository;
 import com.campick.server.api.type.entity.Type;
 import com.campick.server.api.type.entity.VehicleTypeName;
 import com.campick.server.api.type.repository.TypeRepository;
@@ -31,6 +34,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +56,7 @@ public class DataInitializer {
     private final ModelRepository modelRepository;
     private final EngineRepository engineRepository;
     private final TypeRepository typeRepository;
+    private final TransactionRepository transactionRepository;
 
 
     @Bean
@@ -179,6 +184,9 @@ public class DataInitializer {
                         .isDeleted(false)
                         .build();
                 productRepository.save(soldProduct);
+
+                Transaction transaction = new Transaction(null, buyer, seller, soldProduct, LocalDateTime.now(), TransactionType.SELL);
+                transactionRepository.save(transaction);
             }
         }
 

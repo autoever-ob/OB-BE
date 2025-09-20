@@ -49,7 +49,7 @@ public class MemberSignUpRequestDto {
                 .nickname(nickname)
                 .mobileNumber(mobileNumber)
                 .role(role)
-                .profileImage("") // 추후 이미지 추가시에
+                .profileImageUrl("") // 추후 이미지 추가시에
                 .description(null)
                 .deletedAt(null)
                 .isDeleted(false)

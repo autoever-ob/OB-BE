@@ -1,10 +1,13 @@
 package com.campick.server.api.product.controller;
 
-import com.campick.server.api.product.dto.ProductResDto;
-import com.campick.server.api.product.dto.ProductCreateReqDto;
-import com.campick.server.api.product.dto.ProductUpdateReqDto;
-import com.campick.server.api.product.dto.RecommendResDto;
+import com.campick.server.api.model.entity.Model;
+import com.campick.server.api.model.repository.ModelRepository;
+import com.campick.server.api.option.entity.CarOption;
+import com.campick.server.api.option.repository.CarOptionRepository;
+import com.campick.server.api.product.dto.*;
 import com.campick.server.api.product.service.ProductService;
+import com.campick.server.api.type.entity.Type;
+import com.campick.server.api.type.repository.TypeRepository;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +28,9 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
     private final ObjectMapper objectMapper;
+    private final TypeRepository typeRepository;
+    private final ModelRepository modelRepository;
+    private final CarOptionRepository carOptionRepository;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> createProduct(@RequestBody ProductCreateReqDto dto) {
@@ -99,5 +105,24 @@ public class ProductController {
 
         return ApiResponse.success(SuccessStatus.SEND_PRODUCT_LIST_SUCCESS, recommendResDto);
         //return ApiResponse.success(SuccessStatus.SEND_RECOMMEND_SUCCESS, productService.getRecommend());
+    }
+
+    @GetMapping("info")
+    public ResponseEntity<ApiResponse<InfoResDto>> getInfo() {
+        InfoResDto infoResDto = new InfoResDto();
+        List<Type> type = typeRepository.findAll();
+        List<Model> model = modelRepository.findAll();
+        List<CarOption> option = carOptionRepository.findAll();
+
+        List<String> stringType = type.stream()
+                .map(t -> t.getTypeName().toString()).toList();
+        List<String> stringModel = model.stream().map(Model::getModelName).toList();
+        List<String> stringOption = option.stream().map(CarOption::getName).toList();
+
+        infoResDto.setType(stringType);
+        infoResDto.setModel(stringModel);
+        infoResDto.setOption(stringOption);
+
+        return ApiResponse.success(SuccessStatus.SEND_INFO_LIST_SUCCESS, infoResDto);
     }
 }

@@ -1,5 +1,7 @@
 package com.campick.server.api.product.controller;
 
+import com.campick.server.api.member.entity.Role;
+
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +76,7 @@ public class CarDetailMock {
     }
 
     public static CarDetailResponseDto getCarDetail() {
-        User seller = new User("홍길동", "SELLER", 4.7, 12, 30, 101L);
+        User seller = new User("홍길동", Role.DEALER.toString(), 4.7, 12, 30, 101L);
 
         List<String> images = Arrays.asList(
                 "https://example.com/images/car1.jpg",

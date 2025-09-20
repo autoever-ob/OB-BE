@@ -5,6 +5,8 @@ import com.campick.server.api.car.repository.CarRepository;
 import com.campick.server.api.engine.entity.Engine;
 import com.campick.server.api.engine.entity.FuelType;
 import com.campick.server.api.engine.repository.EngineRepository;
+import com.campick.server.api.favorite.entity.Favorite;
+import com.campick.server.api.favorite.repository.FavoriteRepository;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.model.entity.Model;
@@ -50,6 +52,7 @@ public class ProductService {
     private final FirebaseStorageService firebaseStorageService;
     private final ProductImageService productImageService;
     private final EngineRepository engineRepository;
+    private final FavoriteRepository favoriteRepository;
 
     @Transactional
     public Long createProduct(ProductCreateReqDto dto) {
@@ -286,5 +289,41 @@ public class ProductService {
         recommendResDto.setHotVehicle(newVehicleResDto);
 
         return recommendResDto;
+    }
+
+    public void likeToggle(Long productId, Long memberId) {
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
+        );
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        Favorite favorite = favoriteRepository.findByMemberAndProduct(member, product);
+
+        if (favorite != null) {
+            favoriteRepository.delete(favorite);
+        } else {
+            Favorite newFavorite = Favorite.builder()
+                    .member(member)
+                    .product(product)
+                    .build();
+            favoriteRepository.save(newFavorite);
+        }
+    }
+
+    public void updateProductStatus(StatusReqDto dto, Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+        Product product = productRepository.findById(dto.getProductId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
+        );
+
+        if (member != product.getSeller())
+            throw new BadRequestException(ErrorStatus.NOT_SELLER_EXCEPTION.getMessage());
+
+        product.setStatus(ProductStatus.valueOf(dto.getStatus()));
+        productRepository.save(product);
     }
 }

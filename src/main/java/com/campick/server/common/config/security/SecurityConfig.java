@@ -53,6 +53,7 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        // 아래 목록에서 허용된 주소로만 요청 받기
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
@@ -81,6 +82,7 @@ public class SecurityConfig {
                 .cors(withDefaults())
 
                 // CSRF, form-login, basic-auth 모두 비활성화
+                // !!TODO 수정해야될 것
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)

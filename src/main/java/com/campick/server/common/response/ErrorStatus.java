@@ -26,6 +26,7 @@ public enum ErrorStatus {
     TOO_MANY_FILES(HttpStatus.BAD_REQUEST, "이미지는 최대 5 장 업로드 가능합니다"),
     INVALID_VEHICLE_TYPE(HttpStatus.BAD_REQUEST, "존재하지 않는 캠핑카 타입입니다."),
 
+
     /**
      * 401 UNAUTHORIZED
      */
@@ -50,10 +51,9 @@ public enum ErrorStatus {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다"),
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "매물을 찾을 수 없습니다."),
-    NOT_REGISTER_USER_EXCEPTION(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 입니다."),;
-
-
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "매물을 찾을 수 없습니다."),h
+    NOT_REGISTER_USER_EXCEPTION(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 입니다."),
+    EMPTY_FILE_EXCEPTION(HttpStatus.NOT_FOUND, "업로드할 파일이 없습니다.");
 
     /**
      * 500 SERVER_ERROR

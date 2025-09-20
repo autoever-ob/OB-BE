@@ -29,7 +29,7 @@ public class FirebaseStorageService {
 
         StorageClient.getInstance().bucket().create(objectName, file.getBytes(), file.getContentType());
 
-        uploadThumbnail(file, thumbnailObjectName, 200, 200);
+        uploadThumbnail(file, thumbnailObjectName, 50, 50);
 
         String bucket = StorageClient.getInstance().bucket().getName();
         return String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));

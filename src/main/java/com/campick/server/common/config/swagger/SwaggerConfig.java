@@ -34,18 +34,21 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.HEADER)
                 .name(accessTokenHeader);
 
-        // Refresh Token Bearer 인증 스키마 설정
-        SecurityScheme refreshTokenScheme = new SecurityScheme()
-                .type(SecurityScheme.Type.APIKEY)
-                .in(SecurityScheme.In.HEADER)
-                .name(refreshTokenHeader);
+//        // Refresh Token Bearer 인증 스키마 설정
+//        SecurityScheme refreshTokenScheme = new SecurityScheme()
+//                .type(SecurityScheme.Type.APIKEY)
+//                .in(SecurityScheme.In.HEADER)
+//                .name(refreshTokenHeader);
 
         // SecurityRequirement 설정 - 각 토큰별 인증 요구사항 추가
         SecurityRequirement accessTokenRequirement = new SecurityRequirement().addList(accessTokenHeader);
-        SecurityRequirement refreshTokenRequirement = new SecurityRequirement().addList(refreshTokenHeader);
+//        SecurityRequirement refreshTokenRequirement = new SecurityRequirement().addList(refreshTokenHeader);
+
+//        Server server = new Server();
+//        server.setUrl("https://campick.shop");
 
         Server server = new Server();
-        server.setUrl("https://campick.shop");
+        server.setUrl("http://localhost:8080");
 
         return new OpenAPI()
                 .info(new Info()
@@ -54,11 +57,14 @@ public class SwaggerConfig {
                         .version("0.0.1")
                         .contact(new Contact().name("Campick Team"))
                 )
-                .components(new Components()
+                .components(
+                        new Components()
                         .addSecuritySchemes(accessTokenHeader, accessTokenScheme)
-                        .addSecuritySchemes(refreshTokenHeader, refreshTokenScheme))
+//                        .addSecuritySchemes(refreshTokenHeader, refreshTokenScheme)
+                )
                 .addServersItem(server)
                 .addSecurityItem(accessTokenRequirement)
-                .addSecurityItem(refreshTokenRequirement);
+//                .addSecurityItem(refreshTokenRequirement)
+                ;
     }
 }

@@ -23,6 +23,7 @@ import com.campick.server.common.storage.FirebaseStorageService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +46,9 @@ public class MemberService {
     private final DealerRepository dealerRepository;
     private final ProductRepository productRepository;
     private final TransactionRepository transactionRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String ACCESS_TOKEN_PREFIX = "AT:";
+    private static final long ACCESS_TOKEN_EXPIRATION_MS = 1000 * 60 * 30L; // 30분으로 지정
 
     @Transactional
     public void signUp(MemberSignUpRequestDto requestDto) {
@@ -75,52 +79,62 @@ public class MemberService {
                     .user(member)
                     .dealerShip(dealerShip)
                     .build();
-            Dealer savedDealer = dealerRepository.save(dealer);
+            dealerRepository.save(dealer);
 
-            member.assignDealer(savedDealer);
+            member.assignDealer(dealer);
             memberRepository.save(member);
         }
     }
 
-public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
+    public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
 
         Member member = memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
-                .orElseThrow(() -> new BadRequestException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
 
         if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
             throw new BadRequestException(ErrorStatus.INVALID_PASSWORD_EXCEPTION.getMessage());
         }
 
-        String accessToken = jwtUtil.createJwt("access", member.getId(), member.getRole().name(), 1000 * 60 * 30L);
-        String refreshToken = jwtUtil.createJwt("refresh", member.getId(), member.getRole().name(), 1000L * 60 * 60 * 24 * 7);
+        String accessToken = jwtUtil.createJwt("access", member.getId(), member.getRole().name(), ACCESS_TOKEN_EXPIRATION_MS);
 
-        member.updateRefreshToken(refreshToken, 1000L * 60 * 60 * 24 * 7);
-        memberRepository.save(member);
+
+        redisTemplate.opsForValue().set(ACCESS_TOKEN_PREFIX + member.getId(), accessToken, ACCESS_TOKEN_EXPIRATION_MS, TimeUnit.MILLISECONDS);
 
         return MemberLoginResponseDto.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .memberId(member.getId())
                 .nickname(member.getNickname())
                 .phoneNumber(member.getMobileNumber())
                 .dealerId(member.getDealer() != null ? member.getDealer().getId() : null)
                 .role(member.getRole().name())
                 .build();
-
     }
 
     @Transactional
-    public void logout(String refreshToken) {
-        if (refreshToken == null) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_FOUND.getMessage());
+    public void logout(String accessToken) {
+        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Access token is missing or invalid.");
+        }
+        String token = accessToken.substring(7);
+
+        Long memberId;
+        try {
+            memberId = jwtUtil.getId(token);
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰에서도 ID를 가져와야 로그아웃 처리가 가능
+            memberId = e.getClaims().get("id", Long.class);
         }
 
-        Long memberId = jwtUtil.getId(refreshToken);
+        // Redis에서 토큰 삭제
+        redisTemplate.delete(ACCESS_TOKEN_PREFIX + memberId);
+    }
 
+    @Transactional
+    public void deleteMember(Long memberId) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
-
-        member.updateRefreshToken(null, 0L);
+        member.delete();
+        memberRepository.save(member);
     }
 
 
@@ -164,43 +178,40 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
     }
 
     @Transactional
-    public MemberLoginResponseDto reissueToken(String refresh) {
-
-
-        if (refresh == null) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_FOUND.getMessage());
+    public MemberLoginResponseDto reissueToken(String accessToken) {
+        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
+            throw new UnauthorizedException(ErrorStatus.USER_UNAUTHORIZED.getMessage());
         }
+        String token = accessToken.substring(7);
 
+        Long id;
+        String role;
+
+        // id와 role을 추출함
         try {
-            jwtUtil.isExpired(refresh);
+            id = jwtUtil.getId(token);
+            role = jwtUtil.getRole(token);
         } catch (ExpiredJwtException e) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_EXPIRED.getMessage());
+            // 메서드가 제대로 동작하지 ㅎ
+            id = e.getClaims().get("id", Long.class);
+            role = e.getClaims().get("role", String.class);
         }
 
-        String category = jwtUtil.getCategory(refresh);
-        if (!"refresh".equals(category)) {
-            throw new UnauthorizedException(ErrorStatus.MALFORMED_REFRESH_TOKEN_EXCEPTION.getMessage());
-        }
+        String storedToken = (String) redisTemplate.opsForValue().get(ACCESS_TOKEN_PREFIX + id);
 
-        Long id = jwtUtil.getId(refresh);
-        String role = jwtUtil.getRole(refresh);
+        if (storedToken == null || !storedToken.equals(token)) {
+            throw new UnauthorizedException(ErrorStatus.MALFORMED_ACCESS_TOKEN_EXCEPTION.getMessage());
+        }
 
         Member member = memberRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
 
-        if (!refresh.equals(member.getRefreshToken())) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_EQUAL.getMessage());
-        }
+        String newAccessToken = jwtUtil.createJwt("access", id, role, ACCESS_TOKEN_EXPIRATION_MS);
 
-        String newAccessToken = jwtUtil.createJwt("access", id, role, 1000 * 60 * 30L);
-        String newRefreshToken = jwtUtil.createJwt("refresh", id, role, 1000L * 60 * 60 * 24 * 7);
-
-        member.updateRefreshToken(newRefreshToken,1000L * 60 * 60 * 24 * 7);
-        memberRepository.save(member);
+        redisTemplate.opsForValue().set(ACCESS_TOKEN_PREFIX + id, newAccessToken, ACCESS_TOKEN_EXPIRATION_MS, TimeUnit.MILLISECONDS);
 
         return MemberLoginResponseDto.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
                 .memberId(member.getId())
                 .nickname(member.getNickname())
                 .phoneNumber(member.getMobileNumber())
@@ -213,7 +224,7 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
     public MemberResponseDto getMemberById(Long id) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
-        java.util.List<Review> reviews = reviewRepository.findByTargetIdWithAuthor(id);
+        List<Review> reviews = reviewRepository.findByTargetIdWithAuthor(id);
         return MemberResponseDto.of(member, reviews);
     }
 
@@ -221,7 +232,6 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
     // N + 1 문제를 한번 스스로 생각해보기
     public MemberProductListPageDto getMemberProducts(Long id, Pageable pageable) {
 
-        // 멤버가 존재하는지 확인
         if(memberRepository.findByIdAndIsDeletedFalse(id).isEmpty()) {
             throw new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage());
         }

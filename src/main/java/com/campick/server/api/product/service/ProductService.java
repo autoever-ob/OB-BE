@@ -311,4 +311,19 @@ public class ProductService {
             favoriteRepository.save(newFavorite);
         }
     }
+
+    public void updateProductStatus(StatusReqDto dto, Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+        Product product = productRepository.findById(dto.getProductId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
+        );
+
+        if (member != product.getSeller())
+            throw new BadRequestException(ErrorStatus.NOT_SELLER_EXCEPTION.getMessage());
+
+        product.setStatus(ProductStatus.valueOf(dto.getStatus()));
+        productRepository.save(product);
+    }
 }

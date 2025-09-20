@@ -24,6 +24,7 @@ public enum ErrorStatus {
     WRONG_EMAIL_VERIFICATION_CODE_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 인증 코드가 일치하지 않습니다."),
     TOO_MANY_FILES(HttpStatus.BAD_REQUEST, "이미지는 최대 5 장 업로드 가능합니다"),
     INVALID_VEHICLE_TYPE(HttpStatus.BAD_REQUEST, "존재하지 않는 캠핑카 타입입니다."),
+    NOT_SELLER_EXCEPTION(HttpStatus.BAD_REQUEST, "이 매물의 판매자가 아닙니다"),
 
 
     /**

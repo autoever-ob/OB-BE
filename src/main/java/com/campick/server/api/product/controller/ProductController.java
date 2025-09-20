@@ -142,4 +142,13 @@ public class ProductController {
 
         return ApiResponse.success_only(SuccessStatus.SEND_PRODUCT_LIKE_SUCCESS);
     }
+
+    @PatchMapping("/status")
+    public ResponseEntity<ApiResponse<Void>> updateProductStatus(@RequestBody StatusReqDto dto, @AuthenticationPrincipal SecurityMember securityMember) {
+        Long memberId = securityMember.getId();
+
+        productService.updateProductStatus(dto, memberId);
+
+        return ApiResponse.success_only(SuccessStatus.SEND_PRODUCT_STATUS_UPDATED);
+    }
 }

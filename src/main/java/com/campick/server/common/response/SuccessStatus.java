@@ -39,6 +39,7 @@ public enum SuccessStatus {
     SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
     SEND_PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "매물 상세 조회 성공"),
     SEND_PRODUCT_LIKE_SUCCESS(HttpStatus.OK, "하트 누르기 성공(좋아요, 취소)"),
+    SEND_PRODUCT_STATUS_UPDATED(HttpStatus.OK, "매물 상태 변경 성공"),
     SEND_PRODUCT_UPDATE_SUCCESS(HttpStatus.OK, "매물 수정 성공"),
     SEND_PRODUCT_DELETE_SUCCESS(HttpStatus.OK, "매물 삭제 성공"),
     SEND_CHAT_CREATED(HttpStatus.OK, "채팅방 생성 성공"),

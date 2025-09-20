@@ -97,7 +97,15 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         member.updateRefreshToken(refreshToken, 1000L * 60 * 60 * 24 * 7);
         memberRepository.save(member);
 
-        return new MemberLoginResponseDto(accessToken,refreshToken);
+        return MemberLoginResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .phoneNumber(member.getMobileNumber())
+                .dealerId(member.getDealer() != null ? member.getDealer().getId() : null)
+                .role(member.getRole().name())
+                .build();
 
     }
 
@@ -190,7 +198,15 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         member.updateRefreshToken(newRefreshToken,1000L * 60 * 60 * 24 * 7);
         memberRepository.save(member);
 
-        return new MemberLoginResponseDto(newAccessToken, newRefreshToken);
+        return MemberLoginResponseDto.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .phoneNumber(member.getMobileNumber())
+                .dealerId(member.getDealer() != null ? member.getDealer().getId() : null)
+                .role(member.getRole().name())
+                .build();
     }
 
 
@@ -267,6 +283,25 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
                 .size(transactionDtos.getSize())
                 .isLast(transactionDtos.isLast())
                 .content(transactionDtos.getContent())
+                .build();
+    }
+
+    public ReviewListPageDto getReviewById(Long memberId, Pageable pageable) {
+        // 멤버가 존재하는지 확인
+        memberRepository.findByIdAndIsDeletedFalse(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        Page<Review> reviews = reviewRepository.findByTargetIdWithAuthor(memberId, pageable);
+        Page<ReviewResponseDto> reviewResponseDtos = reviews.map(ReviewResponseDto::from);
+
+        return ReviewListPageDto.builder()
+                .totalElements(reviewResponseDtos.getTotalElements())
+                .totalPages(reviewResponseDtos.getTotalPages())
+                .page(reviewResponseDtos.getNumber())
+                .size(reviewResponseDtos.getSize())
+                .isLast(reviewResponseDtos.isLast())
+                .content(reviewResponseDtos.getContent())
                 .build();
     }
 }

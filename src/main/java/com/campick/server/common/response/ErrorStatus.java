@@ -22,7 +22,6 @@ public enum ErrorStatus {
     INVALID_PASSWORD_EXCEPTION(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다."),
     VALIDATION_EMAIL_FORMAT_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
     WRONG_EMAIL_VERIFICATION_CODE_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 인증 코드가 일치하지 않습니다."),
-    EMPTY_FILE_EXCEPTION(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다."),
     TOO_MANY_FILES(HttpStatus.BAD_REQUEST, "이미지는 최대 5 장 업로드 가능합니다"),
     INVALID_VEHICLE_TYPE(HttpStatus.BAD_REQUEST, "존재하지 않는 캠핑카 타입입니다."),
 
@@ -51,7 +50,7 @@ public enum ErrorStatus {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다"),
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "매물을 찾을 수 없습니다."),h
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "매물을 찾을 수 없습니다."),
     NOT_REGISTER_USER_EXCEPTION(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 입니다."),
     EMPTY_FILE_EXCEPTION(HttpStatus.NOT_FOUND, "업로드할 파일이 없습니다.");
 

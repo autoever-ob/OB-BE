@@ -15,6 +15,8 @@ import com.campick.server.api.member.entity.Role;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.model.entity.Model;
 import com.campick.server.api.model.repository.ModelRepository;
+import com.campick.server.api.option.entity.CarOption;
+import com.campick.server.api.option.repository.CarOptionRepository;
 import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.product.entity.ProductType;
@@ -35,10 +37,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
@@ -57,6 +56,7 @@ public class DataInitializer {
     private final EngineRepository engineRepository;
     private final TypeRepository typeRepository;
     private final TransactionRepository transactionRepository;
+    private final CarOptionRepository carOptionRepository;
 
 
     @Bean
@@ -78,34 +78,34 @@ public class DataInitializer {
         List<Member> members = new ArrayList<>();
 
         // 1) 4 ROLE_USER members
-        members.add(createMemberIfAbsent("user1@example.com", encoded, "user1", "010-1000-0001", Role.ROLE_USER));
-        members.add(createMemberIfAbsent("user2@example.com", encoded, "user2", "010-1000-0002", Role.ROLE_USER));
-        members.add(createMemberIfAbsent("user3@example.com", encoded, "user3", "010-1000-0003", Role.ROLE_USER));
-        members.add(createMemberIfAbsent("user4@example.com", encoded, "user4", "010-1000-0004", Role.ROLE_USER));
+        members.add(createMemberIfAbsent("user1@example.com", encoded, "user1", "010-1000-0001", Role.USER));
+        members.add(createMemberIfAbsent("user2@example.com", encoded, "user2", "010-1000-0002", Role.USER));
+        members.add(createMemberIfAbsent("user3@example.com", encoded, "user3", "010-1000-0003", Role.USER));
+        members.add(createMemberIfAbsent("user4@example.com", encoded, "user4", "010-1000-0004", Role.USER));
 
         // 2) 2 ROLE_DEALER members without Dealer entity (just role set)
-        Member dealerNoEntity1 = createMemberIfAbsent("dealer_no_entity1@example.com", encoded, "dealerNoEntity1", "010-2000-0001", Role.ROLE_DEALER);
+        Member dealerNoEntity1 = createMemberIfAbsent("dealer_no_entity1@example.com", encoded, "dealerNoEntity1", "010-2000-0001", Role.DEALER);
         members.add(dealerNoEntity1);
-        Member dealerNoEntity2 = createMemberIfAbsent("dealer_no_entity2@example.com", encoded, "dealerNoEntity2", "010-2000-0002", Role.ROLE_DEALER);
+        Member dealerNoEntity2 = createMemberIfAbsent("dealer_no_entity2@example.com", encoded, "dealerNoEntity2", "010-2000-0002", Role.DEALER);
         members.add(dealerNoEntity2);
 
         // 3) 2 ROLE_DEALER members with Dealer entity only (no dealership)
-        Member dealerOnly1 = createMemberIfAbsent("dealer_only1@example.com", encoded, "dealerOnly1", "010-3000-0001", Role.ROLE_DEALER);
+        Member dealerOnly1 = createMemberIfAbsent("dealer_only1@example.com", encoded, "dealerOnly1", "010-3000-0001", Role.DEALER);
         members.add(dealerOnly1);
         createDealerIfAbsent(dealerOnly1, "BIZ-3000-0001", null);
 
-        Member dealerOnly2 = createMemberIfAbsent("dealer_only2@example.com", encoded, "dealerOnly2", "010-3000-0002", Role.ROLE_DEALER);
+        Member dealerOnly2 = createMemberIfAbsent("dealer_only2@example.com", encoded, "dealerOnly2", "010-3000-0002", Role.DEALER);
         members.add(dealerOnly2);
         createDealerIfAbsent(dealerOnly2, "BIZ-3000-0002", null);
 
         // 4) 2 ROLE_DEALER members with Dealer and DealerShip
         DealerShip ship1 = findOrCreateDealership("Prime Motors", "Seoul, Gangnam-gu", "REG-4000-0001");
-        Member dealerWithShop1 = createMemberIfAbsent("dealer_with_shop1@example.com", encoded, "dealerWithShop1", "010-4000-0001", Role.ROLE_DEALER);
+        Member dealerWithShop1 = createMemberIfAbsent("dealer_with_shop1@example.com", encoded, "dealerWithShop1", "010-4000-0001", Role.DEALER);
         members.add(dealerWithShop1);
         createDealerIfAbsent(dealerWithShop1, ship1.getRegistrationNumber(), ship1);
 
         DealerShip ship2 = findOrCreateDealership("Auto Stars", "Busan, Haeundae-gu", "REG-4000-0002");
-        Member dealerWithShop2 = createMemberIfAbsent("dealer_with_shop2@example.com", encoded, "dealerWithShop2", "010-4000-0002", Role.ROLE_DEALER);
+        Member dealerWithShop2 = createMemberIfAbsent("dealer_with_shop2@example.com", encoded, "dealerWithShop2", "010-4000-0002", Role.DEALER);
         members.add(dealerWithShop2);
         createDealerIfAbsent(dealerWithShop2, ship2.getRegistrationNumber(), ship2);
 
@@ -113,6 +113,18 @@ public class DataInitializer {
 
         // 5) Create Products for each member
         seedProducts(members);
+
+        // type 저장
+        typeRepository.save(Type.builder().typeName(VehicleTypeName.TRUCK_CAMPER).build());
+        typeRepository.save(Type.builder().typeName(VehicleTypeName.TRAILER).build());
+        typeRepository.save(Type.builder().typeName(VehicleTypeName.ETC).build());
+
+        // option
+        List<String> options = Arrays.asList("에어컨", "난방", "냉장고", "전자레인지", "화장실", "샤워실", "침대", "TV");
+
+        for (String option : options) {
+            carOptionRepository.save(CarOption.builder().name(option).build());
+        }
     }
 
     private void seedProducts(List<Member> members) {

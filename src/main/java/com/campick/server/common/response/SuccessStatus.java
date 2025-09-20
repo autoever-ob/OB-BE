@@ -15,6 +15,7 @@ public enum SuccessStatus {
     SEND_REGISTER_SUCCESS(HttpStatus.OK,"회원가입 성공"),
     SEND_LOGIN_SUCCESS(HttpStatus.OK, "로그인 성공"),
     SEND_HEALTH_SUCCESS(HttpStatus.OK,"서버 상태 OK"),
+    DELETE_MEMBER_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공" ),
 
     SEND_MY_PROFILE_SUCCESS(HttpStatus.OK, "내 정보 조회 성공"),
     SEND_MY_SOLD_SUCCESS(HttpStatus.OK, "내가 판 매물 조회 성공"),
@@ -39,6 +40,7 @@ public enum SuccessStatus {
     SEND_EMAIL_VERIFICATION_CODE_SUCCESS(HttpStatus.OK, "이메일 전송 성공"),
     SEND_EMAIL_VERIFICATION_SUCCESS(HttpStatus.OK, "이메일 검증 성공"),
     SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS(HttpStatus.OK, "내가 팔거나 예약 중인 매물 목록 전송 성공."),
+
 
     /**
      * 201

@@ -31,9 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,9 +46,9 @@ public class MemberService {
     private final DealerRepository dealerRepository;
     private final ProductRepository productRepository;
     private final TransactionRepository transactionRepository;
-    private static final long REFRESH_TOKEN_EXPIRATION_MS = 1000L * 60 * 60 * 24 * 7; // 7 days
-    private static final String REFRESH_TOKEN_PREFIX = "RT:";
     private final RedisTemplate<String, Object> redisTemplate;
+    private static final String ACCESS_TOKEN_PREFIX = "AT:";
+    private static final long ACCESS_TOKEN_EXPIRATION_MS = 1000 * 60 * 30L; // 30분으로 지정
 
     @Transactional
     public void signUp(MemberSignUpRequestDto requestDto) {
@@ -88,49 +86,55 @@ public class MemberService {
         }
     }
 
-    public Map<String, Object> login(MemberLoginRequestDto requestDto) {
+    public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
 
         Member member = memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
-                .orElseThrow(() -> new BadRequestException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
 
         if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
             throw new BadRequestException(ErrorStatus.INVALID_PASSWORD_EXCEPTION.getMessage());
         }
 
-        String accessToken = jwtUtil.createJwt("access", member.getId(), member.getRole().name(), 1000 * 60 * 30L); // 30 minutes
-        String refreshToken = jwtUtil.createJwt("refresh", member.getId(), member.getRole().name(), REFRESH_TOKEN_EXPIRATION_MS);
+        String accessToken = jwtUtil.createJwt("access", member.getId(), member.getRole().name(), ACCESS_TOKEN_EXPIRATION_MS);
 
-        // redis에서 리프레시 토큰을 다시 설정
-        redisTemplate.opsForValue().set(
-                REFRESH_TOKEN_PREFIX + member.getId(),
-                refreshToken,
-                REFRESH_TOKEN_EXPIRATION_MS,
-                TimeUnit.MILLISECONDS
-        );
+        // Redis에 Access Token 저장
+        redisTemplate.opsForValue().set(ACCESS_TOKEN_PREFIX + member.getId(), accessToken, ACCESS_TOKEN_EXPIRATION_MS, TimeUnit.MILLISECONDS);
 
-        Long dealerId = member.getDealer() == null ? null : member.getDealer().getId();
-
-        MemberLoginResponseDto dto = new MemberLoginResponseDto(
-                accessToken,
-                member.getId(),
-                dealerId,
-                member.getProfileImage(),
-                member.getProfileImage()
-        );
-
-        Map<String, Object> result =
-                Map.of("loginResponseDto", dto, "refreshToken", refreshToken);
-
-        return result;
+        return MemberLoginResponseDto.builder()
+                .accessToken(accessToken)
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .phoneNumber(member.getMobileNumber())
+                .dealerId(member.getDealer() != null ? member.getDealer().getId() : null)
+                .role(member.getRole().name())
+                .build();
     }
 
     @Transactional
-    public void logout(String refreshToken) {
-        if (refreshToken == null) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_FOUND.getMessage());
+    public void logout(String accessToken) {
+        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Access token is missing or invalid.");
         }
-        Long memberId = jwtUtil.getId(refreshToken);
-        redisTemplate.delete(REFRESH_TOKEN_PREFIX + memberId);
+        String token = accessToken.substring(7);
+
+        Long memberId;
+        try {
+            memberId = jwtUtil.getId(token);
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰에서도 ID를 가져와야 로그아웃 처리가 가능
+            memberId = e.getClaims().get("id", Long.class);
+        }
+
+        // Redis에서 토큰 삭제
+        redisTemplate.delete(ACCESS_TOKEN_PREFIX + memberId);
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
+        member.delete();
+        memberRepository.save(member);
     }
 
 
@@ -174,71 +178,46 @@ public class MemberService {
     }
 
     @Transactional
-    public Map<String, Object> reissueToken(String refresh) {
-
-        // 리프레시 토큰이 없었을 경우
-        if (refresh == null) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_FOUND.getMessage());
+    public MemberLoginResponseDto reissueToken(String accessToken) {
+        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
+            throw new UnauthorizedException(ErrorStatus.USER_UNAUTHORIZED.getMessage());
         }
+        String token = accessToken.substring(7);
 
-        // 리프레시가 만료되었을경우
+        Long id;
+        String role;
+
+        // id와 role을 추출함
         try {
-            jwtUtil.isExpired(refresh);
+            id = jwtUtil.getId(token);
+            role = jwtUtil.getRole(token);
         } catch (ExpiredJwtException e) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_EXPIRED.getMessage());
+            // 메서드가 제대로 동작하지 ㅎ
+            id = e.getClaims().get("id", Long.class);
+            role = e.getClaims().get("role", String.class);
         }
 
-//        // category를 가져옴
-//        String category = jwtUtil.getCategory(refresh);
-//        if (!"refresh".equals(category)) {
-//            throw new UnauthorizedException(ErrorStatus.MALFORMED_REFRESH_TOKEN_EXCEPTION.getMessage());
-//        }
+        String storedToken = (String) redisTemplate.opsForValue().get(ACCESS_TOKEN_PREFIX + id);
 
-        // accessToken에서 id, role 조회
-        Long id = jwtUtil.getId(refresh);
-        String role = jwtUtil.getRole(refresh);
-
-        // 레디스를 이용해 서버에서 저장하는 리프레시 토큰을 불러옴
-        String tokenFromRedis = (String) redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + id);
-        if (tokenFromRedis == null) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_FOUND.getMessage());
+        if (storedToken == null || !storedToken.equals(token)) {
+            throw new UnauthorizedException(ErrorStatus.MALFORMED_ACCESS_TOKEN_EXCEPTION.getMessage());
         }
 
-        // 토큰이 일치하는지 조회
-        if (!refresh.equals(tokenFromRedis)) {
-            throw new UnauthorizedException(ErrorStatus.REFRESH_TOKEN_NOT_EQUAL.getMessage());
-        }
-
-        // 멤버를 찾아야함
         Member member = memberRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
 
-        // 엑세스 토큰과 리프레시 토큰을 재발행
-        String newAccessToken = jwtUtil.createJwt("access", id, role, 1000 * 60 * 30L);
-        String newRefreshToken = jwtUtil.createJwt("refresh", id, role, REFRESH_TOKEN_EXPIRATION_MS);
+        String newAccessToken = jwtUtil.createJwt("access", id, role, ACCESS_TOKEN_EXPIRATION_MS);
 
-        // 새로운 리프레시 토큰을 redis에 저장해줌
-        redisTemplate.opsForValue().set(
-                REFRESH_TOKEN_PREFIX + id,
-                newRefreshToken,
-                REFRESH_TOKEN_EXPIRATION_MS,
-                TimeUnit.MILLISECONDS
-        );
+        redisTemplate.opsForValue().set(ACCESS_TOKEN_PREFIX + id, newAccessToken, ACCESS_TOKEN_EXPIRATION_MS, TimeUnit.MILLISECONDS);
 
-        Long dealerId = member.getDealer() == null ? null : member.getDealer().getId();
-
-        MemberLoginResponseDto dto = new MemberLoginResponseDto(
-                newAccessToken,
-                member.getId(),
-                dealerId,
-                member.getProfileImage(),
-                member.getProfileImage()
-        );
-
-        Map<String, Object> result =
-                Map.of("loginResponseDto", dto, "refreshToken", newRefreshToken);
-
-        return result;
+        return MemberLoginResponseDto.builder()
+                .accessToken(newAccessToken)
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .phoneNumber(member.getMobileNumber())
+                .dealerId(member.getDealer() != null ? member.getDealer().getId() : null)
+                .role(member.getRole().name())
+                .build();
     }
 
 
@@ -263,9 +242,8 @@ public class MemberService {
                 .toList();
     }
 
-    // ! TODO 여기서 수정해야함
     public List<TransactionResponseDto> getMemberBought(Long buyerId) {
-        Member buyer = memberRepository.findById(buyerId).orElseThrow(
+        Member buyer = memberRepository.findByIdAndIsDeletedFalse(buyerId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
         );
 
@@ -276,9 +254,8 @@ public class MemberService {
                 .toList();
     }
 
-    // ! TODO 여기서 수정해야함
     public List<TransactionResponseDto> getMemberSold(Long sellerId) {
-        Member seller = memberRepository.findById(sellerId).orElseThrow(
+        Member seller = memberRepository.findByIdAndIsDeletedFalse(sellerId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
         );
 

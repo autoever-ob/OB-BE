@@ -81,4 +81,9 @@ public class Member extends BaseTimeEntity {
     public void assignDealer(Dealer dealer) {
         this.dealer = dealer;
     }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }

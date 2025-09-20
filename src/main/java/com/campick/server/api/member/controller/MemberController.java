@@ -9,9 +9,6 @@ import com.campick.server.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 
 @RequestMapping("/api/member")
@@ -33,7 +29,7 @@ public class MemberController {
     private final MemberService memberService;
     private final EmailService emailService;
 
-@Operation(
+    @Operation(
             summary = "이메일 회원가입 API", description = "회원정보를 받아 사용자를 등록합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원가입 성공")
@@ -50,26 +46,17 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "로그인 성공")
     })
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
-        Map<String, Object> result = memberService.login(requestDto);
-        MemberLoginResponseDto loginResponseDto = (MemberLoginResponseDto) result.get("loginResponseDto");
-        String refreshToken = (String) result.get("refreshToken");
-
-        Cookie cookie = new Cookie("refresh", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 30);
-        response.addCookie(cookie);
-
-        return ApiResponse.success(SuccessStatus.SEND_LOGIN_SUCCESS,loginResponseDto);
+    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> login(@RequestBody MemberLoginRequestDto requestDto) {
+        MemberLoginResponseDto loginResponseDto = memberService.login(requestDto);
+        return ApiResponse.success(SuccessStatus.SEND_LOGIN_SUCCESS, loginResponseDto);
     }
 
     @Operation(
             summary = "이메일 인증코드 발송 API",
             description = "이메일 인증 코드를 발송합니다.<br>"
-            +"<p>"
-            +"호출 필드 정보) <br>"
-            +"email : 사용자 이메일"
+                    + "<p>"
+                    + "호출 필드 정보) <br>"
+                    + "email : 사용자 이메일"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 인증코드 발송 성공"),
@@ -79,7 +66,6 @@ public class MemberController {
     public ResponseEntity<ApiResponse<Void>> getEmailVerification(@Valid @RequestBody EmailVerificationRequestDto emailVerificationRequestDto) {
         LocalDateTime requestedAt = LocalDateTime.now();
         String email = emailVerificationRequestDto.getEmail();
-
 
         emailService.sendVerificationEmail(email, requestedAt);
         return ApiResponse.success_only(SuccessStatus.SEND_EMAIL_VERIFICATION_CODE_SUCCESS);
@@ -110,40 +96,33 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그아웃 성공")
     })
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refresh")) {
-                    refresh = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        memberService.logout(refresh);
-
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String accessToken) {
+        memberService.logout(accessToken);
         return ApiResponse.success_only(SuccessStatus.LOGOUT_SUCCESS);
     }
 
+    @Operation(summary = "회원 탈퇴 API", description = "현재 로그인된 사용자를 탈퇴 처리합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 탈퇴 성공")
+    })
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteMember(@AuthenticationPrincipal SecurityMember securityMember) {
+        memberService.deleteMember(securityMember.getId());
+        return ApiResponse.success_only(SuccessStatus.DELETE_MEMBER_SUCCESS);
+    }
+
     @Operation(summary = "비밀번호 변경 API", description = "사용자 정보를 가지고 비밀번호를 변경합니다.")
-    @ApiResponses(@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그아웃 성공"))
+    @ApiResponses(@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"))
     @PatchMapping("/password")
     public ResponseEntity<ApiResponse<Void>> updatePassword(@Valid @RequestBody PasswordUpdateRequestDto requestDto,
                                                             @AuthenticationPrincipal SecurityMember securityMember){
-    memberService.updatePassword(
-            securityMember.getEmail(),
-            requestDto
-    );
-    return ApiResponse.success_only(SuccessStatus.UPDATE_PASSWORD_SUCCESS);
+        memberService.updatePassword(
+                securityMember.getEmail(),
+                requestDto
+        );
+        return ApiResponse.success_only(SuccessStatus.UPDATE_PASSWORD_SUCCESS);
     }
 
-    // 마이페이지 프로필 이미지 변경
     @Operation(summary = "프로필 이미지 변경 API", description = "사용자의 프로필 이미지를 변경합니다.")
     @PatchMapping(value = "/image", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<String>> updateProfileImage(
@@ -154,15 +133,6 @@ public class MemberController {
         return ApiResponse.success(SuccessStatus.UPDATE_PROFILE_IMAGE_SUCCESS, imageUrl);
     }
 
-    // 회원 정보 조회
-    @Operation(summary = "회원정보 조회 API", description = "회원 정보를 조회합니다.")
-    @GetMapping("/info")
-    public ResponseEntity<ApiResponse<MemberResponseDto>> getMemberInfo(@AuthenticationPrincipal SecurityMember securityMember) {
-        MemberResponseDto memberResponseDto = memberService.getMemberById(securityMember.getId());
-        return ApiResponse.success(SuccessStatus.SEND_LOGIN_SUCCESS, memberResponseDto);
-    }
-
-    // 특정 회원 정보 조회
     @Operation(summary = "특정 회원 정보 조회", description = "ID를 이용해 회원 정보를 조회합니다.")
     @GetMapping("info/{id}")
     public ResponseEntity<ApiResponse<MemberResponseDto>> getMemberById(@PathVariable Long id) {
@@ -171,35 +141,13 @@ public class MemberController {
     }
 
     @Operation(
-            summary = "access토큰 재발급 API", description = "access토큰 재발급")
+            summary = "access토큰 재발급 API", description = "만료된 access토큰으로 재발급")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "access토큰 재발급 성공")
     })
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> reissue(HttpServletRequest request, HttpServletResponse response) {
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refresh")) {
-                    refresh = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-
-        Map<String,Object> result = memberService.reissueToken(refresh);
-        MemberLoginResponseDto memberLoginResponseDto =
-                (MemberLoginResponseDto) result.get("loginResponseDto");
-        String newRefreshToken = (String) result.get("refreshToken");
-
-        Cookie newRefreshCookie = new Cookie("refresh", newRefreshToken);
-        newRefreshCookie.setHttpOnly(true);
-        newRefreshCookie.setPath("/");
-        newRefreshCookie.setMaxAge(60 * 60 * 24 * 30);
-        response.addCookie(newRefreshCookie);
-
+    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> reissue(@RequestHeader("Authorization") String accessToken) {
+        MemberLoginResponseDto memberLoginResponseDto = memberService.reissueToken(accessToken);
         return ApiResponse.success(SuccessStatus.REISSUE_SUCCESS, memberLoginResponseDto);
     }
 
@@ -228,7 +176,6 @@ public class MemberController {
     }
 
 
-    // 기록 부분
     @Operation(summary = "내가 판 매물 조회", description = "사용자가 판 매물 기록을 봅니다")
     @GetMapping("/product/sold")
     public ResponseEntity<ApiResponse<List<TransactionResponseDto>>> getMemberSold(

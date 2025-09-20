@@ -2,6 +2,9 @@ package com.campick.server.api.product.service;
 
 import com.campick.server.api.car.entity.Car;
 import com.campick.server.api.car.repository.CarRepository;
+import com.campick.server.api.engine.entity.Engine;
+import com.campick.server.api.engine.entity.FuelType;
+import com.campick.server.api.engine.repository.EngineRepository;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.model.entity.Model;
@@ -46,6 +49,7 @@ public class ProductService {
     private final MemberRepository memberRepository;
     private final FirebaseStorageService firebaseStorageService;
     private final ProductImageService productImageService;
+    private final EngineRepository engineRepository;
 
     @Transactional
     public Long createProduct(ProductCreateReqDto dto) {
@@ -250,10 +254,15 @@ public class ProductService {
                     String thumbnailUrl = productImageRepository
                             .findByProductAndIsThumbnailTrue(product)
                             .getImageUrl();
+                    Car car = product.getCar();
+                    Engine engine = car.getEngine();
 
                     return new ProductResDto(
                             product.getTitle(),
                             product.getCost().toString(),
+                            product.getGeneration(),
+                            engine.getFuelType().toString(),
+                            engine.getTransmission().toString(),
                             product.getMileage().toString(),
                             product.getLocation(),
                             product.getCreatedAt(),

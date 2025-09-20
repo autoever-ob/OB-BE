@@ -17,6 +17,12 @@ public class ProductResDto {
     private String title;
     @JsonProperty("price")
     private String price;
+    @JsonProperty("generation")
+    private Integer generation;
+    @JsonProperty("fuelType")
+    private String fuelType;
+    @JsonProperty("transmission")
+    private String transmission;
     @JsonProperty("mileage")
     private String mileage;
     @JsonProperty("location")
@@ -32,9 +38,12 @@ public class ProductResDto {
     private Boolean isLiked;
     private Integer likeCount; //로그인 되고 나면 추가
 
-    public ProductResDto(String title, String price, String mileage, String location, LocalDateTime createdAt, String thumbnailUrl, Long productId, String status) {
+    public ProductResDto(String title, String price, Integer generation, String fuel, String trans, String mileage, String location, LocalDateTime createdAt, String thumbnailUrl, Long productId, String status) {
         this.title = title;
         this.price = price;
+        this.generation = generation;
+        this.fuelType = fuel;
+        this.transmission = trans;
         this.mileage = mileage;
         this.location = location;
         this.createdAt = createdAt;
@@ -42,4 +51,5 @@ public class ProductResDto {
         this.productId = productId;
         this.status = status;
     }
+
 }

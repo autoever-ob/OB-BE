@@ -30,6 +30,8 @@ public enum SuccessStatus {
     UPDATE_PROFILE_IMAGE_SUCCESS(HttpStatus.OK, "프로필 이미지 변경" ),
     REISSUE_SUCCESS(HttpStatus.OK, "토큰 재발행 성공" ),
     SEND_FOLLOWING_LIST_SUCCESS(HttpStatus.OK, "회원 정보 조회 성공"),
+    PASSWORD_RESET_LINK_SENT(HttpStatus.OK, "이메일 초기화 코드 전송 성공"),
+     PASSWORD_RESET_SUCCESS(HttpStatus.OK, "이메일 초기화 성공"),
 
 
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),

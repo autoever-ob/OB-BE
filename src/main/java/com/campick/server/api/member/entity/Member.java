@@ -86,4 +86,9 @@ public class Member extends BaseTimeEntity {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void changePassword(String encode) {
+        this.password = encode;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

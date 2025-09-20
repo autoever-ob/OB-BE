@@ -15,6 +15,7 @@ public enum SuccessStatus {
     SEND_REGISTER_SUCCESS(HttpStatus.OK,"회원가입 성공"),
     SEND_LOGIN_SUCCESS(HttpStatus.OK, "로그인 성공"),
     SEND_HEALTH_SUCCESS(HttpStatus.OK,"서버 상태 OK"),
+    DELETE_MEMBER_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공" ),
 
     SEND_MY_PROFILE_SUCCESS(HttpStatus.OK, "내 정보 조회 성공"),
     SEND_MY_SOLD_SUCCESS(HttpStatus.OK, "내가 판 매물 조회 성공"),
@@ -49,6 +50,7 @@ public enum SuccessStatus {
 
     SEND_LOAD_CHATROOM(HttpStatus.OK, "채팅 상세 조회 성공"),
     SEND_MY_CHATROOMS(HttpStatus.OK, "내 채팅방 조회 성공"),
+
 
     /**
      * 201

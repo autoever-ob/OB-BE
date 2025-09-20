@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
     ProductImage findByProductAndIsThumbnailTrue(Product product);
     List<ProductImage> findAllByProduct(Product product);

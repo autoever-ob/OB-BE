@@ -39,6 +39,10 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+    public Long getExpiration(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().getTime();
+    }
+
     public String createJwt(String category, Long id, String role, Long expiredMs) {
 
         return Jwts.builder()

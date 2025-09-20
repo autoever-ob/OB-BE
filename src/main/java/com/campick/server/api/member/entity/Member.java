@@ -6,7 +6,6 @@ import com.campick.server.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,15 +68,6 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> receivedReviews = new ArrayList<>();
 
-    private String refreshToken;
-    private LocalDateTime refreshTokenExpiration;
-
-    public void updateRefreshToken(String refreshToken, long expireMs) {
-        this.refreshToken = refreshToken;
-        this.refreshTokenExpiration = LocalDateTime.now().plus(Duration.ofMillis(expireMs));
-    }
-
-
     //닉네임 변경
     public void updateNickname(String nickname) { this.nickname = nickname; }
 
@@ -90,5 +80,10 @@ public class Member extends BaseTimeEntity {
     // 딜러 연관관계 설정 (멤버 -> 딜러)
     public void assignDealer(Dealer dealer) {
         this.dealer = dealer;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

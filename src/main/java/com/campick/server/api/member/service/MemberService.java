@@ -269,4 +269,23 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
                 .content(transactionDtos.getContent())
                 .build();
     }
+
+    public ReviewListPageDto getReviewById(Long memberId, Pageable pageable) {
+        // 멤버가 존재하는지 확인
+        memberRepository.findByIdAndIsDeletedFalse(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        Page<Review> reviews = reviewRepository.findByTargetIdWithAuthor(memberId, pageable);
+        Page<ReviewResponseDto> reviewResponseDtos = reviews.map(ReviewResponseDto::from);
+
+        return ReviewListPageDto.builder()
+                .totalElements(reviewResponseDtos.getTotalElements())
+                .totalPages(reviewResponseDtos.getTotalPages())
+                .page(reviewResponseDtos.getNumber())
+                .size(reviewResponseDtos.getSize())
+                .isLast(reviewResponseDtos.isLast())
+                .content(reviewResponseDtos.getContent())
+                .build();
+    }
 }

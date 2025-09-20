@@ -250,4 +250,17 @@ public class MemberController {
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
 
+
+    @Operation(summary = "{memberId}별 리뷰 조회", description = "{memberId}별 산 매물 기록을 봅니다")
+    @GetMapping("/review/{memberId}")
+    public ResponseEntity<ApiResponse<ReviewListPageDto>> getMemberReview(
+            @PathVariable Long memberId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size){
+        Pageable pageable = PageRequest.of(page, size);
+        ReviewListPageDto memberProductsIsAvailable = memberService.getReviewById(memberId, pageable);
+
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
+    }
+
 }

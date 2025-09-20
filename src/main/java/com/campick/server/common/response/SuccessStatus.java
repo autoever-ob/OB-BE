@@ -34,6 +34,7 @@ public enum SuccessStatus {
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
     SEND_CAR_LIST_SUCCESS(HttpStatus.OK, "자동차 리스트 조회 성공"),
     SEND_RECOMMEND_SUCCESS(HttpStatus.OK, "추천 매물 조회 성공"),
+    SEND_INFO_LIST_SUCCESS(HttpStatus.OK, "타입, 모델, 옵션 조회 성공"),
     SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
     SEND_PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "매물 상세 조회 성공"),
     SEND_PRODUCT_UPDATE_SUCCESS(HttpStatus.OK, "매물 수정 성공"),

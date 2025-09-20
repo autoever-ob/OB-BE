@@ -62,7 +62,7 @@ public class MemberService {
         Member member = requestDto.toEntity(encodedPassword);
         memberRepository.save(member);
 
-        if (requestDto.getRole() == Role.ROLE_DEALER) {
+        if (requestDto.getRole() == Role.DEALER) {
             DealerShip dealerShip = dealershipRepository.findByRegistrationNumber(requestDto.getDealershipRegistrationNumber())
                     .orElseGet(() -> dealershipRepository.save(DealerShip.builder()
                             .name(requestDto.getDealershipName())

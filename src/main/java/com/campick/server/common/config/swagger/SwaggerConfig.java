@@ -44,11 +44,11 @@ public class SwaggerConfig {
         SecurityRequirement accessTokenRequirement = new SecurityRequirement().addList(accessTokenHeader);
 //        SecurityRequirement refreshTokenRequirement = new SecurityRequirement().addList(refreshTokenHeader);
 
-//        Server server = new Server();
-//        server.setUrl("https://campick.shop");
-
         Server server = new Server();
-        server.setUrl("http://localhost:8080");
+        server.setUrl("https://campick.shop");
+
+//        Server server = new Server();
+//        server.setUrl("http://localhost:8080");
 
         return new OpenAPI()
                 .info(new Info()

@@ -3,6 +3,7 @@ package com.campick.server.api.member.controller;
 import com.campick.server.api.member.dto.*;
 import com.campick.server.api.member.service.EmailService;
 import com.campick.server.api.member.service.MemberService;
+import com.campick.server.api.member.service.PasswordResetService;
 import com.campick.server.common.config.security.SecurityMember;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
@@ -30,6 +31,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final EmailService emailService;
+    private final PasswordResetService passwordResetService;
 
     @Operation(
             summary = "이메일 회원가입 API", description = "회원정보를 받아 사용자를 등록합니다.")
@@ -218,5 +220,8 @@ public class MemberController {
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
+
+
+
 
 }

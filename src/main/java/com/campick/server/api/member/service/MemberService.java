@@ -97,7 +97,15 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         member.updateRefreshToken(refreshToken, 1000L * 60 * 60 * 24 * 7);
         memberRepository.save(member);
 
-        return new MemberLoginResponseDto(accessToken,refreshToken);
+        return MemberLoginResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .phoneNumber(member.getMobileNumber())
+                .dealerId(member.getDealer() != null ? member.getDealer().getId() : null)
+                .role(member.getRole().name())
+                .build();
 
     }
 
@@ -190,7 +198,15 @@ public MemberLoginResponseDto login(MemberLoginRequestDto requestDto) {
         member.updateRefreshToken(newRefreshToken,1000L * 60 * 60 * 24 * 7);
         memberRepository.save(member);
 
-        return new MemberLoginResponseDto(newAccessToken, newRefreshToken);
+        return MemberLoginResponseDto.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .phoneNumber(member.getMobileNumber())
+                .dealerId(member.getDealer() != null ? member.getDealer().getId() : null)
+                .role(member.getRole().name())
+                .build();
     }
 
 

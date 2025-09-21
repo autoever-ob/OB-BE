@@ -26,6 +26,7 @@ public enum SuccessStatus {
     LOGOUT_SUCCESS(HttpStatus.OK,"로그아웃 성공"),
     CHECK_EMAIL_DUPLICATE(HttpStatus.OK, "이메일 중복 검사 결과입니다."),
     CHECK_NICKNAME_DUPLICATE(HttpStatus.OK, "닉네임 중복 검사 결과입니다."),
+    CHECK_PASSWORD_VALIDATION(HttpStatus.OK, "비밀번호 확인 검사 결과입니다."),
     UPDATE_PASSWORD_SUCCESS(HttpStatus.OK, "비밀번호 변경 성공"),
     UPDATE_PROFILE_IMAGE_SUCCESS(HttpStatus.OK, "프로필 이미지 변경" ),
     REISSUE_SUCCESS(HttpStatus.OK, "토큰 재발행 성공" ),

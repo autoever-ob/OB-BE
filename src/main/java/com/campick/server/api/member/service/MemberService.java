@@ -96,7 +96,11 @@ public class MemberService {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
 
-        if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
+//        if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
+//            throw new BadRequestException(ErrorStatus.INVALID_PASSWORD_EXCEPTION.getMessage());
+//        }
+
+        if (!requestDto.getPassword().equals(member.getPassword())) {
             throw new BadRequestException(ErrorStatus.INVALID_PASSWORD_EXCEPTION.getMessage());
         }
 
@@ -287,6 +291,14 @@ public class MemberService {
 
         return new PageResponseDto<>(reviewResponseDtos);
     }
-    
 
+
+    public boolean checkPasswordValidation(Long memberId, String password) {
+         // 멤버가 존재하는지 확인
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        return member.getPassword().equals(password);
+    }
 }

@@ -25,18 +25,25 @@ import com.campick.server.api.product.repository.ProductRepository;
 import com.campick.server.api.type.entity.Type;
 import com.campick.server.api.type.entity.VehicleTypeName;
 import com.campick.server.api.type.repository.TypeRepository;
+import com.campick.server.common.dto.PageResponseDto;
 import com.campick.server.common.exception.BadRequestException;
 import com.campick.server.common.exception.NotFoundException;
 import com.campick.server.common.response.ErrorStatus;
 import com.campick.server.common.storage.FirebaseStorageService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -55,6 +62,7 @@ public class ProductService {
     private final ProductImageService productImageService;
     private final EngineRepository engineRepository;
     private final FavoriteRepository favoriteRepository;
+    private final EntityManager em;
 
     @Transactional
     public Long createProduct(ProductCreateReqDto dto) {
@@ -251,46 +259,154 @@ public class ProductService {
     }
 
     @Transactional
-    public Page<ProductResDto> getProducts(Pageable pageable) {
-        Page<Product> products = productRepository.findByStatusNot(ProductStatus.SOLD, pageable);
+    public PageResponseDto<ProductResDto> getProducts(FilterReqDto filter, Pageable pageable, Long memberId) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        return products
-                .map(product -> {
-                    String thumbnailUrl = Optional.ofNullable(
-                                    productImageRepository.findByProductAndIsThumbnailTrue(product)
-                            ).map(ProductImage::getImageUrl)
-                            .orElse(null);
-                    Car car = product.getCar();
-                    Engine engine = car.getEngine();
+        // ===== Main Query =====
+        CriteriaQuery<Product> query = cb.createQuery(Product.class);
+        Root<Product> productRoot = query.from(Product.class);
 
-                    return new ProductResDto(
-                            product.getTitle(),
-                            product.getCost().toString(),
-                            product.getGeneration(),
-                            engine.getFuelType().toString(),
-                            engine.getTransmission().toString(),
-                            product.getMileage().toString(),
-                            product.getLocation(),
-                            product.getCreatedAt(),
-                            thumbnailUrl,
-                            product.getId(),
-                            product.getStatus().toString()
+        // Join
+        Join<Product, Car> carJoin = productRoot.join("car", JoinType.INNER);
+        Join<Car, Model> modelJoin = carJoin.join("model", JoinType.INNER);
+        Join<Model, Type> typeJoin = modelJoin.join("type", JoinType.INNER);
+
+        // 이미지 fetch
+        productRoot.fetch("images", JoinType.LEFT);
+
+        // ===== Predicates =====
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.notEqual(productRoot.get("status"), ProductStatus.SOLD));
+
+        // 범위 필터
+        predicates.add(cb.between(productRoot.get("cost"), filter.getCostFrom(), filter.getCostTo()));
+        predicates.add(cb.between(productRoot.get("generation"), filter.getGenerationFrom(), filter.getGenerationTo()));
+        predicates.add(cb.between(productRoot.get("mileage"), filter.getMileageFrom(), filter.getMileageTo()));
+
+        // 옵션 필터
+        if (filter.getOptions() != null && !filter.getOptions().isEmpty()) {
+            Subquery<Long> optionSub = query.subquery(Long.class);
+            Root<ProductOption> optionRoot = optionSub.from(ProductOption.class);
+            optionSub.select(optionRoot.get("product").get("id"))
+                    .where(
+                            cb.equal(optionRoot.get("product"), productRoot),
+                            optionRoot.get("carOption").get("name").in(filter.getOptions()),
+                            cb.isTrue(optionRoot.get("isEquipped"))
                     );
-                });
+            predicates.add(cb.exists(optionSub));
+        }
+
+        // 타입 필터
+        if (filter.getTypes() != null && !filter.getTypes().isEmpty()) {
+            predicates.add(typeJoin.get("typeName").in(filter.getTypes()));
+        }
+
+        query.where(predicates.toArray(new Predicate[0]));
+
+        // 정렬
+        List<Order> orders = pageable.getSort().stream()
+                .map(order -> order.isAscending() ?
+                        cb.asc(productRoot.get(order.getProperty())) :
+                        cb.desc(productRoot.get(order.getProperty())))
+                .toList();
+        query.orderBy(orders);
+
+        // 페이징
+        TypedQuery<Product> typedQuery = em.createQuery(query);
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        List<Product> products = typedQuery.getResultList();
+
+        // ===== Count Query =====
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Product> countRoot = countQuery.from(Product.class);
+        Join<Product, Car> countCarJoin = countRoot.join("car", JoinType.INNER);
+        Join<Car, Model> countModelJoin = countCarJoin.join("model", JoinType.INNER);
+        Join<Model, Type> countTypeJoin = countModelJoin.join("type", JoinType.INNER);
+
+        List<Predicate> countPredicates = new ArrayList<>();
+        countPredicates.add(cb.notEqual(countRoot.get("status"), ProductStatus.SOLD));
+        countPredicates.add(cb.between(countRoot.get("cost"), filter.getCostFrom(), filter.getCostTo()));
+        countPredicates.add(cb.between(countRoot.get("generation"), filter.getGenerationFrom(), filter.getGenerationTo()));
+        countPredicates.add(cb.between(countRoot.get("mileage"), filter.getMileageFrom(), filter.getMileageTo()));
+
+        if (filter.getOptions() != null && !filter.getOptions().isEmpty()) {
+            Subquery<Long> countOptionSub = countQuery.subquery(Long.class);
+            Root<ProductOption> optionRoot = countOptionSub.from(ProductOption.class);
+            countOptionSub.select(optionRoot.get("product").get("id"))
+                    .where(
+                            cb.equal(optionRoot.get("product"), countRoot),
+                            optionRoot.get("carOption").get("name").in(filter.getOptions()),
+                            cb.isTrue(optionRoot.get("isEquipped"))
+                    );
+            countPredicates.add(cb.exists(countOptionSub));
+        }
+
+        if (filter.getTypes() != null && !filter.getTypes().isEmpty()) {
+            countPredicates.add(countTypeJoin.get("typeName").in(filter.getTypes()));
+        }
+
+        countQuery.select(cb.count(countRoot))
+                .where(countPredicates.toArray(new Predicate[0]));
+        Long total = em.createQuery(countQuery).getSingleResult();
+
+        // ===== User's liked products 조회 =====
+        Set<Long> likedProductIds = favoriteRepository.findByMemberId(1L).stream()
+                .map(fav -> fav.getProduct().getId())
+                .collect(Collectors.toSet());
+
+        // ===== DTO 변환 =====
+        List<ProductResDto> content = products.stream().map(p -> {
+            return productToDto(p, likedProductIds);
+        }).toList();
+
+        return new PageResponseDto<>(new PageImpl<>(content, pageable, total));
     }
 
-    public RecommendResDto getRecommend() {
+    public RecommendResDto getRecommend(Long memberId) {
         Product newVehicle = productRepository.findTopByOrderByCreatedAtDesc();
         Product hotVehicle = productRepository.findTopByOrderByLikeCountDesc();
 
-        ProductResDto newVehicleResDto = new ProductResDto();
-        ProductResDto hotVehicleResDto = new ProductResDto();
+        Set<Long> likedProductIds = favoriteRepository.findByMemberId(memberId).stream()
+                .map(fav -> fav.getProduct().getId())
+                .collect(Collectors.toSet());
 
         RecommendResDto recommendResDto = new RecommendResDto();
-        recommendResDto.setHotVehicle(hotVehicleResDto);
-        recommendResDto.setHotVehicle(newVehicleResDto);
+        recommendResDto.setHotVehicle(productToDto(newVehicle, likedProductIds));
+        recommendResDto.setNewVehicle(productToDto(hotVehicle, likedProductIds));
 
         return recommendResDto;
+    }
+
+    private ProductResDto productToDto(Product p, Set<Long> likedProductIds) {
+        if (p == null) return null;
+
+        String thumbnailUrl = p.getImages().stream()
+                .filter(ProductImage::getIsThumbnail)
+                .map(ProductImage::getImageUrl)
+                .findFirst()
+                .orElse(null);
+
+        Car car = p.getCar();
+        Engine engine = car.getEngine();
+
+        return ProductResDto.builder()
+                .title(p.getTitle())
+                .price(p.getCost().toString())
+                .generation(p.getGeneration())
+                .fuelType(engine.getFuelType().toString())
+                .transmission(engine.getTransmission().toString())
+                .mileage(p.getMileage().toString())
+                .vehicleType(car.getModel().getType().getTypeName().toString())
+                .vehicleModel(car.getModel().getModelName())
+                .location(p.getLocation())
+                .createdAt(p.getCreatedAt())
+                .thumbNail(thumbnailUrl)
+                .productId(p.getId())
+                .status(p.getStatus().toString())
+                .isLiked(likedProductIds.contains(p.getId()))
+                .likeCount(p.getLikeCount())
+                .build();
     }
 
     public void likeToggle(Long productId, Long memberId) {

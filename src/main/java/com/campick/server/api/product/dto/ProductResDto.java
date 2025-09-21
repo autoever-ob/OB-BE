@@ -25,6 +25,10 @@ public class ProductResDto {
     private String transmission;
     @JsonProperty("mileage")
     private String mileage;
+    @JsonProperty("vehicleType")
+    private String vehicleType;
+    @JsonProperty("vehicleModel")
+    private String vehicleModel;
     @JsonProperty("location")
     private String location;
     @JsonProperty("createdAt")

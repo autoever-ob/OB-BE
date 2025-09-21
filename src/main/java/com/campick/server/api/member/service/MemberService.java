@@ -9,6 +9,7 @@ import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.entity.Role;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.product.entity.Product;
+import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.product.repository.ProductRepository;
 import com.campick.server.api.review.entity.Review;
 import com.campick.server.api.review.repository.ReviewRepository;
@@ -286,4 +287,6 @@ public class MemberService {
 
         return new PageResponseDto<>(reviewResponseDtos);
     }
+    
+
 }

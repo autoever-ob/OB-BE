@@ -3,6 +3,7 @@ package com.campick.server.api.product.repository;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.entity.ProductStatus;
+import com.campick.server.common.dto.PageResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,9 +36,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Spring Data JPA는 메서드가 호출될 때 전달된 memberId라는 값을 찾아서 쿼리문에 붙여줌
     Page<Product> findProductByMemberIdWithDetails(@Param("memberId") Long memberId, Pageable pageable);
 
-    List<Product> findProductsBySellerAndStatus(Member buyer, ProductStatus productStatus);
+
+    Integer countProductsBySellerAndStatusIn(Member seller, List<ProductStatus> statuses);
 
     Product findTopByOrderByCreatedAtDesc();
     Product findTopByOrderByLikeCountDesc();
     Page<Product> findByStatusNot(ProductStatus status, Pageable pageable);
+
+
+    Integer countProductsBySellerAndStatus(Member seller, ProductStatus productStatus);
+
+    Integer countProductsBySeller(Member seller);
 }

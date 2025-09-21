@@ -15,7 +15,7 @@ import java.util.Map;
 public class ProductImageService {
     private final FirebaseStorageService firebaseStorageService;
 
-    public List<Map<String, String>> uploadImage(List<MultipartFile> files) throws IOException {
+    public List<Map<String, String>> uploadImage(List<MultipartFile> files) {
         List<Map<String, String>> imageUrls = new ArrayList<>();
         for (MultipartFile file : files) {
             imageUrls.add(firebaseStorageService.uploadProductImage(file));

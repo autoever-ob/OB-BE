@@ -21,7 +21,7 @@ public class ProductImageController {
     private final ProductImageService productImageService;
 
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<ApiResponse<List<ProductImageUploadResponseDto>>> upload(@RequestPart("files") List<MultipartFile> files) throws IOException {
+    public ResponseEntity<ApiResponse<List<ProductImageUploadResponseDto>>> upload(@RequestPart("files") List<MultipartFile> files) {
         List<Map<String, String>> imageUrls = productImageService.uploadImage(files);
         List<ProductImageUploadResponseDto> response = imageUrls.stream()
                 .map(ProductImageUploadResponseDto::from)

@@ -171,14 +171,10 @@ public class MemberService {
     public Map<String, String> updateProfileImage(String email, MultipartFile file) {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new BadRequestException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
-        try {
-            Map<String, String> imageUrls = firebaseStorageService.uploadProfileImage(member.getId(), file);
-            member.updateProfileImage(imageUrls.get("profileImageUrl"), imageUrls.get("profileThumbnailUrl"));
-            memberRepository.save(member);
-            return imageUrls;
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 업로드 실패", e);
-        }
+        Map<String, String> imageUrls = firebaseStorageService.uploadProfileImage(member.getId(), file);
+        member.updateProfileImage(imageUrls.get("profileImageUrl"), imageUrls.get("profileThumbnailUrl"));
+        memberRepository.save(member);
+        return imageUrls;
     }
 
     @Transactional

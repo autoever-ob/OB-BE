@@ -3,7 +3,9 @@ package com.campick.server.api.member.controller;
 import com.campick.server.api.member.dto.*;
 import com.campick.server.api.member.service.EmailService;
 import com.campick.server.api.member.service.MemberService;
+import com.campick.server.api.member.service.PasswordResetService;
 import com.campick.server.common.config.security.SecurityMember;
+import com.campick.server.common.dto.PageResponseDto;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 
 @RequestMapping("/api/member")
@@ -30,6 +33,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final EmailService emailService;
+    private final PasswordResetService passwordResetService;
 
     @Operation(
             summary = "이메일 회원가입 API", description = "회원정보를 받아 사용자를 등록합니다.")
@@ -127,12 +131,12 @@ public class MemberController {
 
     @Operation(summary = "프로필 이미지 변경 API", description = "사용자의 프로필 이미지를 변경합니다.")
     @PatchMapping(value = "/image", consumes = {"multipart/form-data"})
-    public ResponseEntity<ApiResponse<String>> updateProfileImage(
+    public ResponseEntity<ApiResponse<ProfileImageUpdateResponseDto>> updateProfileImage(
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal SecurityMember securityMember
     ) {
-        String imageUrl = memberService.updateProfileImage(securityMember.getEmail(), file);
-        return ApiResponse.success(SuccessStatus.UPDATE_PROFILE_IMAGE_SUCCESS, imageUrl);
+        Map<String, String> imageUrls = memberService.updateProfileImage(securityMember.getEmail(), file);
+        return ApiResponse.success(SuccessStatus.UPDATE_PROFILE_IMAGE_SUCCESS, ProfileImageUpdateResponseDto.from(imageUrls));
     }
 
     @Operation(summary = "특정 회원 정보 조회", description = "ID를 이용해 회원 정보를 조회합니다.")
@@ -170,12 +174,12 @@ public class MemberController {
 
     @Operation(summary = "{memberId}별 매물 중 팔거나 예약 중인 제품 리스트", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
     @GetMapping("/product/sell-or-reserve/{memberId}")
-    public ResponseEntity<ApiResponse<MemberProductListPageDto>> getMemberProducts(
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductAvailableSummaryDto>>> getMemberProducts(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        MemberProductListPageDto memberProductsIsAvailable = memberService.getMemberProducts(memberId, pageable);
+        PageResponseDto<ProductAvailableSummaryDto> memberProductsIsAvailable = memberService.getMemberProducts(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
     }
@@ -183,12 +187,12 @@ public class MemberController {
     // 기록 부분
     @Operation(summary = "{memberId}별 판 매물 조회", description = "{memberId}별 판 매물 기록을 봅니다")
     @GetMapping("/product/sold/{memberId}")
-    public ResponseEntity<ApiResponse<MemberTransactionListPageDto>> getMemberSold(
+    public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberSold(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size){
         Pageable pageable = PageRequest.of(page, size);
-        MemberTransactionListPageDto memberProductsIsAvailable = memberService.getMemberSold(memberId, pageable);
+        PageResponseDto<TransactionResponseDto>  memberProductsIsAvailable = memberService.getMemberSold(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_SOLD_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
@@ -196,12 +200,12 @@ public class MemberController {
 
     @Operation(summary = "{memberId}별 산 매물 조회", description = "{memberId}별 산 매물 기록을 봅니다")
     @GetMapping("/product/bought/{memberId}")
-    public ResponseEntity<ApiResponse<MemberTransactionListPageDto>> getMemberBought(
+    public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberBought(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size){
         Pageable pageable = PageRequest.of(page, size);
-        MemberTransactionListPageDto memberProductsIsAvailable = memberService.getMemberBought(memberId, pageable);
+        PageResponseDto<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberBought(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
@@ -209,12 +213,12 @@ public class MemberController {
 
     @Operation(summary = "{memberId}별 리뷰 조회", description = "{memberId}별 산 매물 기록을 봅니다")
     @GetMapping("/review/{memberId}")
-    public ResponseEntity<ApiResponse<ReviewListPageDto>> getMemberReview(
+    public ResponseEntity<ApiResponse<PageResponseDto<ReviewResponseDto>>> getMemberReview(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size){
         Pageable pageable = PageRequest.of(page, size);
-        ReviewListPageDto memberProductsIsAvailable = memberService.getReviewById(memberId, pageable);
+        PageResponseDto<ReviewResponseDto> memberProductsIsAvailable = memberService.getReviewById(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }

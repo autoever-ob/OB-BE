@@ -41,6 +41,9 @@ public class Member extends BaseTimeEntity {
     @Column(name = "profile_image")
     private String profileImageUrl;
 
+    @Column(name = "profile_thumbnail_image")
+    private String profileThumbnailUrl;
+
     @Column(name = "description")
     private String description;
 
@@ -75,7 +78,10 @@ public class Member extends BaseTimeEntity {
     public void updatePassword(String password) { this.password = password; }
 
     // 프로필 이미지 변경
-    public void updateProfileImage(String profileImageUrl) { this.profileImageUrl = profileImageUrl;}
+    public void updateProfileImage(String profileImageUrl, String profileThumbnailUrl) {
+        this.profileImageUrl = profileImageUrl;
+        this.profileThumbnailUrl = profileThumbnailUrl;
+    }
 
     // 딜러 연관관계 설정 (멤버 -> 딜러)
     public void assignDealer(Dealer dealer) {
@@ -85,5 +91,10 @@ public class Member extends BaseTimeEntity {
     public void delete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void changePassword(String encode) {
+        this.password = encode;
+        this.updatedAt = LocalDateTime.now();
     }
 }

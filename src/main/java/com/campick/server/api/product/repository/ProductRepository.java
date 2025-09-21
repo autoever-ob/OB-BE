@@ -39,4 +39,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Product findTopByOrderByCreatedAtDesc();
     Product findTopByOrderByLikeCountDesc();
+    Page<Product> findByStatusNot(ProductStatus status, Pageable pageable);
 }

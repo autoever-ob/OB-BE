@@ -30,6 +30,8 @@ public enum SuccessStatus {
     UPDATE_PROFILE_IMAGE_SUCCESS(HttpStatus.OK, "프로필 이미지 변경" ),
     REISSUE_SUCCESS(HttpStatus.OK, "토큰 재발행 성공" ),
     SEND_FOLLOWING_LIST_SUCCESS(HttpStatus.OK, "회원 정보 조회 성공"),
+    PASSWORD_RESET_LINK_SENT(HttpStatus.OK, "이메일 초기화 코드 전송 성공"),
+     PASSWORD_RESET_SUCCESS(HttpStatus.OK, "이메일 초기화 성공"),
 
 
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
@@ -38,6 +40,8 @@ public enum SuccessStatus {
     SEND_INFO_LIST_SUCCESS(HttpStatus.OK, "타입, 모델, 옵션 조회 성공"),
     SEND_PRODUCT_LIST_SUCCESS(HttpStatus.OK, "매물 조회 성공"),
     SEND_PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "매물 상세 조회 성공"),
+    SEND_PRODUCT_LIKE_SUCCESS(HttpStatus.OK, "하트 누르기 성공(좋아요, 취소)"),
+    SEND_PRODUCT_STATUS_UPDATED(HttpStatus.OK, "매물 상태 변경 성공"),
     SEND_PRODUCT_UPDATE_SUCCESS(HttpStatus.OK, "매물 수정 성공"),
     SEND_PRODUCT_DELETE_SUCCESS(HttpStatus.OK, "매물 삭제 성공"),
     SEND_CHAT_CREATED(HttpStatus.OK, "채팅방 생성 성공"),

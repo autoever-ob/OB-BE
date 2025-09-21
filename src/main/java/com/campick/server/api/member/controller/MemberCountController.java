@@ -21,7 +21,7 @@ public class MemberCountController{
     private final CountService countService;
 
     @Operation(summary = "{memberId}별 모든 매물 개수 조회", description = "{memberId}별 모든 매물 개수 조회합니다")
-    @GetMapping("/product/sell-or-reserve/{memberId}")
+    @GetMapping("/product/all/{memberId}")
     public ResponseEntity<ApiResponse<Integer>> getMemberAllProductCount(@PathVariable Long memberId){
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_ALL_PRODUCTS_COUNT_SUCCESS, countService.getMemberAllProductCount(memberId));

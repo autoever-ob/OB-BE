@@ -394,8 +394,8 @@ public class ProductService {
         SellerResDto sellerResDto = SellerResDto.builder()
                 .nickName(seller.getNickname())
                 .role(seller.getRole().toString())
-                .sellingCount()
-                .completeCount()
+                .sellingCount(countService.getMemberProductAvailableCount(seller.getId()))
+                .completeCount(countService.getMemberProductSoldCount(seller.getId()))
                 .build();
 
         // 딜러인 경우만 별점

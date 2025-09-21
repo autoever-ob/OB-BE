@@ -10,6 +10,7 @@ import com.campick.server.api.favorite.repository.FavoriteRepository;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.entity.Role;
 import com.campick.server.api.member.repository.MemberRepository;
+import com.campick.server.api.member.service.CountService;
 import com.campick.server.api.model.entity.Model;
 import com.campick.server.api.model.repository.ModelRepository;
 import com.campick.server.api.option.entity.CarOption;
@@ -64,6 +65,7 @@ public class ProductService {
     private final EngineRepository engineRepository;
     private final FavoriteRepository favoriteRepository;
     private final EntityManager em;
+    private final CountService countService;
 
     @Transactional
     public Long createProduct(ProductCreateReqDto dto, Long memberId) {

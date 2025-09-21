@@ -13,12 +13,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class ProductImageUploadResponseDto {
     private String productImageUrl;
-    private String productThumbnailUrl;
 
     public static ProductImageUploadResponseDto from(Map<String, String> urls) {
         return ProductImageUploadResponseDto.builder()
                 .productImageUrl(urls.get("productImageUrl"))
-                .productThumbnailUrl(urls.get("productThumbnailUrl"))
                 .build();
     }
 }

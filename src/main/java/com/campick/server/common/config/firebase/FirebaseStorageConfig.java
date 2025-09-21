@@ -46,8 +46,8 @@ public class FirebaseStorageConfig {
         // application.yml에 정의된 경로(`firebase.credentials.path에 값이 있는지 확인
         if (credentialsPath != null && !credentialsPath.isBlank()) {
             // classpath: 접두사가 있는 경우, classpath 리소스로 파일을 찾는다
-            if (credentialsPath.startsWith("classpath:")) {
-                String path = credentialsPath.substring("classpath:".length());
+            if (credentialsPath.startsWith("classpath")) {
+                String path = credentialsPath.substring("classpath".length());
                 Resource resource = new ClassPathResource(path);
                 try (InputStream is = resource.getInputStream()) {
                     return GoogleCredentials.fromStream(is);

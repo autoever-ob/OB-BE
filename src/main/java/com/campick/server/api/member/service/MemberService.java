@@ -14,6 +14,7 @@ import com.campick.server.api.review.entity.Review;
 import com.campick.server.api.review.repository.ReviewRepository;
 import com.campick.server.api.transaction.entity.Transaction;
 import com.campick.server.api.transaction.repository.TransactionRepository;
+import com.campick.server.common.dto.PageResponseDto;
 import com.campick.server.common.exception.BadRequestException;
 import com.campick.server.common.exception.NotFoundException;
 import com.campick.server.common.exception.UnauthorizedException;
@@ -232,7 +233,7 @@ public class MemberService {
 
 
     // N + 1 문제를 한번 스스로 생각해보기
-    public MemberProductListPageDto getMemberProducts(Long id, Pageable pageable) {
+    public PageResponseDto<ProductAvailableSummaryDto> getMemberProducts(Long id, Pageable pageable) {
 
         if(memberRepository.findByIdAndIsDeletedFalse(id).isEmpty()) {
             throw new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage());
@@ -246,19 +247,12 @@ public class MemberService {
         // 찾아왔으면 원하는 값에 알맞게 채워줌
         // 여러개의 products를 하나씩 보내면서 Dto를 만든다
         // 원래는 배열로 가능하나 Stream으로 편리하게 가능
-        return MemberProductListPageDto.builder()
-                .totalElements(productAvailableSummaryDtos.getTotalElements())
-                .totalPages(productAvailableSummaryDtos.getTotalPages())
-                .page(productAvailableSummaryDtos.getNumber())
-                .size(productAvailableSummaryDtos.getSize())
-                .isLast(productAvailableSummaryDtos.isLast())
-                .content(productAvailableSummaryDtos.getContent())
-                .build();
+        return new PageResponseDto<>(productAvailableSummaryDtos);
     }
 
 
     // 내가 샀으니깐 판 사람의 id를 가지고 조회할게
-    public MemberTransactionListPageDto getMemberBought(Long buyerId, Pageable pageable) {
+    public PageResponseDto<TransactionResponseDto> getMemberBought(Long buyerId, Pageable pageable) {
         // 멤버가 존재하는지 확인
         Member buyer = memberRepository.findById(buyerId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
@@ -268,18 +262,11 @@ public class MemberService {
         Page<Transaction> transactions = transactionRepository.findTransactionsByBuyer(buyer, pageable);
         Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "SOLD"));
 
-        return MemberTransactionListPageDto.builder()
-                .totalElements(transactionDtos.getTotalElements())
-                .totalPages(transactionDtos.getTotalPages())
-                .page(transactionDtos.getNumber())
-                .size(transactionDtos.getSize())
-                .isLast(transactionDtos.isLast())
-                .content(transactionDtos.getContent())
-                .build();
+        return new PageResponseDto<>(transactionDtos);
     }
 
     // 내가 판
-    public MemberTransactionListPageDto getMemberSold(Long sellerId, Pageable pageable) {
+    public PageResponseDto<TransactionResponseDto>  getMemberSold(Long sellerId, Pageable pageable) {
         // 멤버가 존재하는지 확인
         Member seller = memberRepository.findById(sellerId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
@@ -288,17 +275,10 @@ public class MemberService {
         Page<Transaction> transactions = transactionRepository.findTransactionsBySeller(seller, pageable);
         Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "BUY"));
 
-        return MemberTransactionListPageDto.builder()
-                .totalElements(transactionDtos.getTotalElements())
-                .totalPages(transactionDtos.getTotalPages())
-                .page(transactionDtos.getNumber())
-                .size(transactionDtos.getSize())
-                .isLast(transactionDtos.isLast())
-                .content(transactionDtos.getContent())
-                .build();
+        return new PageResponseDto<>(transactionDtos);
     }
 
-    public ReviewListPageDto getReviewById(Long memberId, Pageable pageable) {
+    public PageResponseDto<ReviewResponseDto> getReviewById(Long memberId, Pageable pageable) {
         // 멤버가 존재하는지 확인
         memberRepository.findByIdAndIsDeletedFalse(memberId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
@@ -307,13 +287,6 @@ public class MemberService {
         Page<Review> reviews = reviewRepository.findByTargetIdWithAuthor(memberId, pageable);
         Page<ReviewResponseDto> reviewResponseDtos = reviews.map(ReviewResponseDto::from);
 
-        return ReviewListPageDto.builder()
-                .totalElements(reviewResponseDtos.getTotalElements())
-                .totalPages(reviewResponseDtos.getTotalPages())
-                .page(reviewResponseDtos.getNumber())
-                .size(reviewResponseDtos.getSize())
-                .isLast(reviewResponseDtos.isLast())
-                .content(reviewResponseDtos.getContent())
-                .build();
+        return new PageResponseDto<>(reviewResponseDtos);
     }
 }

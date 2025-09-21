@@ -8,14 +8,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ProductImageService {
     private final FirebaseStorageService firebaseStorageService;
 
-    public List<String> uploadImage(List<MultipartFile> files) throws IOException {
-        List<String> imageUrls = new ArrayList<>();
+    public List<Map<String, String>> uploadImage(List<MultipartFile> files) throws IOException {
+        List<Map<String, String>> imageUrls = new ArrayList<>();
         for (MultipartFile file : files) {
             imageUrls.add(firebaseStorageService.uploadProductImage(file));
         }

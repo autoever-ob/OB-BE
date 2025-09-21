@@ -11,12 +11,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class FirebaseStorageService {
 
-    public String uploadProfileImage(Long memberId, MultipartFile file) throws IOException {
+    public Map<String, String> uploadProfileImage(Long memberId, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException(ErrorStatus.EMPTY_FILE_EXCEPTION.getMessage());
         }
@@ -32,10 +34,17 @@ public class FirebaseStorageService {
         uploadThumbnail(file, thumbnailObjectName, 50, 50);
 
         String bucket = StorageClient.getInstance().bucket().getName();
-        return String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));
+        String originalUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));
+        String thumbnailUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(thumbnailObjectName));
+
+        Map<String, String> urls = new HashMap<>();
+        urls.put("profileImageUrl", originalUrl);
+        urls.put("profileThumbnailUrl", thumbnailUrl);
+
+        return urls;
     }
 
-    public String uploadProductImage(MultipartFile file) throws IOException {
+    public Map<String, String> uploadProductImage(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty())
             throw new BadRequestException(ErrorStatus.EMPTY_FILE_EXCEPTION.getMessage());
 
@@ -54,7 +63,14 @@ public class FirebaseStorageService {
         // 해당 버킷의 경로 이름을 얻어옴
         // 파일 경로를 유니코드로 변환
         String bucket = StorageClient.getInstance().bucket().getName();
-        return String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));
+        String originalUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));
+        String thumbnailUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(thumbnailObjectName));
+
+        Map<String, String> urls = new HashMap<>();
+        urls.put("productImageUrl", originalUrl);
+        urls.put("productThumbnailUrl", thumbnailUrl);
+
+        return urls;
     }
 
     // 썸네일 생성 메소드

@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -167,14 +168,14 @@ public class MemberService {
 
 
     @Transactional
-    public String updateProfileImage(String email, MultipartFile file) {
+    public Map<String, String> updateProfileImage(String email, MultipartFile file) {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new BadRequestException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
         try {
-            String imageUrl = firebaseStorageService.uploadProfileImage(member.getId(), file);
-            member.updateProfileImage(imageUrl);
+            Map<String, String> imageUrls = firebaseStorageService.uploadProfileImage(member.getId(), file);
+            member.updateProfileImage(imageUrls.get("profileImageUrl"), imageUrls.get("profileThumbnailUrl"));
             memberRepository.save(member);
-            return imageUrl;
+            return imageUrls;
         } catch (IOException e) {
             throw new RuntimeException("이미지 업로드 실패", e);
         }

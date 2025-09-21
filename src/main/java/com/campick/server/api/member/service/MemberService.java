@@ -9,6 +9,7 @@ import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.entity.Role;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.product.entity.Product;
+import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.product.repository.ProductRepository;
 import com.campick.server.api.review.entity.Review;
 import com.campick.server.api.review.repository.ReviewRepository;
@@ -34,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -167,17 +169,13 @@ public class MemberService {
 
 
     @Transactional
-    public String updateProfileImage(String email, MultipartFile file) {
+    public Map<String, String> updateProfileImage(String email, MultipartFile file) {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new BadRequestException(ErrorStatus.NOT_REGISTER_USER_EXCEPTION.getMessage()));
-        try {
-            String imageUrl = firebaseStorageService.uploadProfileImage(member.getId(), file);
-            member.updateProfileImage(imageUrl);
-            memberRepository.save(member);
-            return imageUrl;
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 업로드 실패", e);
-        }
+        Map<String, String> imageUrls = firebaseStorageService.uploadProfileImage(member.getId(), file);
+        member.updateProfileImage(imageUrls.get("profileImageUrl"), imageUrls.get("profileThumbnailUrl"));
+        memberRepository.save(member);
+        return imageUrls;
     }
 
     @Transactional
@@ -289,4 +287,6 @@ public class MemberService {
 
         return new PageResponseDto<>(reviewResponseDtos);
     }
+    
+
 }

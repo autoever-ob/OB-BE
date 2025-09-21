@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 
 @RequestMapping("/api/member")
@@ -130,12 +131,12 @@ public class MemberController {
 
     @Operation(summary = "프로필 이미지 변경 API", description = "사용자의 프로필 이미지를 변경합니다.")
     @PatchMapping(value = "/image", consumes = {"multipart/form-data"})
-    public ResponseEntity<ApiResponse<String>> updateProfileImage(
+    public ResponseEntity<ApiResponse<ProfileImageUpdateResponseDto>> updateProfileImage(
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal SecurityMember securityMember
     ) {
-        String imageUrl = memberService.updateProfileImage(securityMember.getEmail(), file);
-        return ApiResponse.success(SuccessStatus.UPDATE_PROFILE_IMAGE_SUCCESS, imageUrl);
+        Map<String, String> imageUrls = memberService.updateProfileImage(securityMember.getEmail(), file);
+        return ApiResponse.success(SuccessStatus.UPDATE_PROFILE_IMAGE_SUCCESS, ProfileImageUpdateResponseDto.from(imageUrls));
     }
 
     @Operation(summary = "특정 회원 정보 조회", description = "ID를 이용해 회원 정보를 조회합니다.")
@@ -210,6 +211,8 @@ public class MemberController {
     }
 
 
+
+
     @Operation(summary = "{memberId}별 리뷰 조회", description = "{memberId}별 산 매물 기록을 봅니다")
     @GetMapping("/review/{memberId}")
     public ResponseEntity<ApiResponse<PageResponseDto<ReviewResponseDto>>> getMemberReview(
@@ -221,8 +224,5 @@ public class MemberController {
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
-
-
-
 
 }

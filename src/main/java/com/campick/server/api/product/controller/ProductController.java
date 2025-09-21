@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,7 @@ public class ProductController {
 
     // Mock
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ProductResDto>>> getProducts() {
+    public ResponseEntity<ApiResponse<Page<ProductResDto>>> getProducts(Pageable pageable) {
         //MOCK
         List<ProductResDto> cars = new ArrayList<>();
 
@@ -81,8 +82,7 @@ public class ProductController {
         cars.add(new ProductResDto("현대 팰리세이드 2021 2.2 디젤", "4,300만 원", 2021, "디젤", "자동", "18,000 km", "서울 송파구", LocalDateTime.now().minusDays(2), "https://example.com/images/car26.jpg", 26L, "AVAILABLE", true, 15));
 
         return ApiResponse.success(SuccessStatus.SEND_PRODUCT_LIST_SUCCESS, new PageImpl<>(cars, PageRequest.of(0, 30), cars.size()));
-//        List<AllProductResponseDto> productsList = productService.findAll();
-//        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_LIST_SUCCESS, productsList);
+//        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_LIST_SUCCESS, productService.getProducts(pageable));
     }
 
     // Mock

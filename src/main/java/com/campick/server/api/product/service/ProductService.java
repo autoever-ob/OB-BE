@@ -31,6 +31,8 @@ import com.campick.server.common.response.ErrorStatus;
 import com.campick.server.common.storage.FirebaseStorageService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -249,14 +251,15 @@ public class ProductService {
     }
 
     @Transactional
-    public List<ProductResDto> findAll() {
-        List<Product> products = productRepository.findAll();
+    public Page<ProductResDto> getProducts(Pageable pageable) {
+        Page<Product> products = productRepository.findByStatusNot(ProductStatus.SOLD, pageable);
 
-        return products.stream()
+        return products
                 .map(product -> {
-                    String thumbnailUrl = productImageRepository
-                            .findByProductAndIsThumbnailTrue(product)
-                            .getImageUrl();
+                    String thumbnailUrl = Optional.ofNullable(
+                                    productImageRepository.findByProductAndIsThumbnailTrue(product)
+                            ).map(ProductImage::getImageUrl)
+                            .orElse(null);
                     Car car = product.getCar();
                     Engine engine = car.getEngine();
 
@@ -273,8 +276,7 @@ public class ProductService {
                             product.getId(),
                             product.getStatus().toString()
                     );
-                })
-                .collect(Collectors.toList());
+                });
     }
 
     public RecommendResDto getRecommend() {

@@ -130,7 +130,7 @@ public class MemberController {
     }
 
     @Operation(summary = "프로필 이미지 변경 API", description = "사용자의 프로필 이미지를 변경합니다.")
-    @PatchMapping(value = "/image", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/image", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<ProfileImageUpdateResponseDto>> updateProfileImage(
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal SecurityMember securityMember
@@ -169,6 +169,14 @@ public class MemberController {
     public ResponseEntity<ApiResponse<Boolean>> checkNicknameDuplicate(@RequestParam String nickname) {
         boolean isDuplicate = memberService.isNicknameDuplicate(nickname);
         return ApiResponse.success(SuccessStatus.CHECK_NICKNAME_DUPLICATE, isDuplicate);
+    }
+
+    @Operation(summary = "로그인된 사용자 비밀번호 확인", description = "로그인된 사용자의 비밀번호를 확인합니다")
+    @PostMapping("/check/password")
+    public ResponseEntity<ApiResponse<Boolean>> checkPasswordValidation(@AuthenticationPrincipal SecurityMember securityMember,
+                                                                        @RequestBody MemberPasswordCheckRequestDto requestDto) {
+        boolean isValidation = memberService.checkPasswordValidation(securityMember.getId(),requestDto.getPassword());
+        return ApiResponse.success(SuccessStatus.CHECK_PASSWORD_VALIDATION, isValidation);
     }
 
 

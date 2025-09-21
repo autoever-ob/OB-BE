@@ -22,12 +22,16 @@ jobs:
             const prAuthor = context.payload.pull_request.user.login;
 
             // 1) Assignee 지정 (PR 연 사람을 지정)
-            await github.rest.issues.addAssignees({
-              owner,
-              repo,
-              issue_number: prNumber,
-              assignees: [prAuthor]
-            });
+            try {
+              await github.rest.issues.addAssignees({
+                owner,
+                repo,
+                issue_number: prNumber,
+                assignees: [prAuthor]
+              });
+            } catch (e) {
+              core.warning(`Assignee를 지정할 수 없습니다: ${e.message}. PR 작성자가 collaborator가 아닐 수 있습니다.`);
+            }
 
             // 2) 리포지토리 Collaborators 전체 조회
             const collaborators = await github.paginate(

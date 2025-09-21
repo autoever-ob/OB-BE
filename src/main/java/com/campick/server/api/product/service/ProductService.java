@@ -66,7 +66,7 @@ public class ProductService {
     private final EntityManager em;
 
     @Transactional
-    public Long createProduct(ProductCreateReqDto dto) {
+    public Long createProduct(ProductCreateReqDto dto, Long memberId) {
         VehicleTypeName vehicleTypeName;
         try {
             vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
@@ -79,7 +79,7 @@ public class ProductService {
 
         Car car = carRepository.findByModel(model);
 
-        Member member = memberRepository.findById(1L)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
         Product product = ProductDtoToEntity(member, car, dto);

@@ -40,8 +40,10 @@ public class ProductController {
     private final ProductRepository productRepository;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createProduct(@RequestBody ProductCreateReqDto dto) {
-        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_CREATE_SUCCESS, productService.createProduct(dto));
+    public ResponseEntity<ApiResponse<Long>> createProduct(@RequestBody ProductCreateReqDto dto,
+                                                           @AuthenticationPrincipal SecurityMember securityMember) {
+        Long memberId = securityMember.getId();
+        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_CREATE_SUCCESS, productService.createProduct(dto, memberId));
     }
 
     // Mock

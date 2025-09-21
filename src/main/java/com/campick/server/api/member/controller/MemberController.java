@@ -211,6 +211,8 @@ public class MemberController {
     }
 
 
+
+
     @Operation(summary = "{memberId}별 리뷰 조회", description = "{memberId}별 산 매물 기록을 봅니다")
     @GetMapping("/review/{memberId}")
     public ResponseEntity<ApiResponse<PageResponseDto<ReviewResponseDto>>> getMemberReview(

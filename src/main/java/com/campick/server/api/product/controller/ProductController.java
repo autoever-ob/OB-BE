@@ -101,7 +101,9 @@ public class ProductController {
 
     // Mock
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponse<CarDetailMock.CarDetailResponseDto>> getCarDetail() {
+    public ResponseEntity<ApiResponse<CarDetailMock.CarDetailResponseDto>> getCarDetail(@AuthenticationPrincipal SecurityMember securityMember, @PathVariable Long productId) {
+        Long memberId = securityMember.getId();
+
         return ApiResponse.success(SuccessStatus.SEND_PRODUCT_DETAIL_SUCCESS, CarDetailMock.getCarDetail());
     }
 

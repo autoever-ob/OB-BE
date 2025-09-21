@@ -8,7 +8,9 @@ import com.campick.server.api.engine.repository.EngineRepository;
 import com.campick.server.api.favorite.entity.Favorite;
 import com.campick.server.api.favorite.repository.FavoriteRepository;
 import com.campick.server.api.member.entity.Member;
+import com.campick.server.api.member.entity.Role;
 import com.campick.server.api.member.repository.MemberRepository;
+import com.campick.server.api.member.service.CountService;
 import com.campick.server.api.model.entity.Model;
 import com.campick.server.api.model.repository.ModelRepository;
 import com.campick.server.api.option.entity.CarOption;
@@ -63,9 +65,10 @@ public class ProductService {
     private final EngineRepository engineRepository;
     private final FavoriteRepository favoriteRepository;
     private final EntityManager em;
+    private final CountService countService;
 
     @Transactional
-    public Long createProduct(ProductCreateReqDto dto) {
+    public Long createProduct(ProductCreateReqDto dto, Long memberId) {
         VehicleTypeName vehicleTypeName;
         try {
             vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
@@ -78,7 +81,7 @@ public class ProductService {
 
         Car car = carRepository.findByModel(model);
 
-        Member member = memberRepository.findById(1L)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
         Product product = ProductDtoToEntity(member, car, dto);
@@ -351,16 +354,79 @@ public class ProductService {
         Long total = em.createQuery(countQuery).getSingleResult();
 
         // ===== User's liked products 조회 =====
-        Set<Long> likedProductIds = favoriteRepository.findByMemberId(1L).stream()
-                .map(fav -> fav.getProduct().getId())
-                .collect(Collectors.toSet());
+        Set<Long> likedProductIds = getLikedProductIds(memberId);
 
         // ===== DTO 변환 =====
-        List<ProductResDto> content = products.stream().map(p -> {
-            return productToDto(p, likedProductIds);
-        }).toList();
+        List<ProductResDto> content = products.stream().map(p -> productToDto(p, likedProductIds)).toList();
 
         return new PageResponseDto<>(new PageImpl<>(content, pageable, total));
+    }
+
+    private Set<Long> getLikedProductIds(Long memberId) {
+        return favoriteRepository.findByMemberId(memberId).stream()
+                .map(fav -> fav.getProduct().getId())
+                .collect(Collectors.toSet());
+    }
+
+    public ProductDetailResDto getProductDetail(Long memberId, Long productId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
+        );
+
+        Car car = product.getCar();
+        Engine engine = car.getEngine();
+        Model model = car.getModel();
+        Type type = model.getType();
+
+        List<ProductOption> productOptions = productOptionRepository.findAllByProduct(product);
+        List<OptionResDto> optionResDto = productOptions.stream().map(
+               po -> new OptionResDto(po.getCarOption().getName(), po.getIsEquipped())
+        ).toList();
+
+        Set<Long> likedProductIds = getLikedProductIds(memberId);
+
+        Member seller =  memberRepository.findById(product.getSeller().getId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        SellerResDto sellerResDto = SellerResDto.builder()
+                .nickName(seller.getNickname())
+                .role(seller.getRole().toString())
+                .sellingCount(countService.getMemberProductAvailableCount(seller.getId()))
+                .completeCount(countService.getMemberProductSoldCount(seller.getId()))
+                .build();
+
+        // 딜러인 경우만 별점
+        if (seller.getRole().equals(Role.DEALER))
+            sellerResDto.setRating(seller.getDealer().getRating());
+
+        List<ProductImage> productImages = productImageRepository.findAllByProduct(product);
+
+        return ProductDetailResDto.builder()
+                .title(product.getTitle())
+                .description(product.getDescription())
+                .price(product.getCost().toString())
+                .mileage(product.getMileage().toString())
+                .generation(product.getGeneration())
+                .fuelType(engine.getFuelType().toString())
+                .transmission(engine.getTransmission().toString())
+                .vehicleType(type.getTypeName().toString())
+                .vehicleModel(model.getModelName())
+                .location(product.getLocation())
+                .option(optionResDto)
+                .user(sellerResDto)
+                .plateHash(product.getPlateHash())
+                .productImageUrl(productImages.stream().map(ProductImage::getImageUrl).toList())
+                .productId(product.getId())
+                .createdAt(product.getCreatedAt())
+                .status(product.getStatus().toString())
+                .isLiked(likedProductIds.contains(productId))
+                .likeCount(product.getLikeCount())
+                .build();
     }
 
     public RecommendResDto getRecommend(Long memberId) {

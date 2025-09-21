@@ -66,9 +66,9 @@ public class MemberService {
             throw new BadRequestException(ErrorStatus.PASSWORD_MISMATCH_EXCEPTION.getMessage());
         }
 
-        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
+//        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
 
-        Member member = requestDto.toEntity(encodedPassword);
+        Member member = requestDto.toEntity(requestDto.getPassword());
         memberRepository.save(member);
 
         if (requestDto.getRole() == Role.DEALER) {

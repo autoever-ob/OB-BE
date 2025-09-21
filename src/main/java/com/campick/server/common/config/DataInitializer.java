@@ -73,8 +73,8 @@ public class DataInitializer {
         }
 
         String rawPassword = "123456";
-        String encoded = passwordEncoder.encode(rawPassword);
-
+//        String encoded = passwordEncoder.encode(rawPassword);
+        String encoded = rawPassword;
         List<Member> members = new ArrayList<>();
 
         // 1) 4 ROLE_USER members

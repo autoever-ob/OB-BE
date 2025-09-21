@@ -31,7 +31,7 @@ public class PasswordResetController {
     @Operation(summary = "비밀번호 재설정", description = "비밀번호 재설정")
     @PutMapping
     public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody ResetPasswordRequestDto request) {
-        passwordResetService.resetPasswordWithCode(request.getCode(), request.getNewPassword());
+        passwordResetService.resetPasswordWithCode(request.getCode());
         return ApiResponse.success_only(SuccessStatus.PASSWORD_RESET_SUCCESS);
     }
 }

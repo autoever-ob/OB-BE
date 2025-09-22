@@ -295,7 +295,12 @@ public class ProductService {
 
         // 타입 필터
         if (filter.getTypes() != null && !filter.getTypes().isEmpty()) {
-            predicates.add(typeJoin.get("typeName").in(filter.getTypes()));
+            List<String> typeNames = filter.getTypes().stream()
+                    .map(VehicleTypeName::fromKorean) // 한글 → Enum
+                    .map(Enum::name)
+                    .toList();
+
+            predicates.add(typeJoin.get("typeName").in(typeNames));
         }
 
         query.where(predicates.toArray(new Predicate[0]));
@@ -340,7 +345,12 @@ public class ProductService {
         }
 
         if (filter.getTypes() != null && !filter.getTypes().isEmpty()) {
-            countPredicates.add(countTypeJoin.get("typeName").in(filter.getTypes()));
+            List<String> typeNames = filter.getTypes().stream()
+                    .map(VehicleTypeName::fromKorean) // 한글 → Enum
+                    .map(Enum::name)
+                    .toList();
+
+            countPredicates.add(countTypeJoin.get("typeName").in(typeNames));
         }
 
         countQuery.select(cb.count(countRoot))

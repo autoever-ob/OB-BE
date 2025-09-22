@@ -282,6 +282,7 @@ public class ProductService {
         // ===== Predicates =====
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.notEqual(productRoot.get("status"), ProductStatus.SOLD));
+        predicates.add(cb.isFalse(productRoot.get("isDeleted")));
 
         // 범위 필터
         predicates.add(cb.between(productRoot.get("cost"), filter.getCostFrom(), filter.getCostTo()));
@@ -339,6 +340,7 @@ public class ProductService {
         countPredicates.add(cb.between(countRoot.get("cost"), filter.getCostFrom(), filter.getCostTo()));
         countPredicates.add(cb.between(countRoot.get("generation"), filter.getGenerationFrom(), filter.getGenerationTo()));
         countPredicates.add(cb.between(countRoot.get("mileage"), filter.getMileageFrom(), filter.getMileageTo()));
+        countPredicates.add(cb.isFalse(countRoot.get("isDeleted")));
 
         if (filter.getOptions() != null && !filter.getOptions().isEmpty()) {
             Subquery<Long> countOptionSub = countQuery.subquery(Long.class);

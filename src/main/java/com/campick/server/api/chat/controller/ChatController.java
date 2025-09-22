@@ -4,11 +4,13 @@ import com.campick.server.api.chat.dto.*;
 import com.campick.server.api.chat.entity.ChatMessage;
 import com.campick.server.api.chat.entity.ChatRoom;
 import com.campick.server.api.chat.service.ChatService;
+import com.campick.server.common.config.security.SecurityMember;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -22,13 +24,11 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/start")
-    public ResponseEntity<ApiResponse<ChatStartResDto>> startChat(@RequestBody ChatRoomReqDto chatRoomReqDto) {
-        ChatStartResDto chatStartResDto = new ChatStartResDto();
+    public ResponseEntity<ApiResponse<Long>> startChat(@RequestBody ChatRoomReqDto chatRoomReqDto,
+                                                       @AuthenticationPrincipal SecurityMember securityMember) {
+        Long memberId = securityMember.getId();
 
-        chatStartResDto.setChatId(1L);
-
-        return ApiResponse.success(SuccessStatus.SEND_CHAT_CREATED, chatStartResDto);
-        //return ApiResponse.success(SuccessStatus.SEND_CHAT_CREATED, chatService.startChatRoom(chatRoomReqDto, userId));
+        return ApiResponse.success(SuccessStatus.SEND_CHAT_CREATED, chatService.startChatRoom(chatRoomReqDto, memberId));
     }
 
     @GetMapping("/{chatRoomId}")

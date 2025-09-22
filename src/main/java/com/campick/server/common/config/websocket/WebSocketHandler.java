@@ -1,6 +1,7 @@
 package com.campick.server.common.config.websocket;
 
 import com.campick.server.api.chat.service.ChatService;
+import com.campick.server.websocket.service.WebSocketService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +20,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class WebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper;
-    private final ConcurrentHashMap<Long, WebSocketSession> activeSessions = new ConcurrentHashMap<>();
     private final ChatService chatService;
+    private final WebSocketService webSocketService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Long userId = getUserId(session);
-        activeSessions.put(userId, session);
+        webSocketService.setActiveSession(userId, session);
         System.out.println("웹소켓 연결: " + session.getId());
     }
 
@@ -40,9 +41,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         switch (event) {
             case "join_room":
-                chatService.setChatRoomMap(session);
+                chatService.setChatRoomMap(session, data);
+                break;
             case "chat_message":
                 chatService.handleChatMessage(data);
+                break;
+            case "sold":
+                chatService.broadcastSoldEvent(data);
                 break;
             default:
                 log.warn("Unknown event: {}", event);
@@ -58,7 +63,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        activeSessions.remove(getUserId(session));
+        webSocketService.removeActiveSession(getUserId(session));
         System.out.println("웹소켓 연결 종료: " + session.getId());
     }
 }

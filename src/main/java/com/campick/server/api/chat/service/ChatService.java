@@ -43,7 +43,7 @@ public class ChatService {
         this.chatRoomMap = new LinkedHashMap<>();
     }
 
-    private ChatSocketDto setAndFindChatRoomMapById(Long chatId) {
+    private ChatSocketDto setChatRoomMap(WebSocketSession session, Long chatId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage()));
 
@@ -73,6 +73,8 @@ public class ChatService {
                 .product(product)
                 .build();
         chatRoomRepository.save(chatRoom);
+
+
 
         ChatStartResDto chatStartResDto = new ChatStartResDto();
         chatStartResDto.setChatId(chatRoom.getId());

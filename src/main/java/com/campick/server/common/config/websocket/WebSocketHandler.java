@@ -39,6 +39,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
         JsonNode data = jsonNode.get("data");
 
         switch (event) {
+            case "join_room":
+                chatService.setChatRoomMap(session);
             case "chat_message":
                 chatService.handleChatMessage(data);
                 break;

@@ -194,12 +194,12 @@ public class MemberController {
 
     @Operation(summary = "{memberId}별 모든 매물 리스트", description = "{memberId}별 사용자의 모든 매물을 봅니다.")
     @GetMapping("/product/all/{memberId}")
-    public ResponseEntity<ApiResponse<PageResponseDto<ProductAvailableSummaryDto>>> getMemberProductsAll(
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductAllSummaryDto>>> getMemberProductsAll(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        PageResponseDto<ProductAvailableSummaryDto> memberProductsIsAvailable = memberService.getMemberProductsAll(memberId, pageable);
+        PageResponseDto<ProductAllSummaryDto> memberProductsIsAvailable = memberService.getMemberProductsAll(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_ALL_SUCCESS, memberProductsIsAvailable);
     }

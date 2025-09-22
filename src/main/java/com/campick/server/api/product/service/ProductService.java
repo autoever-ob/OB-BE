@@ -100,7 +100,7 @@ public class ProductService {
                 .description(dto.getDescription())
                 .plateHash(dto.getPlateHash())
                 .location(dto.getLocation())
-                .type(ProductType.SELLING) // 딜러/유저 구분 필요
+                .type(member.getRole() == Role.USER ? ProductType.PENDING : ProductType.SELLING)
                 .status(ProductStatus.AVAILABLE)
                 .isDeleted(false)
                 .build();

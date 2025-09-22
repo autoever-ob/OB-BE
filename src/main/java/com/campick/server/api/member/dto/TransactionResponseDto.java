@@ -3,7 +3,6 @@ package com.campick.server.api.member.dto;
 import com.campick.server.api.product.entity.ProductImage;
 import com.campick.server.api.product.entity.ProductStatus;
 import com.campick.server.api.transaction.entity.Transaction;
-import com.campick.server.common.entity.BaseTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +21,7 @@ public class TransactionResponseDto  {
     private Integer generation;
     private Integer mileage;
     private String location;
-    private List<String> thumbnailUrls;
+    private String productImageUrl;
     private ProductStatus status;
     private LocalDateTime createdAt;
 
@@ -31,11 +30,11 @@ public class TransactionResponseDto  {
         // 판 매물과 산 매물 동시에 하기 위한 작업
         Long memberId = soldOrbought.equals("SOLD") ? transaction.getBuyer().getId() : transaction.getSeller().getId();
 
-
-        // productId 기준으로 제품 사진 불러오기
-        List<String> thumbnailUrl = transaction.getProduct().getImages().stream()
-                .map(ProductImage::getImageUrl)
-                .toList();
+        String productImageUrl = transaction.getProduct().getImages().stream()
+                .filter(image -> Boolean.TRUE.equals(image.getIsThumbnail()))
+                .findFirst()
+                .map(ProductImage::getThumbnailUrl)
+                .orElse(null);
 
         return TransactionResponseDto.builder()
                 .memberId(memberId)
@@ -45,7 +44,7 @@ public class TransactionResponseDto  {
                 .generation(transaction.getProduct().getGeneration())
                 .mileage(transaction.getProduct().getMileage())
                 .location(transaction.getProduct().getLocation())
-                .thumbnailUrls(thumbnailUrl)
+                .productImageUrl(productImageUrl)
                 .status(transaction.getProduct().getStatus())
                 .createdAt(transaction.getCreatedAt())
                 .build();

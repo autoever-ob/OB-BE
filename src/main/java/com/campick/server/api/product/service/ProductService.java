@@ -402,6 +402,7 @@ public class ProductService {
         SellerResDto sellerResDto = SellerResDto.builder()
                 .nickName(product.getSeller().getNickname())
                 .role(product.getSeller().getRole().toString())
+                .userId(product.getSeller().getId())
                 .sellingCount(countService.getMemberProductAvailableCount(product.getSeller().getId()))
                 .completeCount(countService.getMemberProductSoldCount(product.getSeller().getId()))
                 .build();

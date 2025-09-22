@@ -192,8 +192,20 @@ public class MemberController {
         return ApiResponse.success(SuccessStatus.CHECK_PASSWORD_VALIDATION, isValidation);
     }
 
+    @Operation(summary = "{memberId}별 모든 매물 리스트", description = "{memberId}별 사용자의 모든 매물을 봅니다.")
+    @GetMapping("/product/all/{memberId}")
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductAvailableSummaryDto>>> getMemberProductsAll(
+            @PathVariable Long memberId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        PageResponseDto<ProductAvailableSummaryDto> memberProductsIsAvailable = memberService.getMemberProductsAll(memberId, pageable);
 
-    @Operation(summary = "{memberId}별 매물 중 팔거나 예약 중인 제품 리스트", description = "현재 사용자가 팔고 있는 매물을 봅니다.")
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_ALL_SUCCESS, memberProductsIsAvailable);
+    }
+
+
+    @Operation(summary = "{memberId}별 매물 중 팔거나 예약 중인 매물 리스트", description = "{memberId}별 사용자가 팔고 있는 매물을 봅니다.")
     @GetMapping("/product/sell-or-reserve/{memberId}")
     public ResponseEntity<ApiResponse<PageResponseDto<ProductAvailableSummaryDto>>> getMemberProducts(
             @PathVariable Long memberId,

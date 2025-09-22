@@ -60,4 +60,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "left join fetch p.images i " +
             "where p.id = :productId")
     Optional<Product> findDetailById(@Param("productId") Long productId);
+
+    Page<Product> findProductsBySeller(Member seller, Pageable pageable);
 }

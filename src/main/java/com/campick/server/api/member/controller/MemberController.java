@@ -143,7 +143,7 @@ public class MemberController {
     }
 
     @Operation(summary = "프로필 이미지 변경 API", description = "사용자의 프로필 이미지를 변경합니다.")
-    @PatchMapping(value = "/image", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/image", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<ProfileImageUpdateResponseDto>> updateProfileImage(
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal SecurityMember securityMember

@@ -36,7 +36,7 @@ public class PasswordResetController {
 
     // 2. 재설정 실행 (code)
     @Operation(summary = "변경 코드 검증", description = "이메일로 보낸 코드를 검증합니다")
-    @PatchMapping("/verify")
+    @PostMapping("/verify")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody ResetPasswordRequestDto request) {
         passwordResetService.verifyCode(request.getCode());
         return ApiResponse.success_only(SuccessStatus.PASSWORD_RESET_CODE_VERIFIED);

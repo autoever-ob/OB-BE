@@ -95,7 +95,7 @@ public class ProductController {
 
         List<String> stringType = type.stream()
                 .map(t -> t.getTypeName().getKorean()).toList();
-        List<String> stringModel = model.stream().map(Model::getModelName).toList();
+        List<String> stringModel = model.stream().map(Model::getModelName).distinct().toList();
         List<String> stringOption = option.stream().map(CarOption::getName).toList();
 
         infoResDto.setType(stringType);

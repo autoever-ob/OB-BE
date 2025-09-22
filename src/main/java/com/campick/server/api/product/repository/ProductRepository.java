@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
@@ -47,6 +48,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Integer countProductsBySellerAndStatus(Member seller, ProductStatus productStatus);
 
     Integer countProductsBySeller(Member seller);
+
+    @Query(value = "SELECT DISTINCT p FROM Product p " +
+            "JOIN fetch p.seller m " +
+            "JOIN fetch p.car c " +
+            "JOIN fetch c.model mo " +
+            "JOIN fetch c.engine e " +
+            "join fetch mo.type t " +
+            "left join fetch m.dealer d" +
+            // images 가 없는 경우를 포함하기 위해서 LEFT JOIN
+            "left join fetch p.images i " +
+            "where p.id = :productId")
+    Optional<Product> findDetailById(@Param("productId") Long productId);
 
     Page<Product> findProductsBySeller(Member seller, Pageable pageable);
 }

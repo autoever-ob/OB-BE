@@ -59,7 +59,8 @@ public enum ErrorStatus {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "매물을 찾을 수 없습니다."),
     NOT_REGISTER_USER_EXCEPTION(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 입니다."),
     EMPTY_FILE_EXCEPTION(HttpStatus.NOT_FOUND, "업로드할 파일이 없습니다."),
-    CAR_NOT_FOUND(HttpStatus.NOT_FOUND, "자동차 정보를 찾을 수 없습니다"),
+    CAR_NOT_FOUND(HttpStatus.NOT_FOUND, "자동차 정보를 찾을 수 없습니다."),
+    MODEL_NOT_FOUND(HttpStatus.NOT_FOUND, "모델을 찾을 수 없습니다."),
 
 
     /**

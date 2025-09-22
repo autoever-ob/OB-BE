@@ -1,6 +1,7 @@
 package com.campick.server.api.product.dto;
 
 import com.campick.server.api.type.entity.VehicleTypeName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ProductCreateReqDto {
     private String mileage;          // 주행거리
+    @Schema(example = "모터홈")
     private VehicleTypeName vehicleType;      // 차종
     private String vehicleModel;     // 자동차 브랜드
     private Integer generation;      // 연식

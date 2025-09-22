@@ -1,5 +1,6 @@
 package com.campick.server.api.product.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ public class FilterReqDto {
     private Integer costTo;
     private Integer generationFrom;
     private Integer generationTo;
+    @JsonProperty("types")
     private List<String> types;
     private List<String> options;
 }

@@ -73,10 +73,12 @@ public class ProductService {
 
         Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
 
-        Car car = carRepository.findByModel(model);
+        Car car = carRepository.findByModel(model).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.CAR_NOT_FOUND.getMessage())
+        );
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BadRequestException("Member not found"));
+                .orElseThrow(() -> new BadRequestException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
 
         Product product = ProductDtoToEntity(member, car, dto);
         productRepository.save(product);
@@ -169,7 +171,9 @@ public class ProductService {
 
         Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
 
-        Car car = carRepository.findByModel(model);
+        Car car = carRepository.findByModel(model).orElseThrow(
+                () -> new BadRequestException(ErrorStatus.CAR_NOT_FOUND.getMessage())
+        );
 
         // 남이 수정하는 경우 막아야 하나? 요청한 유저랑 기존 셀러랑 비교해서
         Member member = memberRepository.findById(1L)

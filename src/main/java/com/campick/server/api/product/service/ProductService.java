@@ -449,7 +449,7 @@ public class ProductService {
 
         String thumbnailUrl = p.getImages().stream()
                 .filter(ProductImage::getIsThumbnail)
-                .map(ProductImage::getImageUrl)
+                .map(ProductImage::getThumbnailUrl)
                 .findFirst()
                 .orElse(null);
 

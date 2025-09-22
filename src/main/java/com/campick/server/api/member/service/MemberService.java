@@ -185,15 +185,11 @@ public class MemberService {
 
         // 닉네임이 중복인지 확인하는게 필요
         String newNickname = requestDto.getNickname();
-        if (newNickname != null && !newNickname.isBlank() && !newNickname.equals(member.getNickname())) {
-            if (isNicknameDuplicate(newNickname)) {
-                throw new BadRequestException(ErrorStatus.DUPLICATE_NICKNAME_EXCEPTION.getMessage());
-            }
+        if (newNickname != null && !newNickname.isBlank()) {
             member.updateNickname(newNickname);
-        }else{
+        } else{
             throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
         }
-
         // 모바일 업데이트
         String newMobileNumber = requestDto.getMobileNumber();
         if (newMobileNumber != null && !newMobileNumber.isBlank()) {

@@ -21,6 +21,8 @@ public class ProductAvailableSummaryDto {
     private String location;
     private LocalDateTime createdAt;
     private String productImageUrl;
+//    private String fuelType;
+//    private String transmission;
     private ProductStatus status;
 
     public static ProductAvailableSummaryDto from(Product product){
@@ -39,6 +41,8 @@ public class ProductAvailableSummaryDto {
                 .location(product.getLocation())
                 .createdAt(product.getCreatedAt())
                 .productImageUrl(productImageUrl)
+//                .fuelType(product.getCar().getEngine().getFuelType().getKorean())
+//                .transmission(product.getCar().getEngine().getTransmission().getKorean())
                 .status(product.getStatus())
                 .build();
     }

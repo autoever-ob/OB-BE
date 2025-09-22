@@ -16,6 +16,6 @@ public class FilterReqDto {
     private Integer generationFrom;
     private Integer generationTo;
     @JsonProperty("types")
-    private List<VehicleTypeName> types;
+    private List<String> types;
     private List<String> options;
 }

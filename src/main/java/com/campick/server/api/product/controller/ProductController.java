@@ -94,7 +94,7 @@ public class ProductController {
         List<CarOption> option = carOptionRepository.findAll();
 
         List<String> stringType = type.stream()
-                .map(t -> t.getTypeName().toString()).toList();
+                .map(t -> t.getTypeName().getKorean()).toList();
         List<String> stringModel = model.stream().map(Model::getModelName).toList();
         List<String> stringOption = option.stream().map(CarOption::getName).toList();
 

@@ -114,11 +114,6 @@ public class DataInitializer {
         // 5) Create Products for each member
         seedProducts(members);
 
-        // type 저장
-        typeRepository.save(Type.builder().typeName(VehicleTypeName.TRUCK_CAMPER).build());
-        typeRepository.save(Type.builder().typeName(VehicleTypeName.TRAILER).build());
-        typeRepository.save(Type.builder().typeName(VehicleTypeName.ETC).build());
-
         // option
         List<String> options = Arrays.asList("에어컨", "난방", "냉장고", "전자레인지", "화장실", "샤워실", "침대", "TV");
 
@@ -133,16 +128,29 @@ public class DataInitializer {
             return;
         }
 
-        // Create reusable entities
+        // type 저장
         Type type1 = typeRepository.save(Type.builder().typeName(VehicleTypeName.MOTOR_HOME).build());
+        Type type2 = typeRepository.save(Type.builder().typeName(VehicleTypeName.CARAVAN).build());
+        Type type3 = typeRepository.save(Type.builder().typeName(VehicleTypeName.TRUCK_CAMPER).build());
+        Type type4 = typeRepository.save(Type.builder().typeName(VehicleTypeName.TRAILER).build());
+        Type type5 = typeRepository.save(Type.builder().typeName(VehicleTypeName.ETC).build());
+
+        // Create reusable entities
         Engine engine1 = engineRepository.save(Engine.builder().fuelType(FuelType.DIESEL).transmission(Transmission.AUTOMATIC).horsePower(180).build());
-        Model model1 = modelRepository.save(Model.builder().type(type1).modelName("Grand Starex").marketName("Hyundai Grand Starex").build());
+        Model model1 = modelRepository.save(Model.builder().type(type1).modelName("그랜드 스타렉스").marketName("현대 그랜드 스타렉스").build());
         Car car1 = carRepository.save(Car.builder().model(model1).engine(engine1).build());
 
-        Type type2 = typeRepository.save(Type.builder().typeName(VehicleTypeName.CARAVAN).build());
         Engine engine2 = engineRepository.save(Engine.builder().fuelType(FuelType.GASOLINE).transmission(Transmission.AUTOMATIC).horsePower(250).build());
-        Model model2 = modelRepository.save(Model.builder().type(type2).modelName("Explorer").marketName("Ford Explorer").build());
+        Model model2 = modelRepository.save(Model.builder().type(type2).modelName("익스플로어").marketName("포드 익스플로어").build());
         Car car2 = carRepository.save(Car.builder().model(model2).engine(engine2).build());
+
+        Engine engine3 = engineRepository.save(Engine.builder().fuelType(FuelType.ELECTRIC).transmission(Transmission.AUTOMATIC).horsePower(200).build());
+        Model model3 = modelRepository.save(Model.builder().type(type3).modelName("카운티").marketName("카운티").build());
+        Car car3 = carRepository.save(Car.builder().model(model3).engine(engine3).build());
+
+        Model model4 = modelRepository.save(Model.builder().type(type4).modelName("스타렉스").marketName("스타렉스").build());
+        Car car4 = carRepository.save(Car.builder().model(model4).engine(engine1).build());
+
 
         List<Car> cars = List.of(car1, car2);
         AtomicInteger carIndex = new AtomicInteger(0);

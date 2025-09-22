@@ -38,6 +38,8 @@ public class PasswordResetService {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.EMAIL_NOT_FOUND.getMessage()));
 
+        passwordResetRepository.findByEmail(email).ifPresent(passwordResetRepository::delete);
+
 //        String code = UUID.randomUUID().toString().replace("-", "");
         String code = emailService.generateCode();
         LocalDateTime expiration = LocalDateTime.now().plusMinutes(15);
@@ -61,18 +63,30 @@ public class PasswordResetService {
     }
 
     // 2. 인증코드 검증 및 비밀번호 재설정
-    public void resetPasswordWithCode(String code, String newPassword) {
+    public void verifyCode(String code) {
+        // 리세 코드를 만듦
         PasswordReset reset = passwordResetRepository.findByCode(code)
                 .orElseThrow(() -> new BadRequestException(ErrorStatus.PASSWORD_RESET_INVALID_CODE.getMessage()));
 
+        // 만료 시간 체크
         if (reset.getExpirationTime().isBefore(LocalDateTime.now())) {
             throw new BadRequestException(ErrorStatus.PASSWORD_RESET_EXPIRED_CODE.getMessage());
         }
 
+        // 코드가 유효합지 체크
         if (reset.isVerified()) {
             throw new BadRequestException(ErrorStatus.PASSWORD_RESET_CODE_ALREADY_USED.getMessage());
         }
+        
+        reset.markVerified(); // 인증코드 사용 처리
+        passwordResetRepository.save(reset);
 
+    }
+
+    // 3. 비밀번호 변경
+    public void resetPassword(String email,  String newPassword){
+        PasswordReset reset = passwordResetRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException(ErrorStatus.PASSWORD_RESET_INVALID_CODE.getMessage()));
 
         Member member = memberRepository.findByEmailAndIsDeletedFalse(reset.getEmail())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
@@ -85,7 +99,6 @@ public class PasswordResetService {
         member.changePassword(newPassword);
         memberRepository.save(member);
 
-        reset.markVerified(); // 인증코드 사용 처리
-        passwordResetRepository.save(reset);
+        
     }
 }

@@ -27,7 +27,7 @@ public class ProductAvailableSummaryDto {
         String productImageUrl = product.getImages().stream()
                 .filter(image -> Boolean.TRUE.equals(image.getIsThumbnail()))
                 .findFirst()
-                .map(ProductImage::getThumbnailUrl)
+                .map(ProductImage::getImageUrl)
                 .orElse(null);
 
         return ProductAvailableSummaryDto.builder()

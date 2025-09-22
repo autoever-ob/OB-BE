@@ -111,7 +111,7 @@ public class SecurityConfig {
                         ).permitAll() // 회원, 스웨거 허가
                         //! TODO /api/product 는 일단 개발을 위해 전부 열어놓음
                         .requestMatchers("/api/product/**","/api/product").permitAll()
-                        .requestMatchers("/api/member/product/sold/**","/api/member/product/bought/**","/api/member/product/sell-or-reserve/**").permitAll()
+                        .requestMatchers("/api/member/product/sold/**","/api/member/product/bought/**","/api/member/product/sell-or-reserve/**", "/api/member/product/all/**").permitAll()
                         .requestMatchers("/api/password-reset","/api/password-reset/**").permitAll()
                         .requestMatchers("/api/car", "/api/types","/api/reviews","/api/options/**","/api/models","/api/favorites","/api/engines","/api/dealers").permitAll()
                         .requestMatchers("/api/count/**").permitAll()

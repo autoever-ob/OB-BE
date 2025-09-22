@@ -7,6 +7,7 @@ import com.campick.server.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.Fetch;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.campick.server.common.response.SuccessStatus;
@@ -29,9 +30,9 @@ public class PasswordResetController {
 
     // 2. 재설정 실행 (code + new password)
     @Operation(summary = "비밀번호 재설정", description = "비밀번호 재설정")
-    @PutMapping
+    @PatchMapping
     public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody ResetPasswordRequestDto request) {
-        passwordResetService.resetPasswordWithCode(request.getCode());
+        passwordResetService.resetPasswordWithCode(request.getCode(), request.getNewPassword());
         return ApiResponse.success_only(SuccessStatus.PASSWORD_RESET_SUCCESS);
     }
 }

@@ -29,6 +29,7 @@ public enum ErrorStatus {
     PASSWORD_RESET_CODE_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용된 비밀번호 재설정 코드입니다."),
     PASSWORD_RESET_ALREADY_USED(HttpStatus.BAD_REQUEST, "이전 비밀번호와 다른 비밀번호로 설정해주세요."),
     NOT_SELLER_EXCEPTION(HttpStatus.BAD_REQUEST, "이 매물의 판매자가 아닙니다"),
+    DUPLICATE_NICKNAME_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다. 다른 닉네임으로 시도해주세요."),
 
 
     /**

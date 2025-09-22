@@ -71,7 +71,8 @@ public class ProductService {
     public Long createProduct(ProductCreateReqDto dto, Long memberId) {
         Type type = typeRepository.findBytypeName(dto.getVehicleType());
 
-        Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
+        Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MODEL_NOT_FOUND.getMessage()));
 
         Car car = carRepository.findByModel(model).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.CAR_NOT_FOUND.getMessage())
@@ -169,7 +170,8 @@ public class ProductService {
 
         Type type = typeRepository.findBytypeName(dto.getVehicleType());
 
-        Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
+        Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MODEL_NOT_FOUND.getMessage()));
 
         Car car = carRepository.findByModel(model).orElseThrow(
                 () -> new BadRequestException(ErrorStatus.CAR_NOT_FOUND.getMessage())

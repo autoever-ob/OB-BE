@@ -487,12 +487,16 @@ public class ProductService {
 
         if (favorite != null) {
             favoriteRepository.delete(favorite);
+            product.setLikeCount(product.getLikeCount() - 1);
+            productRepository.save(product);
         } else {
             Favorite newFavorite = Favorite.builder()
                     .member(member)
                     .product(product)
                     .build();
             favoriteRepository.save(newFavorite);
+            product.setLikeCount(product.getLikeCount() + 1);
+            productRepository.save(product);
         }
     }
 

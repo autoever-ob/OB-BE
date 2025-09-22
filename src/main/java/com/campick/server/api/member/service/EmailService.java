@@ -30,7 +30,8 @@ public class EmailService {
 
     public void sendVerificationEmail(String email, LocalDateTime requestedAt) {
         // 이메일이 중복인가 확인
-        if(memberRepository.findByEmail(email).isPresent()){
+        // 회원 탈퇴되지 않은 멤버가 있으면 이미 있는 계정
+        if(memberRepository.findByEmailAndIsDeletedFalse(email).isPresent()){
             throw new BadRequestException(ErrorStatus.ALREADY_REGISTERED_ACCOUNT_EXCEPTION.getMessage());
         }
 

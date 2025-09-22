@@ -151,6 +151,8 @@ public class DataInitializer {
         Model model4 = modelRepository.save(Model.builder().type(type4).modelName("스타렉스").marketName("스타렉스").build());
         Car car4 = carRepository.save(Car.builder().model(model4).engine(engine1).build());
 
+        modelRepository.flush();
+        carRepository.flush();
 
         List<Car> cars = List.of(car1, car2);
         AtomicInteger carIndex = new AtomicInteger(0);

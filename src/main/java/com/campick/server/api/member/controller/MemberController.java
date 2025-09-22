@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ import java.util.Map;
 
 
 @RequestMapping("/api/member")
-@Tag(name="member", description = "멤버 관련 API 입니다.")
+@Tag(name = "member", description = "멤버 관련 API 입니다.")
 @RequiredArgsConstructor
 @RestController
 public class MemberController {
@@ -121,7 +120,7 @@ public class MemberController {
     @ApiResponses(@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"))
     @PatchMapping("/password")
     public ResponseEntity<ApiResponse<Void>> updatePassword(@Valid @RequestBody PasswordUpdateRequestDto requestDto,
-                                                            @AuthenticationPrincipal SecurityMember securityMember){
+                                                            @AuthenticationPrincipal SecurityMember securityMember) {
         memberService.updatePassword(
                 securityMember.getEmail(),
                 requestDto
@@ -129,8 +128,22 @@ public class MemberController {
         return ApiResponse.success_only(SuccessStatus.UPDATE_PASSWORD_SUCCESS);
     }
 
+    @Operation(summary = "회원 정보 수정 API", description = "현재 로그인된 사용자의 정보를 수정합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 정보 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "닉네임이 중복됩니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "회원을 찾을 수 없습니다.")
+    })
+    @PatchMapping("/update")
+    public ResponseEntity<ApiResponse<Void>> updateMemberInfo(
+            @AuthenticationPrincipal SecurityMember securityMember,
+            @RequestBody MemberUpdateRequestDto requestDto) {
+        memberService.updateMemberInfo(securityMember.getId(), requestDto);
+        return ApiResponse.success_only(SuccessStatus.UPDATE_MEMBER_INFO_SUCCESS);
+    }
+
     @Operation(summary = "프로필 이미지 변경 API", description = "사용자의 프로필 이미지를 변경합니다.")
-    @PutMapping(value = "/image", consumes = {"multipart/form-data"})
+    @PatchMapping(value = "/image", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<ProfileImageUpdateResponseDto>> updateProfileImage(
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal SecurityMember securityMember
@@ -175,7 +188,7 @@ public class MemberController {
     @PostMapping("/check/password")
     public ResponseEntity<ApiResponse<Boolean>> checkPasswordValidation(@AuthenticationPrincipal SecurityMember securityMember,
                                                                         @RequestBody MemberPasswordCheckRequestDto requestDto) {
-        boolean isValidation = memberService.checkPasswordValidation(securityMember.getId(),requestDto.getPassword());
+        boolean isValidation = memberService.checkPasswordValidation(securityMember.getId(), requestDto.getPassword());
         return ApiResponse.success(SuccessStatus.CHECK_PASSWORD_VALIDATION, isValidation);
     }
 
@@ -198,9 +211,9 @@ public class MemberController {
     public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberSold(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size){
+            @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        PageResponseDto<TransactionResponseDto>  memberProductsIsAvailable = memberService.getMemberSold(memberId, pageable);
+        PageResponseDto<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberSold(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_SOLD_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
@@ -211,7 +224,7 @@ public class MemberController {
     public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberBought(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size){
+            @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         PageResponseDto<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberBought(memberId, pageable);
 
@@ -219,14 +232,12 @@ public class MemberController {
     }
 
 
-
-
     @Operation(summary = "{memberId}별 리뷰 조회", description = "{memberId}별 산 매물 기록을 봅니다")
     @GetMapping("/review/{memberId}")
     public ResponseEntity<ApiResponse<PageResponseDto<ReviewResponseDto>>> getMemberReview(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size){
+            @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         PageResponseDto<ReviewResponseDto> memberProductsIsAvailable = memberService.getReviewById(memberId, pageable);
 

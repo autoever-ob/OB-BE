@@ -28,11 +28,12 @@ public enum SuccessStatus {
     CHECK_NICKNAME_DUPLICATE(HttpStatus.OK, "닉네임 중복 검사 결과입니다."),
     CHECK_PASSWORD_VALIDATION(HttpStatus.OK, "비밀번호 확인 검사 결과입니다."),
     UPDATE_PASSWORD_SUCCESS(HttpStatus.OK, "비밀번호 변경 성공"),
-    UPDATE_PROFILE_IMAGE_SUCCESS(HttpStatus.OK, "프로필 이미지 변경" ),
+    UPDATE_PROFILE_IMAGE_SUCCESS(HttpStatus.OK, "프로필 이미지 변경 성공" ),
     REISSUE_SUCCESS(HttpStatus.OK, "토큰 재발행 성공" ),
     SEND_FOLLOWING_LIST_SUCCESS(HttpStatus.OK, "회원 정보 조회 성공"),
     PASSWORD_RESET_LINK_SENT(HttpStatus.OK, "이메일 초기화 코드 전송 성공"),
-     PASSWORD_RESET_SUCCESS(HttpStatus.OK, "이메일 초기화 성공"),
+    PASSWORD_RESET_SUCCESS(HttpStatus.OK, "이메일 초기화 성공"),
+    UPDATE_MEMBER_INFO_SUCCESS(HttpStatus.OK, "멤버 정보 수정 성공"),
 
 
     WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),

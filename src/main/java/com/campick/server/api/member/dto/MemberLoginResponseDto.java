@@ -13,5 +13,6 @@ public class MemberLoginResponseDto {
     private String phoneNumber;
     private Long dealerId;
     private String role;
-
+    private String profileImageUrl;
+    private String profileThumbnailUrl;
 }

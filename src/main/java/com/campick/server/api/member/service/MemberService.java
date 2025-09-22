@@ -324,4 +324,15 @@ public class MemberService {
         );
         return member.getPassword().equals(password);
     }
+
+    public PageResponseDto<ProductAvailableSummaryDto> getMemberProductsAll(Long memberId, Pageable pageable) {
+        // 멤버가 존재하는지 확인
+        Member seller = memberRepository.findByIdAndIsDeletedFalse(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+        Page<Product> products = productRepository.findProductsBySeller(seller, pageable);
+        Page<ProductAvailableSummaryDto> productAvailableSummaryDtos = products.map(ProductAvailableSummaryDto::from);
+        return new PageResponseDto<>(productAvailableSummaryDtos);
+    }
 }

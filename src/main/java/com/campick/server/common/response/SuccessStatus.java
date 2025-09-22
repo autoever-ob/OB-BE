@@ -51,6 +51,7 @@ public enum SuccessStatus {
     SEND_EMAIL_VERIFICATION_CODE_SUCCESS(HttpStatus.OK, "이메일 전송 성공"),
     SEND_EMAIL_VERIFICATION_SUCCESS(HttpStatus.OK, "이메일 검증 성공"),
     SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS(HttpStatus.OK, "내가 팔거나 예약 중인 매물 목록 전송 성공."),
+    SEND_MEMBER_PRODUCTS_ALL_SUCCESS(HttpStatus.OK, "{memberId} 별 모든 매물 조회 성공"),
     SEND_MEMBER_SOLD_PRODUCTS_SUCCESS(HttpStatus.OK, "{memberId} 별 판 매물 조회 성공"),
     SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS(HttpStatus.OK, "{memberId} 별 산 매물 조회 성공"),
     SEND_MEMBER_ALL_PRODUCTS_COUNT_SUCCESS(HttpStatus.OK, "{memberId} 별 모든 매물 개수 전송 성공"),

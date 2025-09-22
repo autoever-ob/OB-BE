@@ -22,7 +22,7 @@ public enum VehicleTypeName {
     @JsonCreator
     public static VehicleTypeName fromKorean(String koreanName) {
         for (VehicleTypeName type : values()) {
-            if (type.getKorean().equals(koreanName)) {
+            if (type.korean.equals(koreanName)) {
                 return type;
             }
         }

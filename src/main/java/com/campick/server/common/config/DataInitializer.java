@@ -136,12 +136,12 @@ public class DataInitializer {
         // Create reusable entities
         Type type1 = typeRepository.save(Type.builder().typeName(VehicleTypeName.MOTOR_HOME).build());
         Engine engine1 = engineRepository.save(Engine.builder().fuelType(FuelType.DIESEL).transmission(Transmission.AUTOMATIC).horsePower(180).build());
-        Model model1 = modelRepository.save(Model.builder().type(type1).modelName("Grand Starex").marketName("Hyundai Grand Starex").build());
+        Model model1 = modelRepository.save(Model.builder().type(type1).modelName("그랜드 스타렉스").marketName("현대 그랜드 스타렉스").build());
         Car car1 = carRepository.save(Car.builder().model(model1).engine(engine1).build());
 
         Type type2 = typeRepository.save(Type.builder().typeName(VehicleTypeName.CARAVAN).build());
         Engine engine2 = engineRepository.save(Engine.builder().fuelType(FuelType.GASOLINE).transmission(Transmission.AUTOMATIC).horsePower(250).build());
-        Model model2 = modelRepository.save(Model.builder().type(type2).modelName("Explorer").marketName("Ford Explorer").build());
+        Model model2 = modelRepository.save(Model.builder().type(type2).modelName("익스플로어").marketName("포드 익스플로어").build());
         Car car2 = carRepository.save(Car.builder().model(model2).engine(engine2).build());
 
         List<Car> cars = List.of(car1, car2);

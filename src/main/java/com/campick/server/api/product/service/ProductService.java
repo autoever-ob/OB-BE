@@ -69,13 +69,7 @@ public class ProductService {
 
     @Transactional
     public Long createProduct(ProductCreateReqDto dto, Long memberId) {
-        VehicleTypeName vehicleTypeName;
-        try {
-            vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid vehicle type: " + dto.getVehicleType());
-        }
-        Type type = typeRepository.findBytypeName(vehicleTypeName);
+        Type type = typeRepository.findBytypeName(dto.getVehicleType());
 
         Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
 
@@ -171,13 +165,7 @@ public class ProductService {
                 () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
         );
 
-        VehicleTypeName vehicleTypeName;
-        try {
-            vehicleTypeName = VehicleTypeName.valueOf(dto.getVehicleType().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException(ErrorStatus.INVALID_VEHICLE_TYPE.getMessage() + dto.getVehicleType());
-        }
-        Type type = typeRepository.findBytypeName(vehicleTypeName);
+        Type type = typeRepository.findBytypeName(dto.getVehicleType());
 
         Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel());
 
@@ -414,7 +402,7 @@ public class ProductService {
                 .generation(product.getGeneration())
                 .fuelType(engine.getFuelType().toString())
                 .transmission(engine.getTransmission().toString())
-                .vehicleType(type.getTypeName().toString())
+                .vehicleType(type.getTypeName().getKorean())
                 .vehicleModel(model.getModelName())
                 .location(product.getLocation())
                 .option(optionResDto)
@@ -463,7 +451,7 @@ public class ProductService {
                 .fuelType(engine.getFuelType().toString())
                 .transmission(engine.getTransmission().toString())
                 .mileage(p.getMileage().toString())
-                .vehicleType(car.getModel().getType().getTypeName().toString())
+                .vehicleType(car.getModel().getType().getTypeName().getKorean())
                 .vehicleModel(car.getModel().getModelName())
                 .location(p.getLocation())
                 .createdAt(p.getCreatedAt())

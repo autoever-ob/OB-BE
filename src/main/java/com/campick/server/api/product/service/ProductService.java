@@ -191,10 +191,13 @@ public class ProductService {
     }
 
     private void updateProductOptions(Product product, List<OptionDto> newOptions) {
-        List<ProductOption> existingOption = productOptionRepository.findAllByProduct(product);
-        List<String> existingOptionName = existingOption.stream().map(ProductOption::getCarOption)
-                .map(CarOption::getName).toList();
-        List<String> newOptionNames = newOptions.stream().map(OptionDto::getOptionName).toList();
+        List<ProductOption> existingOption = productOptionRepository.findAllByProductWithOption(product);
+        Set<String> existingOptionName = existingOption.stream()
+                .map(po -> po.getCarOption().getName())
+                .collect(Collectors.toSet());
+        Set<String> newOptionNames = newOptions.stream()
+                .map(OptionDto::getOptionName)
+                .collect(Collectors.toSet());
 
         List<ProductOption> toDelete = existingOption.stream().filter(
                 opt -> !newOptionNames.contains(opt.getCarOption().getName())
@@ -204,7 +207,8 @@ public class ProductService {
                 newOpt -> !existingOptionName.contains(newOpt.getOptionName())
         ).toList();
 
-        productOptionRepository.deleteAll(toDelete);
+        if (!toDelete.isEmpty())
+            productOptionRepository.deleteAll(toDelete);
 
         if (!toAdd.isEmpty())
             saveOptions(product, toAdd);
@@ -377,11 +381,7 @@ public class ProductService {
     }
 
     public ProductDetailResDto getProductDetail(Long memberId, Long productId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
-        );
-
-        Product product = productRepository.findById(productId).orElseThrow(
+        Product product = productRepository.findDetailById(productId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
         );
 
@@ -397,20 +397,16 @@ public class ProductService {
 
         Set<Long> likedProductIds = getLikedProductIds(memberId);
 
-        Member seller =  memberRepository.findById(product.getSeller().getId()).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
-        );
-
         SellerResDto sellerResDto = SellerResDto.builder()
-                .nickName(seller.getNickname())
-                .role(seller.getRole().toString())
-                .sellingCount(countService.getMemberProductAvailableCount(seller.getId()))
-                .completeCount(countService.getMemberProductSoldCount(seller.getId()))
+                .nickName(product.getSeller().getNickname())
+                .role(product.getSeller().getRole().toString())
+                .sellingCount(countService.getMemberProductAvailableCount(product.getSeller().getId()))
+                .completeCount(countService.getMemberProductSoldCount(product.getSeller().getId()))
                 .build();
 
         // 딜러인 경우만 별점
-        if (seller.getRole().equals(Role.DEALER))
-            sellerResDto.setRating(seller.getDealer().getRating());
+        if (product.getSeller().getRole().equals(Role.DEALER))
+            sellerResDto.setRating(product.getSeller().getDealer().getRating());
 
         List<ProductImage> productImages = productImageRepository.findAllByProduct(product);
 

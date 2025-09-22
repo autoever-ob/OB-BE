@@ -70,13 +70,16 @@ public class ProductController {
     }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<ApiResponse<Long>> updateProduct(@RequestBody ProductUpdateReqDto dto, @PathVariable Long productId) {
-        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_UPDATE_SUCCESS, productService.updateProduct(productId, dto));
+    public ResponseEntity<ApiResponse<Long>> updateProduct(@RequestBody ProductUpdateReqDto dto, @PathVariable Long productId,
+                                                           @AuthenticationPrincipal SecurityMember securityMember) {
+        Long memberId = securityMember.getId();
+        return ApiResponse.success(SuccessStatus.SEND_PRODUCT_UPDATE_SUCCESS, productService.updateProduct(productId, dto, memberId));
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId) {
-        productService.deleteProduct(productId);
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId, @AuthenticationPrincipal SecurityMember securityMember) {
+        Long memberId = securityMember.getId();
+        productService.deleteProduct(productId, memberId);
         return ApiResponse.success_only(SuccessStatus.SEND_PRODUCT_DELETE_SUCCESS);
     }
 

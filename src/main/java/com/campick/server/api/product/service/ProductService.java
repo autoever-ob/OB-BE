@@ -163,7 +163,7 @@ public class ProductService {
         }
     }
 
-    public Long updateProduct(Long productId, ProductUpdateReqDto dto) {
+    public Long updateProduct(Long productId, ProductUpdateReqDto dto, Long memberId) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
         );
@@ -177,9 +177,9 @@ public class ProductService {
                 () -> new BadRequestException(ErrorStatus.CAR_NOT_FOUND.getMessage())
         );
 
-        // 남이 수정하는 경우 막아야 하나? 요청한 유저랑 기존 셀러랑 비교해서
-        Member member = memberRepository.findById(1L)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
+        if (!product.getSeller().getId().equals(memberId)) {
+            throw new BadRequestException(ErrorStatus.NOT_SELLER_EXCEPTION.getMessage());
+        }
 
         updateProductStrings(product, car, dto);
 
@@ -246,10 +246,14 @@ public class ProductService {
         }
     }
 
-    public void deleteProduct(Long productId) {
+    public void deleteProduct(Long productId, Long memberId) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
         );
+
+        if (!product.getSeller().getId().equals(memberId)) {
+            throw new BadRequestException(ErrorStatus.NOT_SELLER_EXCEPTION.getMessage());
+        }
 
         product.setIsDeleted(true);
         productRepository.save(product);

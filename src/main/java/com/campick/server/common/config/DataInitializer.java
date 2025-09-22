@@ -135,82 +135,65 @@ public class DataInitializer {
         Type type4 = typeRepository.save(Type.builder().typeName(VehicleTypeName.TRAILER).build());
         Type type5 = typeRepository.save(Type.builder().typeName(VehicleTypeName.ETC).build());
 
-        // Create reusable entities
+        // Engine
+        // 디젤 - 자동
         Engine engine1 = engineRepository.save(Engine.builder().fuelType(FuelType.DIESEL).transmission(Transmission.AUTOMATIC).horsePower(180).build());
-        Model model1 = modelRepository.save(Model.builder().type(type1).modelName("그랜드 스타렉스").marketName("현대 그랜드 스타렉스").build());
-        Car car1 = carRepository.save(Car.builder().model(model1).engine(engine1).build());
-
+        // 가솔린 - 자동
         Engine engine2 = engineRepository.save(Engine.builder().fuelType(FuelType.GASOLINE).transmission(Transmission.AUTOMATIC).horsePower(250).build());
-        Model model2 = modelRepository.save(Model.builder().type(type2).modelName("익스플로어").marketName("포드 익스플로어").build());
-        Car car2 = carRepository.save(Car.builder().model(model2).engine(engine2).build());
-
+        // 전기 - 자동
         Engine engine3 = engineRepository.save(Engine.builder().fuelType(FuelType.ELECTRIC).transmission(Transmission.AUTOMATIC).horsePower(200).build());
-        Model model3 = modelRepository.save(Model.builder().type(type3).modelName("카운티").marketName("카운티").build());
+
+        // MODEL
+        // 스타렉스
+        Model model1 = modelRepository.save(Model.builder().type(type1).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
+        Model model2 = modelRepository.save(Model.builder().type(type2).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
+        Model model3 = modelRepository.save(Model.builder().type(type3).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
+        Model model4 = modelRepository.save(Model.builder().type(type4).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
+        Model model5 = modelRepository.save(Model.builder().type(type5).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
+
+        // 카라반 - 카라반
+        Model model6 = modelRepository.save(Model.builder().type(type2).modelName("카라반").marketName("카라반 300급").build());
+        Model model12 = modelRepository.save(Model.builder().type(type1).modelName("카라반").marketName("카라반 300급").build());
+        Model model13 = modelRepository.save(Model.builder().type(type3).modelName("카라반").marketName("카라반 300급").build());
+        Model model14 = modelRepository.save(Model.builder().type(type4).modelName("카라반").marketName("카라반 300급").build());
+        Model model15 = modelRepository.save(Model.builder().type(type5).modelName("카라반").marketName("카라반 300급").build());
+
+
+        // 트럭 캠퍼
+        Model model7 = modelRepository.save(Model.builder().type(type3).modelName("트럭캠퍼 홈런 모델").marketName("트럭캠퍼 홈런 모델").build());
+        Model model8 = modelRepository.save(Model.builder().type(type2).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
+        Model model17 = modelRepository.save(Model.builder().type(type1).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
+        Model model18 = modelRepository.save(Model.builder().type(type4).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
+        Model model19 = modelRepository.save(Model.builder().type(type5).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
+
+        // 트레일러 - 카운티
+        Model model9 = modelRepository.save(Model.builder().type(type4).modelName("카운티").marketName("카운티").build());
+        Model model10 = modelRepository.save(Model.builder().type(type1).modelName("카운티").marketName("현대 카운티").build());
+        Model model11 = modelRepository.save(Model.builder().type(type2).modelName("카운티").marketName("현대 카운티").build());
+        Model model20 = modelRepository.save(Model.builder().type(type3).modelName("카운티").marketName("현대 카운티").build());
+        Model model21 = modelRepository.save(Model.builder().type(type5).modelName("카운티").marketName("현대 카운티").build());
+
+        // Create reusable entities
+        Car car1 = carRepository.save(Car.builder().model(model1).engine(engine1).build());
+        Car car2 = carRepository.save(Car.builder().model(model2).engine(engine2).build());
         Car car3 = carRepository.save(Car.builder().model(model3).engine(engine3).build());
-
-        Model model4 = modelRepository.save(Model.builder().type(type4).modelName("스타렉스").marketName("스타렉스").build());
         Car car4 = carRepository.save(Car.builder().model(model4).engine(engine1).build());
-
-        modelRepository.flush();
-        carRepository.flush();
-
-        List<Car> cars = List.of(car1, car2);
-        AtomicInteger carIndex = new AtomicInteger(0);
-
-        log.info("Seeding products for {} members...", members.size());
-
-        for (Member member : members) {
-            for (int i = 1; i <= 10; i++) {
-                Car car = cars.get(carIndex.getAndIncrement() % cars.size());
-                Product product = Product.builder()
-                        .seller(member)
-                        .car(car)
-                        .title(member.getNickname() + "'s Camping Car - " + i)
-                        .cost(10000000 + (i * 1000000))
-                        .mileage(50000 + (i * 1000))
-                        .generation(2017)
-                        .description("A very nice camping car for sale. Well-maintained and ready for adventure.")
-                        .plateHash(UUID.randomUUID().toString().substring(0, 8)) // Simplified hash
-                        .exteriorColor("White")
-                        .interiorColor("Black")
-                        .location("Seoul")
-                        .type(ProductType.SELLING)
-                        .status(ProductStatus.AVAILABLE)
-                        .isDeleted(false)
-                        .build();
-                productRepository.save(product);
-            }
-        }
-
-        // Create multiple sold products to simulate purchases
-        if (members.size() > 1) {
-            for (int i = 0; i < 3; i++) {
-                Member seller = members.get(i % members.size());
-                Member buyer = members.get((i + 1) % members.size());
-                Car car = cars.get(i % cars.size());
-
-                Product soldProduct = Product.builder()
-                        .seller(seller)
-                        .car(car)
-                        .title(seller.getNickname() + "'s Sold Camping Car " + (i + 1))
-                        .cost(12000000 + (i * 1000000))
-                        .mileage(55000 + (i * 5000))
-                        .generation(2018)
-                        .description("This camping car was sold to " + buyer.getNickname() + ".")
-                        .plateHash(UUID.randomUUID().toString().substring(0, 8))
-                        .exteriorColor("Silver")
-                        .interiorColor("Grey")
-                        .location("Busan")
-                        .type(ProductType.SELLING)
-                        .status(ProductStatus.SOLD)
-                        .isDeleted(false)
-                        .build();
-                productRepository.save(soldProduct);
-
-                Transaction transaction = new Transaction(null, buyer, seller, soldProduct, LocalDateTime.now(), TransactionType.SELL);
-                transactionRepository.save(transaction);
-            }
-        }
+        Car car5 = carRepository.save(Car.builder().model(model5).engine(engine2).build());
+        Car car6 = carRepository.save(Car.builder().model(model6).engine(engine3).build());
+        Car car7 = carRepository.save(Car.builder().model(model7).engine(engine2).build());
+        Car car8 = carRepository.save(Car.builder().model(model8).engine(engine1).build());
+        Car car9 = carRepository.save(Car.builder().model(model9).engine(engine3).build());
+        Car car10 = carRepository.save(Car.builder().model(model10).engine(engine1).build());
+        Car car11 = carRepository.save(Car.builder().model(model11).engine(engine2).build());
+        Car car12 = carRepository.save(Car.builder().model(model12).engine(engine3).build());
+        Car car13 = carRepository.save(Car.builder().model(model13).engine(engine1).build());
+        Car car14 = carRepository.save(Car.builder().model(model14).engine(engine2).build());
+        Car car15 = carRepository.save(Car.builder().model(model15).engine(engine3).build());
+        Car car17 = carRepository.save(Car.builder().model(model17).engine(engine2).build());
+        Car car18 = carRepository.save(Car.builder().model(model18).engine(engine3).build());
+        Car car19 = carRepository.save(Car.builder().model(model19).engine(engine1).build());
+        Car car20 = carRepository.save(Car.builder().model(model20).engine(engine2).build());
+        Car car21 = carRepository.save(Car.builder().model(model21).engine(engine3).build());
 
         log.info("Seed data inserted: {} products created.", productRepository.count());
     }

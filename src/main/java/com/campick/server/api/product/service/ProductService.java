@@ -163,7 +163,7 @@ public class ProductService {
         }
     }
 
-    public Long updateProduct(Long productId, ProductUpdateReqDto dto) {
+    public Long updateProduct(Long productId, ProductUpdateReqDto dto, Long memberId) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
         );
@@ -177,9 +177,9 @@ public class ProductService {
                 () -> new BadRequestException(ErrorStatus.CAR_NOT_FOUND.getMessage())
         );
 
-        // 남이 수정하는 경우 막아야 하나? 요청한 유저랑 기존 셀러랑 비교해서
-        Member member = memberRepository.findById(1L)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
+        if (!product.getSeller().getId().equals(memberId)) {
+            throw new BadRequestException(ErrorStatus.NOT_SELLER_EXCEPTION.getMessage());
+        }
 
         updateProductStrings(product, car, dto);
 
@@ -191,10 +191,13 @@ public class ProductService {
     }
 
     private void updateProductOptions(Product product, List<OptionDto> newOptions) {
-        List<ProductOption> existingOption = productOptionRepository.findAllByProduct(product);
-        List<String> existingOptionName = existingOption.stream().map(ProductOption::getCarOption)
-                .map(CarOption::getName).toList();
-        List<String> newOptionNames = newOptions.stream().map(OptionDto::getOptionName).toList();
+        List<ProductOption> existingOption = productOptionRepository.findAllByProductWithOption(product);
+        Set<String> existingOptionName = existingOption.stream()
+                .map(po -> po.getCarOption().getName())
+                .collect(Collectors.toSet());
+        Set<String> newOptionNames = newOptions.stream()
+                .map(OptionDto::getOptionName)
+                .collect(Collectors.toSet());
 
         List<ProductOption> toDelete = existingOption.stream().filter(
                 opt -> !newOptionNames.contains(opt.getCarOption().getName())
@@ -204,7 +207,8 @@ public class ProductService {
                 newOpt -> !existingOptionName.contains(newOpt.getOptionName())
         ).toList();
 
-        productOptionRepository.deleteAll(toDelete);
+        if (!toDelete.isEmpty())
+            productOptionRepository.deleteAll(toDelete);
 
         if (!toAdd.isEmpty())
             saveOptions(product, toAdd);
@@ -246,10 +250,14 @@ public class ProductService {
         }
     }
 
-    public void deleteProduct(Long productId) {
+    public void deleteProduct(Long productId, Long memberId) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new BadRequestException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
         );
+
+        if (!product.getSeller().getId().equals(memberId)) {
+            throw new BadRequestException(ErrorStatus.NOT_SELLER_EXCEPTION.getMessage());
+        }
 
         product.setIsDeleted(true);
         productRepository.save(product);
@@ -274,6 +282,7 @@ public class ProductService {
         // ===== Predicates =====
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.notEqual(productRoot.get("status"), ProductStatus.SOLD));
+        predicates.add(cb.isFalse(productRoot.get("isDeleted")));
 
         // 범위 필터
         predicates.add(cb.between(productRoot.get("cost"), filter.getCostFrom(), filter.getCostTo()));
@@ -331,6 +340,7 @@ public class ProductService {
         countPredicates.add(cb.between(countRoot.get("cost"), filter.getCostFrom(), filter.getCostTo()));
         countPredicates.add(cb.between(countRoot.get("generation"), filter.getGenerationFrom(), filter.getGenerationTo()));
         countPredicates.add(cb.between(countRoot.get("mileage"), filter.getMileageFrom(), filter.getMileageTo()));
+        countPredicates.add(cb.isFalse(countRoot.get("isDeleted")));
 
         if (filter.getOptions() != null && !filter.getOptions().isEmpty()) {
             Subquery<Long> countOptionSub = countQuery.subquery(Long.class);
@@ -373,11 +383,7 @@ public class ProductService {
     }
 
     public ProductDetailResDto getProductDetail(Long memberId, Long productId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
-        );
-
-        Product product = productRepository.findById(productId).orElseThrow(
+        Product product = productRepository.findDetailById(productId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage())
         );
 
@@ -393,20 +399,16 @@ public class ProductService {
 
         Set<Long> likedProductIds = getLikedProductIds(memberId);
 
-        Member seller =  memberRepository.findById(product.getSeller().getId()).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
-        );
-
         SellerResDto sellerResDto = SellerResDto.builder()
-                .nickName(seller.getNickname())
-                .role(seller.getRole().toString())
-                .sellingCount(countService.getMemberProductAvailableCount(seller.getId()))
-                .completeCount(countService.getMemberProductSoldCount(seller.getId()))
+                .nickName(product.getSeller().getNickname())
+                .role(product.getSeller().getRole().toString())
+                .sellingCount(countService.getMemberProductAvailableCount(product.getSeller().getId()))
+                .completeCount(countService.getMemberProductSoldCount(product.getSeller().getId()))
                 .build();
 
         // 딜러인 경우만 별점
-        if (seller.getRole().equals(Role.DEALER))
-            sellerResDto.setRating(seller.getDealer().getRating());
+        if (product.getSeller().getRole().equals(Role.DEALER))
+            sellerResDto.setRating(product.getSeller().getDealer().getRating());
 
         List<ProductImage> productImages = productImageRepository.findAllByProduct(product);
 

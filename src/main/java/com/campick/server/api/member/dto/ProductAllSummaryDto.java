@@ -32,8 +32,8 @@ public class ProductAllSummaryDto {
         String productImageUrl = product.getImages().stream()
                 .filter(image -> Boolean.TRUE.equals(image.getIsThumbnail()))
                 .findFirst()
-                .map(ProductImage::getThumbnailUrl)
-                .orElse(null);
+                .map(ProductImage::getImageUrl)
+                .orElse("");
 
 
 

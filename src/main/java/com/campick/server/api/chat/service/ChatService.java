@@ -93,13 +93,18 @@ public class ChatService {
         Member seller = product.getSeller();
         Member buyer = memberRepository.findById(memberId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
-        ChatRoom chatRoom = ChatRoom.builder()
-                .seller(seller)
-                .buyer(buyer)
-                .product(product)
-                .build();
-        chatRoomRepository.save(chatRoom);
 
+        ChatRoom chatRoom = chatRoomRepository.findByProductAndSellerAndBuyer(product, seller, buyer)
+                .orElse(null);
+
+        if (chatRoom == null) {
+            chatRoom = ChatRoom.builder()
+                    .seller(seller)
+                    .buyer(buyer)
+                    .product(product)
+                    .build();
+            chatRoomRepository.save(chatRoom);
+        }
         return chatRoom.getId();
     }
 
@@ -239,6 +244,12 @@ public class ChatService {
     }
 
     private ChatRoomResDto convertToChatRoomResDto(ChatRoom chatRoom, List<ChatMessage> chatMessages) {
+        String thumbnailImage = chatRoom.getProduct().getImages().stream()
+                .filter(ProductImage::getIsThumbnail)
+                .map(ProductImage::getImageUrl)
+                .findFirst()
+                .orElse(null);
+
         ChatRoomResDto chatRoomResDto = new ChatRoomResDto();
         chatRoomResDto.setSellerId(chatRoom.getSeller().getId());
         chatRoomResDto.setSellerNickname(chatRoom.getSeller().getNickname());
@@ -248,6 +259,7 @@ public class ChatService {
         chatRoomResDto.setSellerPhoneNumber(chatRoom.getSeller().getMobileNumber());
         chatRoomResDto.setProductId(chatRoom.getProduct().getId());
         chatRoomResDto.setProductTitle(chatRoom.getProduct().getTitle());
+        chatRoomResDto.setProductImage(thumbnailImage);
         chatRoomResDto.setProductStatus(chatRoom.getProduct().getStatus().toString());
         chatRoomResDto.setProductPrice(chatRoom.getProduct().getCost().toString());
         chatRoomResDto.setIsActive(!chatRoom.getIsSellerOut() && !chatRoom.getIsBuyerOut());

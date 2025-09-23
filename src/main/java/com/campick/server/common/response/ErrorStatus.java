@@ -61,6 +61,7 @@ public enum ErrorStatus {
     EMPTY_FILE_EXCEPTION(HttpStatus.NOT_FOUND, "업로드할 파일이 없습니다."),
     CAR_NOT_FOUND(HttpStatus.NOT_FOUND, "자동차 정보를 찾을 수 없습니다."),
     MODEL_NOT_FOUND(HttpStatus.NOT_FOUND, "모델을 찾을 수 없습니다."),
+    TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "타입을 찾을 수 없습니다."),
 
 
     /**

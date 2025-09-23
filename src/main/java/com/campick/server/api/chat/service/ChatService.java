@@ -113,8 +113,8 @@ public class ChatService {
                             .productThumbnail(thumbnailUrl)
                             .nickname(chatRoom.getSeller().getNickname())
                             .profileImage(chatRoom.getSeller().getProfileImageUrl())
-                            .lastMessage(lastChatMessage.getMessage() == null ? "" : lastChatMessage.getMessage())
-                            .lastMessageCreatedAt(TimeUtil.getTimeAgo(lastChatMessage.getCreatedAt()))
+                            .lastMessage(lastChatMessage == null ? "" : lastChatMessage.getMessage())
+                            .lastMessageCreatedAt(lastChatMessage == null ? "" : TimeUtil.getTimeAgo(lastChatMessage.getCreatedAt()))
                             .unreadMessage(unreadMessageCount)
                             .build();
                 }).toList();

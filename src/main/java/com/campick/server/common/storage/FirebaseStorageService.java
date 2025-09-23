@@ -84,6 +84,22 @@ public class FirebaseStorageService {
         }
     }
 
+    public String uploadChatImage(Long chatId, MultipartFile file) {
+        if (file == null || file.isEmpty())
+            throw new BadRequestException(ErrorStatus.EMPTY_FILE_EXCEPTION.getMessage());
+
+        try {
+            String ext = extractExtension(file.getOriginalFilename());
+            String objectName = String.format("chat/%d%s", chatId, ext);
+
+            StorageClient.getInstance().bucket().create(objectName, file.getBytes(), file.getContentType());
+
+            return String.format("%s/o/%s?alt=media",storageBaseUrl, urlEncode(objectName));
+        } catch (IOException e) {
+            throw new ImageUploadFailedException(ErrorStatus.IMAGE_UPLOAD_FAILED_EXCEPTION);
+        }
+    }
+
     private void uploadThumbnail(MultipartFile file, String objectName, int width, int height) throws IOException {
         ByteArrayOutputStream thumbnailOStream = new ByteArrayOutputStream();
 

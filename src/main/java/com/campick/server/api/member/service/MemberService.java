@@ -333,4 +333,13 @@ public class MemberService {
         Page<ProductAllSummaryDto> productAvailableSummaryDtos = products.map(ProductAllSummaryDto::from);
         return new PageResponseDto<>(productAvailableSummaryDtos);
     }
+
+    public PageResponseDto<ProductAvailableSummaryDto> getMemberSoldByProduct(Long sellerId, Pageable pageable) {
+        if (memberRepository.findByIdAndIsDeletedFalse(sellerId).isEmpty()) {
+            throw new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage());
+        }
+        Page<Product> products = productRepository.findProductByMemberIdWithDetailsAndSOLD(sellerId, pageable);
+        Page<ProductAvailableSummaryDto> productAvailableSummaryDtos = products.map(ProductAvailableSummaryDto::from);
+        return new PageResponseDto<>(productAvailableSummaryDtos);
+    }
 }

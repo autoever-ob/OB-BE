@@ -48,8 +48,8 @@ public class MemberProductController {
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
     }
 
-    @Operation(summary = "{memberId}별 판 매물 조회", description = "{memberId}별 판 매물 기록을 봅니다 (출력된 memberId는 산 사람)")
-    @GetMapping("/product/sold/{memberId}")
+    @Operation(summary = "{memberId}별 대화를 통해 판 매물 조회", description = "{memberId}별 판 매물 기록을 봅니다 (출력된 memberId는 산 사람)")
+    @GetMapping("/product/sold/{memberId}/chat")
     public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberSold(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
@@ -61,8 +61,8 @@ public class MemberProductController {
     }
 
 
-    @Operation(summary = "{memberId}별 산 매물 조회", description = "{memberId}별 산 매물 기록을 봅니다 (출력된 memberId는 판 사람)")
-    @GetMapping("/product/bought/{memberId}")
+    @Operation(summary = "{memberId}별 대화를 통해 산 매물 조회", description = "{memberId}별 산 매물 기록을 봅니다 (출력된 memberId는 판 사람)")
+    @GetMapping("/product/bought/{memberId}/chat")
     public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberBought(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,
@@ -71,5 +71,17 @@ public class MemberProductController {
         PageResponseDto<TransactionResponseDto> memberProductsIsAvailable = memberService.getMemberBought(memberId, pageable);
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_BOUGHT_PRODUCTS_SUCCESS, memberProductsIsAvailable);
+    }
+
+    @Operation(summary = "{memberId}별 매물 변경을 통해 판 매물 조회", description = "{memberId}별 판 매물 기록을 봅니다 (출력된 memberId는 산 사람)")
+    @GetMapping("/product/sold/{memberId}/modify")
+    public ResponseEntity<ApiResponse<PageResponseDto<ProductAvailableSummaryDto>>> getMemberSoldByProduct(
+            @PathVariable Long memberId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        PageResponseDto<ProductAvailableSummaryDto> memberProductsIsAvailable = memberService.getMemberSoldByProduct(memberId, pageable);
+
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_SOLD_PRODUCTS_SUCCESS, memberProductsIsAvailable);
     }
 }

@@ -31,6 +31,7 @@ public class ChatMessage extends BaseTimeEntity {
     private String message;
 
     @Column(name = "is_read", nullable = false)
+    @Builder.Default
     private Boolean isRead = false;
 
     @Column(name = "created_at", nullable = false)

@@ -17,6 +17,7 @@ public class ChatRoomResDto {
     private String sellerPhoneNumber;
     private Long productId;
     private String productTitle;
+    private String productImage;
     private String productStatus;
     private String productPrice;
     private Boolean isActive;

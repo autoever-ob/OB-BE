@@ -21,6 +21,8 @@ public class SwaggerConfig {
     @Value("${jwt.refresh.header}")
     private String refreshTokenHeader;
 
+    @Value("${serverUrl}")
+    private String serverUrl;
 
 
 
@@ -45,7 +47,7 @@ public class SwaggerConfig {
 //        SecurityRequirement refreshTokenRequirement = new SecurityRequirement().addList(refreshTokenHeader);
 
         Server server = new Server();
-        server.setUrl("https://campick.shop");
+        server.setUrl(serverUrl);
 
 //        Server server = new Server();
 //        server.setUrl("http://localhost:8080");

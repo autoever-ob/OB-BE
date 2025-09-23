@@ -48,7 +48,7 @@ public class MemberProductController {
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_PRODUCTS_AVAILABLE_SUCCESS, memberProductsIsAvailable);
     }
 
-    @Operation(summary = "{memberId}별 판 매물 조회", description = "{memberId}별 판 매물 기록을 봅니다")
+    @Operation(summary = "{memberId}별 판 매물 조회", description = "{memberId}별 판 매물 기록을 봅니다 (출력된 memberId는 산 사람)")
     @GetMapping("/product/sold/{memberId}")
     public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberSold(
             @PathVariable Long memberId,
@@ -61,7 +61,7 @@ public class MemberProductController {
     }
 
 
-    @Operation(summary = "{memberId}별 산 매물 조회", description = "{memberId}별 산 매물 기록을 봅니다")
+    @Operation(summary = "{memberId}별 산 매물 조회", description = "{memberId}별 산 매물 기록을 봅니다 (출력된 memberId는 판 사람)")
     @GetMapping("/product/bought/{memberId}")
     public ResponseEntity<ApiResponse<PageResponseDto<TransactionResponseDto>>> getMemberBought(
             @PathVariable Long memberId,

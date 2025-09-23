@@ -25,10 +25,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,24 +45,45 @@ public class ChatService {
         this.chatRoomMap = new LinkedHashMap<>();
     }
 
-    public void setChatRoomMap(WebSocketSession session, JsonNode data) throws IOException {
-        Long chatId = data.get("chat_id").asLong();
-
-        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage()));
-
-        ChatSocketDto chatSocketDto = ChatSocketDto.builder()
-                .chatId(chatId)
-                .sellerId(chatRoom.getSeller().getId())
-                .buyerId(chatRoom.getBuyer().getId())
-                .build();
-        chatSocketDto.getSessions().add(session);
-        chatSocketDto.getSessions().add(webSocketService.getActiveSession(chatRoom.getSeller().getId()));
-        chatRoomMap.put(chatId, chatSocketDto);
+    public void setChatRoomMap(Long memberId, WebSocketSession session, JsonNode data) throws IOException {
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllByMemberId(memberId);
+        for (ChatRoom chatRoom : chatRooms) {
+            System.out.println(chatRoom);
+            findOrMakeChatRoomById(chatRoom.getId(), session);
+        }
     }
 
-    private ChatSocketDto findChatRoomById(Long chatId) {
+    private ChatSocketDto findOrMakeChatRoomById(Long chatId, WebSocketSession session) {
+        ChatSocketDto room = chatRoomMap.get(chatId);
+
+        if (room == null) {
+            ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+                    .orElseThrow(() -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage()));
+
+            ChatSocketDto chatSocketDto = ChatSocketDto.builder()
+                    .chatId(chatId)
+                    .sellerId(chatRoom.getSeller().getId())
+                    .buyerId(chatRoom.getBuyer().getId())
+                    .build();
+
+            chatSocketDto.getSessions().add(session);
+
+            Long myId = (Long) session.getAttributes().get("memberId");
+            Long otherId = Objects.equals(chatRoom.getBuyer().getId(), myId) ? chatRoom.getSeller().getId() : chatRoom.getBuyer().getId();
+
+            WebSocketSession otherSession = webSocketService.getActiveSession(otherId);
+            if  (otherSession != null)
+                chatSocketDto.getSessions().add(webSocketService.getActiveSession(otherId));
+            chatRoomMap.put(chatId, chatSocketDto);
+        }
+
         return chatRoomMap.get(chatId);
+    }
+
+    public void startChatRoom(WebSocketSession session, JsonNode data) throws IOException {
+        Long chatId = data.get("chatId").asLong();
+
+        findOrMakeChatRoomById(chatId, session);
     }
 
     //http
@@ -141,12 +159,13 @@ public class ChatService {
         chatRoomRepository.save(chatRoom);
     }
 
-    public void handleChatMessage(JsonNode data) {
+    public void handleChatMessage(WebSocketSession session, JsonNode data) {
         ChatMessageReqDto chatMessageReqDto = objectMapper.convertValue(data, ChatMessageReqDto.class);
+        System.out.println(chatMessageReqDto);
 
         ChatMessage chatMessage = saveMessage(chatMessageReqDto);
         ChatMessageResDto chatMessageResDto = convertToChatMessageResDto(chatMessage);
-        sendMessage(chatMessageReqDto.getChatId(), chatMessageResDto);
+        sendMessage(chatMessageReqDto.getChatId(), chatMessageResDto, session);
     }
 
     private ChatMessageResDto convertToChatMessageResDto(ChatMessage chatMessage) {
@@ -179,13 +198,25 @@ public class ChatService {
     }
 
     //websocket
-    public void sendMessage(Long chatId, ChatMessageResDto message) {
-        ChatSocketDto room = findChatRoomById(chatId);
+    public void sendMessage(Long chatId, ChatMessageResDto message, WebSocketSession session) {
+        ChatSocketDto room = findOrMakeChatRoomById(chatId, session);
+        System.out.println(room.getSessions());
 
         if (room != null) {
-            for (WebSocketSession session : room.getSessions()) {
+            for (WebSocketSession se : room.getSessions()) {
                 try {
-                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
+                    Map<String, Object> payload = new HashMap<>();
+                    payload.put("content", message.getMessage());
+                    payload.put("senderId", message.getSenderId());
+                    payload.put("sendAt", message.getSendAt());
+                    payload.put("isRead", message.getIsRead());
+
+                    Map<String, Object> wrapper = new HashMap<>();
+                    wrapper.put("type", "chat_message");
+                    wrapper.put("data", payload);
+
+                    System.out.println(payload);
+                    se.sendMessage(new TextMessage(objectMapper.writeValueAsString(wrapper)));
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -193,13 +224,13 @@ public class ChatService {
         }
     }
 
-    public void broadcastSoldEvent(JsonNode data) {
-        Long chatId = data.get("chat_id").asLong();
-        ChatSocketDto room = findChatRoomById(chatId);
+    public void broadcastSoldEvent(WebSocketSession session, JsonNode data) {
+        Long chatId = data.get("chatId").asLong();
+        ChatSocketDto room = findOrMakeChatRoomById(chatId, session);
         if (room != null) {
-            for (WebSocketSession session : room.getSessions()) {
+            for (WebSocketSession se : room.getSessions()) {
                 try {
-                    session.sendMessage(new TextMessage("{\"type\":\"sold\"}"));
+                    se.sendMessage(new TextMessage("{\"type\":\"sold\"}"));
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -229,4 +260,11 @@ public class ChatService {
         return chatRoomResDto;
     }
 
+    public void removeFromChatRoomMap(Long memberId, WebSocketSession session) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllByMemberId(memberId);
+
+        for (ChatRoom chatRoom : chatRooms) {
+            chatRoomMap.get(chatRoom.getId()).getSessions().remove(session);
+        }
+    }
 }

@@ -25,8 +25,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long userId = getMemberId(session);
-        webSocketService.setActiveSession(userId, session);
+        Long memberId = getMemberId(session);
+        webSocketService.setActiveSession(memberId, session);
         System.out.println("웹소켓 연결: " + session.getId());
     }
 
@@ -35,19 +35,24 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         System.out.println("클라이언트 메시지: " + payload);
 
+        Long memberId = getMemberId(session);
+
         JsonNode jsonNode = objectMapper.readTree(payload);
         String event = jsonNode.get("type").asText();
         JsonNode data = jsonNode.get("data");
 
         switch (event) {
-            case "join_room":
-                chatService.setChatRoomMap(session, data);
+            case "start_room":
+                chatService.startChatRoom(session, data);
+                break;
+            case "set_chat_room":
+                chatService.setChatRoomMap(memberId, session, data);
                 break;
             case "chat_message":
-                chatService.handleChatMessage(data);
+                chatService.handleChatMessage(session, data);
                 break;
             case "sold":
-                chatService.broadcastSoldEvent(data);
+                chatService.broadcastSoldEvent(session, data);
                 break;
             default:
                 log.warn("Unknown event: {}", event);
@@ -63,7 +68,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        webSocketService.removeActiveSession(getMemberId(session));
+        Long memberId = getMemberId(session);
+        webSocketService.removeActiveSession(memberId);
+        chatService.removeFromChatRoomMap(memberId, session);
         System.out.println("웹소켓 연결 종료: " + session.getId());
     }
 }

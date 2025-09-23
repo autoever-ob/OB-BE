@@ -32,9 +32,6 @@ public class ChatRoom extends BaseTimeEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
     @Column(name = "is_reviewed")
     @Builder.Default
     private Boolean isReviewed = false;

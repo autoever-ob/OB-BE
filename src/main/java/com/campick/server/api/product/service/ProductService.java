@@ -75,9 +75,15 @@ public class ProductService {
         Model model = modelRepository.findByTypeAndModelName(type, dto.getVehicleModel())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MODEL_NOT_FOUND.getMessage()));
 
-        Car car = carRepository.findByModel(model).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.CAR_NOT_FOUND.getMessage())
-        );
+        // 수정해야함
+        List<Car> cars = carRepository.findCarsByModel(model);
+
+        if(cars.isEmpty()){
+            throw new NotFoundException(ErrorStatus.CAR_NOT_FOUND.getMessage());
+        }
+
+        Car car = cars.get(0);
+
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));

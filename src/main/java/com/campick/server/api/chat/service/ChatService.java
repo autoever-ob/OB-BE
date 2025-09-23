@@ -239,6 +239,12 @@ public class ChatService {
     }
 
     private ChatRoomResDto convertToChatRoomResDto(ChatRoom chatRoom, List<ChatMessage> chatMessages) {
+        String thumbnailImage = chatRoom.getProduct().getImages().stream()
+                .filter(ProductImage::getIsThumbnail)
+                .map(ProductImage::getImageUrl)
+                .findFirst()
+                .orElse(null);
+
         ChatRoomResDto chatRoomResDto = new ChatRoomResDto();
         chatRoomResDto.setSellerId(chatRoom.getSeller().getId());
         chatRoomResDto.setSellerNickname(chatRoom.getSeller().getNickname());
@@ -248,6 +254,7 @@ public class ChatService {
         chatRoomResDto.setSellerPhoneNumber(chatRoom.getSeller().getMobileNumber());
         chatRoomResDto.setProductId(chatRoom.getProduct().getId());
         chatRoomResDto.setProductTitle(chatRoom.getProduct().getTitle());
+        chatRoomResDto.setProductImage(thumbnailImage);
         chatRoomResDto.setProductStatus(chatRoom.getProduct().getStatus().toString());
         chatRoomResDto.setProductPrice(chatRoom.getProduct().getCost().toString());
         chatRoomResDto.setIsActive(!chatRoom.getIsSellerOut() && !chatRoom.getIsBuyerOut());

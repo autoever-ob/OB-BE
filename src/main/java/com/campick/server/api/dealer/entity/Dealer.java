@@ -21,8 +21,9 @@ public class Dealer extends BaseTimeEntity {
     @Column(name = "business_no", nullable = false)
     private String businessNo;
 
+    @Builder.Default
     @Column(name = "rating", nullable = false)
-    private Double rating;
+    private Double rating = 0.0;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

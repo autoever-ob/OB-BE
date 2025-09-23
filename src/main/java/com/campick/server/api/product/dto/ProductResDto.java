@@ -56,4 +56,9 @@ public class ProductResDto {
         this.status = status;
     }
 
+//    public static ProductResDto from(){
+//        return ProductResDto.builder()
+//                .title()
+//    }
+
 }

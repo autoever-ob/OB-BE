@@ -5,6 +5,7 @@ import com.campick.server.common.exception.ImageUploadFailedException;
 import com.campick.server.common.response.ErrorStatus;
 import com.google.firebase.cloud.StorageClient;
 import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,24 +20,31 @@ import java.util.UUID;
 @Service
 public class FirebaseStorageService {
 
+
+    @Value("https://firebasestorage.googleapis.com/v0/b/campick-6072a.firebasestorage.app")
+    private String storageBaseUrl;
+
     public Map<String, String> uploadProfileImage(Long memberId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException(ErrorStatus.EMPTY_FILE_EXCEPTION.getMessage());
         }
 
         try {
+
+//            https://firebasestorage.googleapis.com/v0/b/campick-6072a.firebasestorage.app/o/profiles%2F1%2F43b9d56f-2b62-4d07-87e3-fe596872ab4e.jpg?alt=media&token=f174e790-f7e5-40c1-8cab-cee3aceac61c
+//            https://firebasestorage.googleapis.com/v0/b/campick-6072a.firebasestorage.app/o/products%2F03606fef-9c86-479a-953c-fb25461d714b.jpg?alt=media
             String ext = extractExtension(file.getOriginalFilename());
             String randomName = UUID.randomUUID().toString();
-            String objectName = String.format("profiles/%d/%s%s", memberId, randomName, ext);
-            String thumbnailObjectName = String.format("profiles/%d/thumbnails/%s%s", memberId, randomName, ext);
+            String objectName = String.format("profiles/%d/%s%s?alt=media", memberId, randomName, ext);
+            String thumbnailObjectName = String.format("profiles/%d/thumbnails/%s%s?alt=media", memberId, randomName, ext);
 
             StorageClient.getInstance().bucket().create(objectName, file.getBytes(), file.getContentType());
 
             uploadThumbnail(file, thumbnailObjectName, 50, 50);
 
             String bucket = StorageClient.getInstance().bucket().getName();
-            String originalUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));
-            String thumbnailUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(thumbnailObjectName));
+            String originalUrl = String.format("%s/o/%s?alt=media",storageBaseUrl, urlEncode(objectName));
+            String thumbnailUrl = String.format("%s/o/%s?alt=media",storageBaseUrl, urlEncode(thumbnailObjectName));
 
             Map<String, String> urls = new HashMap<>();
             urls.put("profileImageUrl", originalUrl);
@@ -63,8 +71,8 @@ public class FirebaseStorageService {
             uploadThumbnail(file, thumbnailObjectName, 200, 200);
 
             String bucket = StorageClient.getInstance().bucket().getName();
-            String originalUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(objectName));
-            String thumbnailUrl = String.format("https://storage.googleapis.com/%s/%s", bucket, urlEncode(thumbnailObjectName));
+            String originalUrl = String.format("%s/o/%s?alt=media",storageBaseUrl, urlEncode(objectName));
+            String thumbnailUrl = String.format("%s/o/%s?alt=media",storageBaseUrl, urlEncode(thumbnailObjectName));
 
             Map<String, String> urls = new HashMap<>();
             urls.put("productImageUrl", originalUrl);

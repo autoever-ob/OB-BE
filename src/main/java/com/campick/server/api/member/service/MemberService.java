@@ -185,15 +185,11 @@ public class MemberService {
 
         // 닉네임이 중복인지 확인하는게 필요
         String newNickname = requestDto.getNickname();
-        if (newNickname != null && !newNickname.isBlank() && !newNickname.equals(member.getNickname())) {
-            if (isNicknameDuplicate(newNickname)) {
-                throw new BadRequestException(ErrorStatus.DUPLICATE_NICKNAME_EXCEPTION.getMessage());
-            }
+        if (newNickname != null && !newNickname.isBlank()) {
             member.updateNickname(newNickname);
-        }else{
+        } else{
             throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
         }
-
         // 모바일 업데이트
         String newMobileNumber = requestDto.getMobileNumber();
         if (newMobileNumber != null && !newMobileNumber.isBlank()) {
@@ -290,7 +286,7 @@ public class MemberService {
 
         //! TODO N + 1은 추후에 풀어보기 ( 복습 )
         Page<Transaction> transactions = transactionRepository.findTransactionsByBuyer(buyer, pageable);
-        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "SOLD"));
+        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "BUY"));
         return new PageResponseDto<>(transactionDtos);
     }
 
@@ -302,7 +298,7 @@ public class MemberService {
         );
 
         Page<Transaction> transactions = transactionRepository.findTransactionsBySeller(seller, pageable);
-        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "BUY"));
+        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "SOLD"));
         return new PageResponseDto<>(transactionDtos);
     }
 
@@ -323,5 +319,18 @@ public class MemberService {
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
         );
         return member.getPassword().equals(password);
+    }
+
+    public PageResponseDto<ProductAllSummaryDto> getMemberProductsAll(Long memberId, Pageable pageable) {
+        // 멤버가 존재하는지 확인
+        Member seller = memberRepository.findByIdAndIsDeletedFalse(memberId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage())
+        );
+
+
+        // Product들을 바당온다
+        Page<Product> products = productRepository.findDetailsByMemberId(memberId,pageable);
+        Page<ProductAllSummaryDto> productAvailableSummaryDtos = products.map(ProductAllSummaryDto::from);
+        return new PageResponseDto<>(productAvailableSummaryDtos);
     }
 }

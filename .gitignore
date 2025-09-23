@@ -40,3 +40,5 @@ out/
 .tmp.*
 
 src/main/resources/firebase/
+
+**/DataInitializer.java

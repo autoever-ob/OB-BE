@@ -25,7 +25,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long userId = getUserId(session);
+        Long userId = getMemberId(session);
         webSocketService.setActiveSession(userId, session);
         System.out.println("웹소켓 연결: " + session.getId());
     }
@@ -57,13 +57,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     // 예시: 세션에서 사용자 ID 가져오기
-    private Long getUserId(WebSocketSession session) {
-        return (Long) session.getAttributes().get("userId");
+    private Long getMemberId(WebSocketSession session) {
+        return (Long) session.getAttributes().get("memberId");
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        webSocketService.removeActiveSession(getUserId(session));
+        webSocketService.removeActiveSession(getMemberId(session));
         System.out.println("웹소켓 연결 종료: " + session.getId());
     }
 }

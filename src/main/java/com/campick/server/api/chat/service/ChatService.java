@@ -8,9 +8,11 @@ import com.campick.server.api.chat.repository.ChatRoomRepository;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.product.entity.Product;
+import com.campick.server.api.product.entity.ProductImage;
 import com.campick.server.api.product.repository.ProductRepository;
 import com.campick.server.common.exception.NotFoundException;
 import com.campick.server.common.response.ErrorStatus;
+import com.campick.server.common.util.TimeUtil;
 import com.campick.server.websocket.service.WebSocketService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +25,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +93,54 @@ public class ChatService {
 
         return convertToChatRoomResDto(chatRoom, chatMessages);
     }
+
+    public MyChatResDto getMyChatRooms(Long memberId) {
+        List<ChatRoom> myChatRooms = chatRoomRepository.findAllByMemberId(memberId);
+        List<ChatListDto> chatListDtos = myChatRooms.stream().map(
+                chatRoom -> {
+                    String thumbnailUrl = chatRoom.getProduct().getImages().stream()
+                            .filter(ProductImage::getIsThumbnail)
+                            .map(ProductImage::getImageUrl)
+                            .findFirst()
+                            .orElse(null);
+
+                    ChatMessage lastChatMessage = chatMessageRepository.findLastMessageByChatRoomId(chatRoom.getId());
+                    Integer unreadMessageCount = chatMessageRepository.countUnreadMessages(chatRoom.getId(), memberId);
+
+                    return ChatListDto.builder()
+                            .chatRoomId(chatRoom.getId())
+                            .productName(chatRoom.getProduct().getTitle())
+                            .productThumbnail(thumbnailUrl)
+                            .nickname(chatRoom.getSeller().getNickname())
+                            .profileImage(chatRoom.getSeller().getProfileImageUrl())
+                            .lastMessage(lastChatMessage.getMessage())
+                            .lastMessageCreatedAt(TimeUtil.getTimeAgo(lastChatMessage.getCreatedAt()))
+                            .unreadMessage(unreadMessageCount)
+                            .build();
+                }).toList();
+
+        return MyChatResDto.builder()
+                .chatRoom(chatListDtos)
+                .totalUnreadMessage(chatMessageRepository.countAllUnreadMessages(memberId))
+                .build();
+    }
+
+    public Integer getTotalUnreadMessage(Long memberId) {
+        return chatMessageRepository.countAllUnreadMessages(memberId);
+    }
+
+    public void completeChat(Long chatRoomId, Long memberId) {
+        ChatRoom chatRoom = chatRoomRepository.findDetailById(chatRoomId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage())
+        );
+
+        if (memberId.equals(chatRoom.getSeller().getId()))
+            chatRoom.setIsSellerOut(true);
+        else
+            chatRoom.setIsBuyerOut(true);
+        chatRoomRepository.save(chatRoom);
+    }
+
     public void handleChatMessage(JsonNode data) {
         ChatMessageReqDto chatMessageReqDto = objectMapper.convertValue(data, ChatMessageReqDto.class);
 

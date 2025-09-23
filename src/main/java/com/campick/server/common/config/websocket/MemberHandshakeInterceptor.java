@@ -21,9 +21,9 @@ public class MemberHandshakeInterceptor implements HandshakeInterceptor {
             String path = servletRequest.getServletRequest().getRequestURI();
             System.out.println("path: " + path);
             if (path.matches("/ws/\\w+")) {
-                Long userId = Long.valueOf(path.replace("/ws/", ""));
-                System.out.println(userId);
-                attributes.put("userId", userId);
+                Long memberId = Long.valueOf(path.replace("/ws/", ""));
+                System.out.println(memberId);
+                attributes.put("memberId", memberId);
             } else {
                 // 형식이 안 맞으면 연결 거부
                 System.out.println("false");

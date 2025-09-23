@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/member")
+@RequestMapping("/api/member/favorite")
 @Tag(name="member-favorite", description = "멤버의 좋아요 관련 API 입니다.")
 @RequiredArgsConstructor
 @RestController
@@ -23,7 +23,7 @@ public class MemberFavoriteController {
     private final FavoriteService favoriteService;
 
     @Operation(summary = "{memberId}가 좋아요 누른 상품 목록 조회")
-    @GetMapping("/favorite/{memberId}")
+    @GetMapping("/{memberId}")
     public ResponseEntity<ApiResponse<PageResponseDto<ProductAllSummaryDto>>> getMyFavoriteProducts(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") Integer page,

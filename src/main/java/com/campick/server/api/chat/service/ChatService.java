@@ -93,13 +93,18 @@ public class ChatService {
         Member seller = product.getSeller();
         Member buyer = memberRepository.findById(memberId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
-        ChatRoom chatRoom = ChatRoom.builder()
-                .seller(seller)
-                .buyer(buyer)
-                .product(product)
-                .build();
-        chatRoomRepository.save(chatRoom);
 
+        ChatRoom chatRoom = chatRoomRepository.findByProductAndSellerAndBuyer(product, seller, buyer)
+                .orElse(null);
+
+        if (chatRoom == null) {
+            chatRoom = ChatRoom.builder()
+                    .seller(seller)
+                    .buyer(buyer)
+                    .product(product)
+                    .build();
+            chatRoomRepository.save(chatRoom);
+        }
         return chatRoom.getId();
     }
 

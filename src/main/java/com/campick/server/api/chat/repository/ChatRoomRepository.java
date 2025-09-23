@@ -1,6 +1,8 @@
 package com.campick.server.api.chat.repository;
 
 import com.campick.server.api.chat.entity.ChatRoom;
+import com.campick.server.api.member.entity.Member;
+import com.campick.server.api.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +26,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "WHERE s.id = :memberId OR b.id = :memberId")
     List<ChatRoom> findAllByMemberId(@Param("memberId") Long memberId);
 
+    Optional<ChatRoom> findByProductAndSellerAndBuyer(Product product, Member seller, Member buyer);
 }

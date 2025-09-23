@@ -41,3 +41,5 @@ out/
 
 src/main/resources/firebase/
 #/src/main/java/com/campick/server/common/config/DataInitializer.java
+
+*/.DS_Store

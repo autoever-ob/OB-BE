@@ -286,7 +286,7 @@ public class MemberService {
 
         //! TODO N + 1은 추후에 풀어보기 ( 복습 )
         Page<Transaction> transactions = transactionRepository.findTransactionsByBuyer(buyer, pageable);
-        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "SOLD"));
+        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "BUY"));
         return new PageResponseDto<>(transactionDtos);
     }
 
@@ -298,7 +298,7 @@ public class MemberService {
         );
 
         Page<Transaction> transactions = transactionRepository.findTransactionsBySeller(seller, pageable);
-        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "BUY"));
+        Page<TransactionResponseDto> transactionDtos = transactions.map(transaction -> TransactionResponseDto.from(transaction, "SOLD"));
         return new PageResponseDto<>(transactionDtos);
     }
 

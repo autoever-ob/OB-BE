@@ -40,7 +40,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// @Configuration
+ @Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
 
@@ -112,7 +112,7 @@ public class DataInitializer {
         log.info("Seed data inserted: demo users and dealers created. Default password='{}'", rawPassword);
 
         // 5) Create Products for each member
-        seedProducts(members);
+//        seedProducts(members);
 
         // option
         List<String> options = Arrays.asList("에어컨", "난방", "냉장고", "전자레인지", "화장실", "샤워실", "침대", "TV");

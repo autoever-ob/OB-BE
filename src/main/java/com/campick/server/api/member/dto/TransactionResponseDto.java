@@ -22,6 +22,8 @@ public class TransactionResponseDto  {
     private Integer mileage;
     private String location;
     private String productImageUrl;
+//    private String fuelType;
+//    private String transmission;
     private ProductStatus status;
     private LocalDateTime createdAt;
 
@@ -45,6 +47,8 @@ public class TransactionResponseDto  {
                 .mileage(transaction.getProduct().getMileage())
                 .location(transaction.getProduct().getLocation())
                 .productImageUrl(productImageUrl)
+//                .fuelType(transaction.getProduct().getCar().getEngine().getFuelType().getKorean())
+//                .transmission(transaction.getProduct().getCar().getEngine().getTransmission().getKorean())
                 .status(transaction.getProduct().getStatus())
                 .createdAt(transaction.getCreatedAt())
                 .build();

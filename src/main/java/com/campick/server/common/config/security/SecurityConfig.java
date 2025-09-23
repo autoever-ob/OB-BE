@@ -113,6 +113,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/product/**","/api/product").permitAll()
                         .requestMatchers("/api/member/product/sold/**","/api/member/product/bought/**","/api/member/product/sell-or-reserve/**", "/api/member/product/all/**").permitAll()
                         .requestMatchers("/api/password-reset","/api/password-reset/**").permitAll()
+                        .requestMatchers("/api/member/review/**","/api/count/favorite/**").permitAll()
                         .requestMatchers("/api/car", "/api/types","/api/reviews","/api/options/**","/api/models","/api/favorites","/api/engines","/api/dealers").permitAll()
                         .requestMatchers("/api/count/**").permitAll()
                         .anyRequest().authenticated()

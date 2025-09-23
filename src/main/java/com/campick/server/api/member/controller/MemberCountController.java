@@ -1,5 +1,6 @@
 package com.campick.server.api.member.controller;
 
+import com.campick.server.api.favorite.service.FavoriteService;
 import com.campick.server.api.member.service.CountService;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberCountController{
 
     private final CountService countService;
+    private final FavoriteService favoriteService;
 
     @Operation(summary = "{memberId}별 모든 매물 개수 조회", description = "{memberId}별 모든 매물 개수 조회합니다")
     @GetMapping("/product/all/{memberId}")
@@ -39,5 +41,11 @@ public class MemberCountController{
     public ResponseEntity<ApiResponse<Integer>> getMemberProductSoldCount(@PathVariable Long memberId){
 
         return ApiResponse.success(SuccessStatus.SEND_MEMBER_SOLD_PRODUCTS_COUNT_SUCCESS, countService.getMemberProductSoldCount(memberId));
+    }
+
+    @Operation(summary = "{memberId}가 좋아요 누른 매물 개수 조회", description = "{memberId}가 좋아요 누른 매물 개수를 조회합니다")
+    @GetMapping("/favorite/{memberId}")
+    public ResponseEntity<ApiResponse<Long>> getMemberFavoriteCount(@PathVariable Long memberId){
+        return ApiResponse.success(SuccessStatus.SEND_MEMBER_FAVORITE_PRODUCTS_COUNT_SUCCESS, favoriteService.getFavoriteCount(memberId));
     }
 }

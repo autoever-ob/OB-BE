@@ -40,7 +40,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Configuration
+// @Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
 
@@ -123,79 +123,44 @@ public class DataInitializer {
     }
 
     private void seedProducts(List<Member> members) {
-        if (productRepository.count() > 0) {
-            log.info("Product seed data already present; skipping initialization");
+        if (modelRepository.count() > 0) {
+            log.info("Model seed data already present; skipping initialization");
             return;
         }
 
-        // type 저장
-        Type type1 = typeRepository.save(Type.builder().typeName(VehicleTypeName.MOTOR_HOME).build());
-        Type type2 = typeRepository.save(Type.builder().typeName(VehicleTypeName.CARAVAN).build());
-        Type type3 = typeRepository.save(Type.builder().typeName(VehicleTypeName.TRUCK_CAMPER).build());
-        Type type4 = typeRepository.save(Type.builder().typeName(VehicleTypeName.TRAILER).build());
-        Type type5 = typeRepository.save(Type.builder().typeName(VehicleTypeName.ETC).build());
+        log.info("Seeding new Type and Model data as requested.");
 
-        // Engine
-        // 디젤 - 자동
-        Engine engine1 = engineRepository.save(Engine.builder().fuelType(FuelType.DIESEL).transmission(Transmission.AUTOMATIC).horsePower(180).build());
-        // 가솔린 - 자동
-        Engine engine2 = engineRepository.save(Engine.builder().fuelType(FuelType.GASOLINE).transmission(Transmission.AUTOMATIC).horsePower(250).build());
-        // 전기 - 자동
-        Engine engine3 = engineRepository.save(Engine.builder().fuelType(FuelType.ELECTRIC).transmission(Transmission.AUTOMATIC).horsePower(200).build());
+        // Create Types
+        Type motorHomeType = typeRepository.save(Type.builder().typeName(VehicleTypeName.MOTOR_HOME).build());
+        Type caravanType = typeRepository.save(Type.builder().typeName(VehicleTypeName.CARAVAN).build());
+        Type trailerType = typeRepository.save(Type.builder().typeName(VehicleTypeName.TRAILER).build());
+        Type truckCamperType = typeRepository.save(Type.builder().typeName(VehicleTypeName.TRUCK_CAMPER).build());
+        typeRepository.save(Type.builder().typeName(VehicleTypeName.ETC).build());
 
-        // MODEL
-        // 스타렉스
-        Model model1 = modelRepository.save(Model.builder().type(type1).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
-        Model model2 = modelRepository.save(Model.builder().type(type2).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
-        Model model3 = modelRepository.save(Model.builder().type(type3).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
-        Model model4 = modelRepository.save(Model.builder().type(type4).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
-        Model model5 = modelRepository.save(Model.builder().type(type5).modelName("스타렉스").marketName("현대 그랜드 스타렉스").build());
+        // Create Models based on user request
+        // 모터홈
+        modelRepository.save(Model.builder().type(motorHomeType).modelName("1톤축연장").build());
+        modelRepository.save(Model.builder().type(motorHomeType).modelName("1톤축미연장").build());
+        modelRepository.save(Model.builder().type(motorHomeType).modelName("칸").build());
+        modelRepository.save(Model.builder().type(motorHomeType).modelName("마스터").build());
+        modelRepository.save(Model.builder().type(motorHomeType).modelName("스타렉스").build());
+        modelRepository.save(Model.builder().type(motorHomeType).modelName("스타리아").build());
+        modelRepository.save(Model.builder().type(motorHomeType).modelName("카운티").build());
 
-        // 카라반 - 카라반
-        Model model6 = modelRepository.save(Model.builder().type(type2).modelName("카라반").marketName("카라반 300급").build());
-        Model model12 = modelRepository.save(Model.builder().type(type1).modelName("카라반").marketName("카라반 300급").build());
-        Model model13 = modelRepository.save(Model.builder().type(type3).modelName("카라반").marketName("카라반 300급").build());
-        Model model14 = modelRepository.save(Model.builder().type(type4).modelName("카라반").marketName("카라반 300급").build());
-        Model model15 = modelRepository.save(Model.builder().type(type5).modelName("카라반").marketName("카라반 300급").build());
+        // 카라반
+        modelRepository.save(Model.builder().type(caravanType).modelName("300급").build());
+        modelRepository.save(Model.builder().type(caravanType).modelName("400급").build());
+        modelRepository.save(Model.builder().type(caravanType).modelName("500급").build());
+        modelRepository.save(Model.builder().type(caravanType).modelName("600급").build());
 
+        // 트레일러
+        modelRepository.save(Model.builder().type(trailerType).modelName("폴딩형").build());
+        modelRepository.save(Model.builder().type(trailerType).modelName("카고형").build());
 
-        // 트럭 캠퍼
-        Model model7 = modelRepository.save(Model.builder().type(type3).modelName("트럭캠퍼 홈런 모델").marketName("트럭캠퍼 홈런 모델").build());
-        Model model8 = modelRepository.save(Model.builder().type(type2).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
-        Model model17 = modelRepository.save(Model.builder().type(type1).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
-        Model model18 = modelRepository.save(Model.builder().type(type4).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
-        Model model19 = modelRepository.save(Model.builder().type(type5).modelName("베이스캠프 캠핑카 550g 모델").marketName("베이스캠프 캠핑카 550g 모델").build());
+        // 트럭캠퍼
+        modelRepository.save(Model.builder().type(truckCamperType).modelName("그외").build());
 
-        // 트레일러 - 카운티
-        Model model9 = modelRepository.save(Model.builder().type(type4).modelName("카운티").marketName("카운티").build());
-        Model model10 = modelRepository.save(Model.builder().type(type1).modelName("카운티").marketName("현대 카운티").build());
-        Model model11 = modelRepository.save(Model.builder().type(type2).modelName("카운티").marketName("현대 카운티").build());
-        Model model20 = modelRepository.save(Model.builder().type(type3).modelName("카운티").marketName("현대 카운티").build());
-        Model model21 = modelRepository.save(Model.builder().type(type5).modelName("카운티").marketName("현대 카운티").build());
-
-        // Create reusable entities
-        Car car1 = carRepository.save(Car.builder().model(model1).engine(engine1).build());
-        Car car2 = carRepository.save(Car.builder().model(model2).engine(engine2).build());
-        Car car3 = carRepository.save(Car.builder().model(model3).engine(engine3).build());
-        Car car4 = carRepository.save(Car.builder().model(model4).engine(engine1).build());
-        Car car5 = carRepository.save(Car.builder().model(model5).engine(engine2).build());
-        Car car6 = carRepository.save(Car.builder().model(model6).engine(engine3).build());
-        Car car7 = carRepository.save(Car.builder().model(model7).engine(engine2).build());
-        Car car8 = carRepository.save(Car.builder().model(model8).engine(engine1).build());
-        Car car9 = carRepository.save(Car.builder().model(model9).engine(engine3).build());
-        Car car10 = carRepository.save(Car.builder().model(model10).engine(engine1).build());
-        Car car11 = carRepository.save(Car.builder().model(model11).engine(engine2).build());
-        Car car12 = carRepository.save(Car.builder().model(model12).engine(engine3).build());
-        Car car13 = carRepository.save(Car.builder().model(model13).engine(engine1).build());
-        Car car14 = carRepository.save(Car.builder().model(model14).engine(engine2).build());
-        Car car15 = carRepository.save(Car.builder().model(model15).engine(engine3).build());
-        Car car17 = carRepository.save(Car.builder().model(model17).engine(engine2).build());
-        Car car18 = carRepository.save(Car.builder().model(model18).engine(engine3).build());
-        Car car19 = carRepository.save(Car.builder().model(model19).engine(engine1).build());
-        Car car20 = carRepository.save(Car.builder().model(model20).engine(engine2).build());
-        Car car21 = carRepository.save(Car.builder().model(model21).engine(engine3).build());
-
-        log.info("Seed data inserted: {} products created.", productRepository.count());
+        log.info("Successfully seeded Type and Model data. Dummy Engine, Car, and Product creation has been removed.");
     }
 
 

@@ -59,6 +59,8 @@ public enum SuccessStatus {
     SEND_MEMBER_SOLD_PRODUCTS_COUNT_SUCCESS(HttpStatus.OK, "{memberId} 별 판매된 매물 개수 전송 성공"),
      SEND_MEMBER_FAVORITE_PRODUCTS_SUCCESS(HttpStatus.OK, "{memberId} 별 좋아요 누른 매물 목록 전송 성공"),
     SEND_MEMBER_FAVORITE_PRODUCTS_COUNT_SUCCESS(HttpStatus.OK, "{memberId} 별 좋아요 누른 매물 개수 전송 성공"),
+    SEND_TYPE_LIST_SUCCESS(HttpStatus.OK, "타입 리스트 전송 성공"),
+    SEND_MODEL_LIST_SUCCESS(HttpStatus.OK, "{type}별 모델 리스트 전송 성공"),
 
     UPLOAD_PRODUCT_IMAGE_SUCCESS(HttpStatus.OK, "매물 사진 등록 성공"),
 

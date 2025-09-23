@@ -1,14 +1,13 @@
 package com.campick.server.api.chat.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter @Setter
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class MyChatResDto {
     private List<ChatListDto> chatRoom;
     private Integer totalUnreadMessage;

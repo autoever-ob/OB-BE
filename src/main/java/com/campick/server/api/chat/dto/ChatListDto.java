@@ -1,15 +1,14 @@
 package com.campick.server.api.chat.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.checkerframework.checker.units.qual.A;
 import org.checkerframework.checker.units.qual.N;
 
 import java.time.LocalDateTime;
 
 @Getter @Setter
-@NoArgsConstructor
-
+@Builder
+@AllArgsConstructor
 public class ChatListDto {
     private Long chatRoomId;
     private String productName;
@@ -17,6 +16,6 @@ public class ChatListDto {
     private String nickname;
     private String profileImage;
     private String lastMessage;
-    private LocalDateTime lastMessageCreatedAt;
+    private String lastMessageCreatedAt;
     private Integer unreadMessage;
 }

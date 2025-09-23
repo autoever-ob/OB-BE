@@ -8,9 +8,12 @@ import com.campick.server.api.chat.repository.ChatRoomRepository;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.product.entity.Product;
+import com.campick.server.api.product.entity.ProductImage;
 import com.campick.server.api.product.repository.ProductRepository;
 import com.campick.server.common.exception.NotFoundException;
 import com.campick.server.common.response.ErrorStatus;
+import com.campick.server.common.util.TimeUtil;
+import com.campick.server.websocket.service.WebSocketService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -22,6 +25,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,7 @@ public class ChatService {
     private final ObjectMapper objectMapper;
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
+    private final WebSocketService webSocketService;
     private Map<Long, ChatSocketDto> chatRoomMap;
 
     @PostConstruct
@@ -43,7 +48,9 @@ public class ChatService {
         this.chatRoomMap = new LinkedHashMap<>();
     }
 
-    private ChatSocketDto setAndFindChatRoomMapById(Long chatId) {
+    public void setChatRoomMap(WebSocketSession session, JsonNode data) throws IOException {
+        Long chatId = data.get("chat_id").asLong();
+
         ChatRoom chatRoom = chatRoomRepository.findById(chatId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage()));
 
@@ -52,8 +59,9 @@ public class ChatService {
                 .sellerId(chatRoom.getSeller().getId())
                 .buyerId(chatRoom.getBuyer().getId())
                 .build();
+        chatSocketDto.getSessions().add(session);
+        chatSocketDto.getSessions().add(webSocketService.getActiveSession(chatRoom.getSeller().getId()));
         chatRoomMap.put(chatId, chatSocketDto);
-        return chatSocketDto;
     }
 
     private ChatSocketDto findChatRoomById(Long chatId) {
@@ -61,11 +69,11 @@ public class ChatService {
     }
 
     //http
-    public ChatStartResDto startChatRoom(ChatRoomReqDto chatRoomReqDto, Long userId) {
+    public Long startChatRoom(ChatRoomReqDto chatRoomReqDto, Long memberId) {
         Product product = productRepository.findById(chatRoomReqDto.getProductId()).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.PRODUCT_NOT_FOUND.getMessage()));
         Member seller = product.getSeller();
-        Member buyer = memberRepository.findById(userId).orElseThrow(
+        Member buyer = memberRepository.findById(memberId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
         ChatRoom chatRoom = ChatRoom.builder()
                 .seller(seller)
@@ -74,9 +82,63 @@ public class ChatService {
                 .build();
         chatRoomRepository.save(chatRoom);
 
-        ChatStartResDto chatStartResDto = new ChatStartResDto();
-        chatStartResDto.setChatId(chatRoom.getId());
-        return chatStartResDto;
+        return chatRoom.getId();
+    }
+
+    public ChatRoomResDto getChatRoom(Long chatRoomId) {
+        ChatRoom chatRoom = chatRoomRepository.findDetailById(chatRoomId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage())
+        );
+        List<ChatMessage> chatMessages = chatMessageRepository.findMessagesByChatRoomId(chatRoomId);
+
+        return convertToChatRoomResDto(chatRoom, chatMessages);
+    }
+
+    public MyChatResDto getMyChatRooms(Long memberId) {
+        List<ChatRoom> myChatRooms = chatRoomRepository.findAllByMemberId(memberId);
+        List<ChatListDto> chatListDtos = myChatRooms.stream().map(
+                chatRoom -> {
+                    String thumbnailUrl = chatRoom.getProduct().getImages().stream()
+                            .filter(ProductImage::getIsThumbnail)
+                            .map(ProductImage::getImageUrl)
+                            .findFirst()
+                            .orElse(null);
+
+                    ChatMessage lastChatMessage = chatMessageRepository.findLastMessageByChatRoomId(chatRoom.getId());
+                    Integer unreadMessageCount = chatMessageRepository.countUnreadMessages(chatRoom.getId(), memberId);
+
+                    return ChatListDto.builder()
+                            .chatRoomId(chatRoom.getId())
+                            .productName(chatRoom.getProduct().getTitle())
+                            .productThumbnail(thumbnailUrl)
+                            .nickname(chatRoom.getSeller().getNickname())
+                            .profileImage(chatRoom.getSeller().getProfileImageUrl())
+                            .lastMessage(lastChatMessage.getMessage())
+                            .lastMessageCreatedAt(TimeUtil.getTimeAgo(lastChatMessage.getCreatedAt()))
+                            .unreadMessage(unreadMessageCount)
+                            .build();
+                }).toList();
+
+        return MyChatResDto.builder()
+                .chatRoom(chatListDtos)
+                .totalUnreadMessage(chatMessageRepository.countAllUnreadMessages(memberId))
+                .build();
+    }
+
+    public Integer getTotalUnreadMessage(Long memberId) {
+        return chatMessageRepository.countAllUnreadMessages(memberId);
+    }
+
+    public void completeChat(Long chatRoomId, Long memberId) {
+        ChatRoom chatRoom = chatRoomRepository.findDetailById(chatRoomId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage())
+        );
+
+        if (memberId.equals(chatRoom.getSeller().getId()))
+            chatRoom.setIsSellerOut(true);
+        else
+            chatRoom.setIsBuyerOut(true);
+        chatRoomRepository.save(chatRoom);
     }
 
     public void handleChatMessage(JsonNode data) {
@@ -88,13 +150,12 @@ public class ChatService {
     }
 
     private ChatMessageResDto convertToChatMessageResDto(ChatMessage chatMessage) {
-        ChatMessageResDto chatMessageResDto = new ChatMessageResDto();
-        chatMessageResDto.setMessage(chatMessage.getMessage());
-        chatMessageResDto.setSenderId(chatMessage.getMember().getId());
-        chatMessageResDto.setSendAt(chatMessage.getCreatedAt());
-        chatMessageResDto.setIsRead(chatMessage.getIsRead());
-
-        return chatMessageResDto;
+        return ChatMessageResDto.builder()
+                .message(chatMessage.getMessage())
+                .senderId(chatMessage.getMember().getId())
+                .sendAt(chatMessage.getCreatedAt())
+                .isRead(chatMessage.getIsRead())
+                .build();
     }
 
     private ChatMessage saveMessage(ChatMessageReqDto chatMessageReqDto) {
@@ -132,7 +193,8 @@ public class ChatService {
         }
     }
 
-    public void broadcastSoldEvent(Long chatId) {
+    public void broadcastSoldEvent(JsonNode data) {
+        Long chatId = data.get("chat_id").asLong();
         ChatSocketDto room = findChatRoomById(chatId);
         if (room != null) {
             for (WebSocketSession session : room.getSessions()) {
@@ -145,7 +207,7 @@ public class ChatService {
         }
     }
 
-    private ChatRoomResDto convertToChatRoomResDto(ChatRoom chatRoom, Long userId) {
+    private ChatRoomResDto convertToChatRoomResDto(ChatRoom chatRoom, List<ChatMessage> chatMessages) {
         ChatRoomResDto chatRoomResDto = new ChatRoomResDto();
         chatRoomResDto.setSellerId(chatRoom.getSeller().getId());
         chatRoomResDto.setSellerNickname(chatRoom.getSeller().getNickname());
@@ -158,7 +220,11 @@ public class ChatService {
         chatRoomResDto.setProductStatus(chatRoom.getProduct().getStatus().toString());
         chatRoomResDto.setProductPrice(chatRoom.getProduct().getCost().toString());
         chatRoomResDto.setIsActive(!chatRoom.getIsSellerOut() && !chatRoom.getIsBuyerOut());
-        // 메시지 담아야 함
+
+        List<ChatMessageResDto> chatMessageResDto = chatMessages.stream()
+                .map(this::convertToChatMessageResDto
+                ).toList();
+        chatRoomResDto.setChatData(chatMessageResDto);
 
         return chatRoomResDto;
     }

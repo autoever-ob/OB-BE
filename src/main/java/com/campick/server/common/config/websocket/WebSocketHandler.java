@@ -1,6 +1,7 @@
 package com.campick.server.common.config.websocket;
 
 import com.campick.server.api.chat.service.ChatService;
+import com.campick.server.websocket.service.WebSocketService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +20,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class WebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper;
-    private final ConcurrentHashMap<Long, WebSocketSession> activeSessions = new ConcurrentHashMap<>();
     private final ChatService chatService;
+    private final WebSocketService webSocketService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long userId = getUserId(session);
-        activeSessions.put(userId, session);
+        Long userId = getMemberId(session);
+        webSocketService.setActiveSession(userId, session);
         System.out.println("웹소켓 연결: " + session.getId());
     }
 
@@ -39,8 +40,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
         JsonNode data = jsonNode.get("data");
 
         switch (event) {
+            case "join_room":
+                chatService.setChatRoomMap(session, data);
+                break;
             case "chat_message":
                 chatService.handleChatMessage(data);
+                break;
+            case "sold":
+                chatService.broadcastSoldEvent(data);
                 break;
             default:
                 log.warn("Unknown event: {}", event);
@@ -50,13 +57,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     // 예시: 세션에서 사용자 ID 가져오기
-    private Long getUserId(WebSocketSession session) {
-        return (Long) session.getAttributes().get("userId");
+    private Long getMemberId(WebSocketSession session) {
+        return (Long) session.getAttributes().get("memberId");
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        activeSessions.remove(getUserId(session));
+        webSocketService.removeActiveSession(getMemberId(session));
         System.out.println("웹소켓 연결 종료: " + session.getId());
     }
 }

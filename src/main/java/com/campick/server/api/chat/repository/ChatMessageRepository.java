@@ -30,6 +30,15 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             "ORDER BY m.createdAt DESC LIMIT 1")
     ChatMessage findLastMessageByChatRoomId(@Param("chatRoomId") Long chatRoomId);
 
+    @Query("""
+        SELECT m FROM ChatMessage m
+        WHERE m.chatRoom.id IN :chatRoomIds
+        AND m.createdAt IN (
+            SELECT MAX(m2.createdAt) FROM ChatMessage m2 WHERE m2.chatRoom.id = m.chatRoom.id
+        )
+    """)
+    List<ChatMessage> findLastMessages(@Param("chatRoomIds") List<Long> chatRoomIds);
+
     @Query("SELECT COUNT(m) FROM ChatMessage m " +
             "WHERE m.chatRoom.id = :chatRoomId " +
             "AND m.isRead = false " +

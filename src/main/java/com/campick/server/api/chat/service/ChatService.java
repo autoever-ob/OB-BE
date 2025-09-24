@@ -10,6 +10,7 @@ import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.entity.ProductImage;
 import com.campick.server.api.product.repository.ProductRepository;
+import com.campick.server.common.dto.PageResponseDto;
 import com.campick.server.common.exception.NotFoundException;
 import com.campick.server.common.response.ErrorStatus;
 import com.campick.server.common.util.TimeUtil;
@@ -20,12 +21,17 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -121,8 +127,14 @@ public class ChatService {
         Integer readMessageCount = chatMessageRepository.markMessagesAsRead(chatRoomId, memberId);
     }
 
-    public MyChatResDto getMyChatRooms(Long memberId) {
-        List<ChatRoom> myChatRooms = chatRoomRepository.findAllByMemberId(memberId);
+    public MyChatPageResDto<ChatListDto> getMyChatRooms(Long memberId, Pageable pageable) {
+        Page<ChatRoom> myChatRooms = chatRoomRepository.findByMemberIdOrderByLastMessageDesc(memberId, pageable);
+        List<Long> chatRoomIds = myChatRooms.stream().map(ChatRoom::getId).toList();
+        Map<Long, ChatMessage> lastMessageMap = chatMessageRepository.findLastMessages(chatRoomIds)
+                .stream()
+                .collect(Collectors.toMap(m -> m.getChatRoom().getId(), Function.identity()));
+        long total = chatRoomRepository.countChatRoomByMemberId(memberId);
+
         List<ChatListDto> chatListDtos = myChatRooms.stream().map(
                 chatRoom -> {
                     String thumbnailUrl = chatRoom.getProduct().getImages().stream()
@@ -131,7 +143,7 @@ public class ChatService {
                             .findFirst()
                             .orElse(null);
 
-                    ChatMessage lastChatMessage = chatMessageRepository.findLastMessageByChatRoomId(chatRoom.getId());
+                    ChatMessage lastChatMessage = lastMessageMap.get(chatRoom.getId());
                     Integer unreadMessageCount = chatMessageRepository.countUnreadMessages(chatRoom.getId(), memberId);
 
                     return ChatListDto.builder()
@@ -146,10 +158,10 @@ public class ChatService {
                             .build();
                 }).toList();
 
-        return MyChatResDto.builder()
-                .chatRoom(chatListDtos)
-                .totalUnreadMessage(chatMessageRepository.countAllUnreadMessages(memberId))
-                .build();
+        Integer totalUnreadMessage = chatMessageRepository.countAllUnreadMessages(memberId);
+        Page<ChatListDto> pageImpl = new PageImpl<>(chatListDtos, pageable, total);
+
+        return new MyChatPageResDto<>(pageImpl, totalUnreadMessage);
     }
 
     public Integer getTotalUnreadMessage(Long memberId) {

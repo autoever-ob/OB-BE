@@ -23,7 +23,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "JOIN FETCH cr.product p " +
             "JOIN FETCH cr.seller s " +
             "JOIN FETCH cr.buyer b " +
-            "WHERE s.id = :memberId OR b.id = :memberId")
+            "WHERE (s.id = :memberId OR b.id = :memberId) " +
+            "AND ((s.id = :memberId AND cr.isSellerOut = false) " +
+            "     OR (b.id = :memberId AND cr.isBuyerOut = false))")
     List<ChatRoom> findAllByMemberId(@Param("memberId") Long memberId);
 
     Optional<ChatRoom> findByProductAndSellerAndBuyer(Product product, Member seller, Member buyer);

@@ -117,6 +117,10 @@ public class ChatService {
         return convertToChatRoomResDto(chatRoom, chatMessages);
     }
 
+    public void readChatRoom(Long chatRoomId, Long memberId) {
+        Integer readMessageCount = chatMessageRepository.markMessagesAsRead(chatRoomId, memberId);
+    }
+
     public MyChatResDto getMyChatRooms(Long memberId) {
         List<ChatRoom> myChatRooms = chatRoomRepository.findAllByMemberId(memberId);
         List<ChatListDto> chatListDtos = myChatRooms.stream().map(

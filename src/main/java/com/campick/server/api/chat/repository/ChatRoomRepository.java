@@ -3,8 +3,6 @@ package com.campick.server.api.chat.repository;
 import com.campick.server.api.chat.entity.ChatRoom;
 import com.campick.server.api.member.entity.Member;
 import com.campick.server.api.product.entity.Product;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,20 +28,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "     OR (b.id = :memberId AND cr.isBuyerOut = false))")
     List<ChatRoom> findAllByMemberId(@Param("memberId") Long memberId);
 
-    @Query("""
-        SELECT c FROM ChatRoom c
-        WHERE c.seller.id = :memberId OR c.buyer.id = :memberId
-        ORDER BY (
-            SELECT MAX(m.createdAt) FROM ChatMessage m WHERE m.chatRoom = c
-        ) DESC
-    """)
-    Page<ChatRoom> findByMemberIdOrderByLastMessageDesc(@Param("memberId") Long memberId, Pageable pageable);
-
     Optional<ChatRoom> findByProductAndSellerAndBuyer(Product product, Member seller, Member buyer);
-
-    @Query("""
-        SELECT COUNT(c) FROM ChatRoom c
-        WHERE c.seller.id = :memberId OR c.buyer.id = :memberId
-        """)
-    long countChatRoomByMemberId(@Param("memberId") Long memberId);
 }

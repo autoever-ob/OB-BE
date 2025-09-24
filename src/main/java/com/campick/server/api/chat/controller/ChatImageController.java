@@ -19,7 +19,7 @@ public class ChatImageController {
     private final ChatImageService chatImageService;
 
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<ApiResponse<ChatImageResDto>> upload(@RequestPart("chatId") Long chatId,
+    public ResponseEntity<ApiResponse<ChatImageResDto>> upload(@RequestParam("chatId") Long chatId,
                                                                @RequestPart("file") MultipartFile file) {
         String imageUrl = chatImageService.uploadImage(chatId, file);
         ChatImageResDto chatImageResDto = ChatImageResDto.builder()

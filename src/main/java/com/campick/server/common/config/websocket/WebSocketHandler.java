@@ -54,6 +54,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
             case "sold":
                 chatService.broadcastSoldEvent(session, data);
                 break;
+            case "is_online":
+                webSocketService.checkIsOnline(session, memberId, data);
             default:
                 log.warn("Unknown event: {}", event);
         }

@@ -2,6 +2,7 @@ package com.campick.server.api.chat.repository;
 
 import com.campick.server.api.chat.entity.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,6 +14,16 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             "WHERE cm.chatRoom.id = :chatRoomId " +
             "ORDER BY cm.createdAt ASC")
     List<ChatMessage> findMessagesByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+
+    @Modifying
+    @Query("UPDATE ChatMessage m " +
+            "SET m.isRead = true " +
+            "WHERE m.chatRoom.id = :chatRoomId " +
+            "AND m.member.id <> :memberId " +
+            "AND m.isRead = false")
+    Integer markMessagesAsRead(@Param("chatRoomId") Long chatRoomId,
+                           @Param("memberId") Long memberId);
+
 
     @Query("SELECT m FROM ChatMessage m " +
             "WHERE m.chatRoom.id = :chatRoomId " +

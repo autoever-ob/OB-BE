@@ -36,6 +36,14 @@ public class ChatController {
         return ApiResponse.success(SuccessStatus.SEND_LOAD_CHATROOM, chatService.getChatRoom(chatRoomId));
     }
 
+    @PatchMapping("/{chatRoomId}")
+    public ResponseEntity<ApiResponse<Void>> readChatRoom(@PathVariable Long chatRoomId,
+                                                          @AuthenticationPrincipal SecurityMember securityMember) {
+        Long memberId =  securityMember.getId();
+        chatService.readChatRoom(chatRoomId, memberId);
+        return ApiResponse.success_only(SuccessStatus.READ_CHAT_SUCCESS);
+    }
+
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<MyChatResDto>> getMyChatRoom(@AuthenticationPrincipal SecurityMember securityMember) {
         Long memberId = securityMember.getId();
@@ -55,6 +63,5 @@ public class ChatController {
         Long memberId = securityMember.getId();
         chatService.completeChat(chatRoomId, memberId);
         return ApiResponse.success_only(SuccessStatus.COMPLETE_CHAT);
-
     }
 }

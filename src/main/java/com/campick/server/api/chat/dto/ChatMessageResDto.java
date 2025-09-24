@@ -10,6 +10,6 @@ import java.time.LocalDateTime;
 public class ChatMessageResDto {
     private String message;
     private Long senderId;
-    private LocalDateTime sendAt;
+    private String sendAt;
     private Boolean isRead;
 }

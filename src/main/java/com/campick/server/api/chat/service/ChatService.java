@@ -177,7 +177,7 @@ public class ChatService {
         return ChatMessageResDto.builder()
                 .message(chatMessage.getMessage())
                 .senderId(chatMessage.getMember().getId())
-                .sendAt(chatMessage.getCreatedAt())
+                .sendAt(TimeUtil.getTimeAgo(chatMessage.getCreatedAt()))
                 .isRead(chatMessage.getIsRead())
                 .build();
     }

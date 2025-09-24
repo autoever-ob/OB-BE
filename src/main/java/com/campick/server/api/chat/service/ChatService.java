@@ -10,7 +10,6 @@ import com.campick.server.api.member.repository.MemberRepository;
 import com.campick.server.api.product.entity.Product;
 import com.campick.server.api.product.entity.ProductImage;
 import com.campick.server.api.product.repository.ProductRepository;
-import com.campick.server.common.dto.PageResponseDto;
 import com.campick.server.common.exception.NotFoundException;
 import com.campick.server.common.response.ErrorStatus;
 import com.campick.server.common.util.TimeUtil;
@@ -114,11 +113,11 @@ public class ChatService {
         return chatRoom.getId();
     }
 
-    public ChatRoomResDto getChatRoom(Long chatRoomId) {
+    public ChatRoomPageResDto<ChatMessage> getChatRoom(Long chatRoomId, Pageable pageable) {
         ChatRoom chatRoom = chatRoomRepository.findDetailById(chatRoomId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage())
         );
-        List<ChatMessage> chatMessages = chatMessageRepository.findMessagesByChatRoomId(chatRoomId);
+        Page<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId, pageable);
 
         return convertToChatRoomResDto(chatRoom, chatMessages);
     }
@@ -259,33 +258,29 @@ public class ChatService {
         }
     }
 
-    private ChatRoomResDto convertToChatRoomResDto(ChatRoom chatRoom, List<ChatMessage> chatMessages) {
+    private ChatRoomPageResDto<ChatMessage> convertToChatRoomResDto(ChatRoom chatRoom, Page<ChatMessage> chatMessages) {
         String thumbnailImage = chatRoom.getProduct().getImages().stream()
                 .filter(ProductImage::getIsThumbnail)
                 .map(ProductImage::getImageUrl)
                 .findFirst()
                 .orElse(null);
 
-        ChatRoomResDto chatRoomResDto = new ChatRoomResDto();
-        chatRoomResDto.setSellerId(chatRoom.getSeller().getId());
-        chatRoomResDto.setSellerNickname(chatRoom.getSeller().getNickname());
-        chatRoomResDto.setBuyerId(chatRoom.getBuyer().getId());
-        chatRoomResDto.setBuyerNickname(chatRoom.getBuyer().getNickname());
-        chatRoomResDto.setSellerProfileImage(chatRoom.getSeller().getProfileImageUrl());
-        chatRoomResDto.setSellerPhoneNumber(chatRoom.getSeller().getMobileNumber());
-        chatRoomResDto.setProductId(chatRoom.getProduct().getId());
-        chatRoomResDto.setProductTitle(chatRoom.getProduct().getTitle());
-        chatRoomResDto.setProductImage(thumbnailImage);
-        chatRoomResDto.setProductStatus(chatRoom.getProduct().getStatus().toString());
-        chatRoomResDto.setProductPrice(chatRoom.getProduct().getCost().toString());
-        chatRoomResDto.setIsActive(!chatRoom.getIsSellerOut() && !chatRoom.getIsBuyerOut());
+        ChatRoomPageResDto<ChatMessage> chatRoomPageResDto = new ChatRoomPageResDto<>(chatMessages);
 
-        List<ChatMessageResDto> chatMessageResDto = chatMessages.stream()
-                .map(this::convertToChatMessageResDto
-                ).toList();
-        chatRoomResDto.setChatData(chatMessageResDto);
+        chatRoomPageResDto.setSellerId(chatRoom.getSeller().getId());
+        chatRoomPageResDto.setSellerNickname(chatRoom.getSeller().getNickname());
+        chatRoomPageResDto.setBuyerId(chatRoom.getBuyer().getId());
+        chatRoomPageResDto.setBuyerNickname(chatRoom.getBuyer().getNickname());
+        chatRoomPageResDto.setSellerProfileImage(chatRoom.getSeller().getProfileImageUrl());
+        chatRoomPageResDto.setSellerPhoneNumber(chatRoom.getSeller().getMobileNumber());
+        chatRoomPageResDto.setProductId(chatRoom.getProduct().getId());
+        chatRoomPageResDto.setProductTitle(chatRoom.getProduct().getTitle());
+        chatRoomPageResDto.setProductImage(thumbnailImage);
+        chatRoomPageResDto.setProductStatus(chatRoom.getProduct().getStatus().toString());
+        chatRoomPageResDto.setProductPrice(chatRoom.getProduct().getCost().toString());
+        chatRoomPageResDto.setIsActive(!chatRoom.getIsSellerOut() && !chatRoom.getIsBuyerOut());
 
-        return chatRoomResDto;
+        return chatRoomPageResDto;
     }
 
     public void removeFromChatRoomMap(Long memberId, WebSocketSession session) {

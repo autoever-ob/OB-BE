@@ -1,6 +1,8 @@
 package com.campick.server.api.chat.repository;
 
 import com.campick.server.api.chat.entity.ChatMessage;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -52,4 +54,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             "AND cm.isRead = false " +
             "AND cm.member.id <> :memberId")
     Integer countAllUnreadMessages(@Param("memberId") Long memberId);
+
+    Page<ChatMessage> findByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId, Pageable pageable);
 }

@@ -35,8 +35,11 @@ public class ChatController {
     }
 
     @GetMapping("/{chatRoomId}")
-    public ResponseEntity<ApiResponse<ChatRoomResDto>> getChatRoom(@PathVariable Long chatRoomId) {
-        return ApiResponse.success(SuccessStatus.SEND_LOAD_CHATROOM, chatService.getChatRoom(chatRoomId));
+    public ResponseEntity<ApiResponse<ChatRoomPageResDto<ChatMessage>>> getChatRoom(@PathVariable Long chatRoomId,
+                                                                   @RequestParam(defaultValue = "0") Integer page,
+                                                                   @RequestParam(defaultValue = "20") Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.success(SuccessStatus.SEND_LOAD_CHATROOM, chatService.getChatRoom(chatRoomId, pageable));
     }
 
     @PatchMapping("/{chatRoomId}")

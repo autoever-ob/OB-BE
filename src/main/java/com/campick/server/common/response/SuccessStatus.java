@@ -68,6 +68,7 @@ public enum SuccessStatus {
     SEND_MY_CHATROOMS(HttpStatus.OK, "내 채팅방 조회 성공"),
     SEND_TOTAL_UNREAD_MSG(HttpStatus.OK, "총 안 읽은 메시지 수 조회 성공"),
     COMPLETE_CHAT(HttpStatus.OK, "채팅방 종료 완료"),
+    UPLOAD_CHAT_IMAGE_SUCCESS(HttpStatus.OK, "채팅방 내 이미지 업로드 성공"),
 
 
     /**

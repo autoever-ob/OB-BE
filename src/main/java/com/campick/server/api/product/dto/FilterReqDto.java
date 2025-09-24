@@ -15,6 +15,7 @@ public class FilterReqDto {
     private Integer costTo;
     private Integer generationFrom;
     private Integer generationTo;
+    private String keyword;
     @JsonProperty("types")
     private List<String> types;
     private List<String> options;

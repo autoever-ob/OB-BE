@@ -292,6 +292,11 @@ public class ProductService {
         predicates.add(cb.notEqual(productRoot.get("status"), ProductStatus.SOLD));
         predicates.add(cb.isFalse(productRoot.get("isDeleted")));
 
+        // 제목 검색
+        if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {
+            predicates.add(cb.like(cb.lower(productRoot.get("title")), "%" + filter.getKeyword().toLowerCase() + "%"));
+        }
+
         // 범위 필터
         predicates.add(cb.between(productRoot.get("cost"), filter.getCostFrom(), filter.getCostTo()));
         predicates.add(cb.between(productRoot.get("generation"), filter.getGenerationFrom(), filter.getGenerationTo()));
@@ -349,6 +354,11 @@ public class ProductService {
         countPredicates.add(cb.between(countRoot.get("generation"), filter.getGenerationFrom(), filter.getGenerationTo()));
         countPredicates.add(cb.between(countRoot.get("mileage"), filter.getMileageFrom(), filter.getMileageTo()));
         countPredicates.add(cb.isFalse(countRoot.get("isDeleted")));
+
+        // 제목 검색
+        if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {
+            predicates.add(cb.like(cb.lower(productRoot.get("title")), "%" + filter.getKeyword().trim().toLowerCase() + "%"));
+        }
 
         if (filter.getOptions() != null && !filter.getOptions().isEmpty()) {
             Subquery<Long> countOptionSub = countQuery.subquery(Long.class);

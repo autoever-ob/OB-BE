@@ -45,7 +45,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -83,8 +82,7 @@ public class ProductService {
             throw new NotFoundException(ErrorStatus.CAR_NOT_FOUND.getMessage());
         }
 
-        Random random = new Random();
-        Car car = cars.get(random.nextInt(cars.size()));
+        Car car = cars.get(0);
 
 
         Member member = memberRepository.findById(memberId)

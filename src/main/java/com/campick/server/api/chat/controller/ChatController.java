@@ -35,7 +35,7 @@ public class ChatController {
     }
 
     @GetMapping("/{chatRoomId}")
-    public ResponseEntity<ApiResponse<ChatRoomPageResDto<ChatMessageResDto>>> getChatRoom(@PathVariable Long chatRoomId,
+    public ResponseEntity<ApiResponse<ChatRoomPageResDto<ChatMessage>>> getChatRoom(@PathVariable Long chatRoomId,
                                                                    @RequestParam(defaultValue = "0") Integer page,
                                                                    @RequestParam(defaultValue = "20") Integer size) {
         Pageable pageable = PageRequest.of(page, size);

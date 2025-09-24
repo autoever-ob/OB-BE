@@ -5,10 +5,13 @@ import com.campick.server.api.chat.entity.ChatMessage;
 import com.campick.server.api.chat.entity.ChatRoom;
 import com.campick.server.api.chat.service.ChatService;
 import com.campick.server.common.config.security.SecurityMember;
+import com.campick.server.common.dto.PageResponseDto;
 import com.campick.server.common.response.ApiResponse;
 import com.campick.server.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.units.qual.A;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +35,11 @@ public class ChatController {
     }
 
     @GetMapping("/{chatRoomId}")
-    public ResponseEntity<ApiResponse<ChatRoomResDto>> getChatRoom(@PathVariable Long chatRoomId) {
-        return ApiResponse.success(SuccessStatus.SEND_LOAD_CHATROOM, chatService.getChatRoom(chatRoomId));
+    public ResponseEntity<ApiResponse<ChatRoomPageResDto<ChatMessage>>> getChatRoom(@PathVariable Long chatRoomId,
+                                                                   @RequestParam(defaultValue = "0") Integer page,
+                                                                   @RequestParam(defaultValue = "20") Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.success(SuccessStatus.SEND_LOAD_CHATROOM, chatService.getChatRoom(chatRoomId, pageable));
     }
 
     @PatchMapping("/{chatRoomId}")
@@ -45,10 +51,13 @@ public class ChatController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<MyChatResDto>> getMyChatRoom(@AuthenticationPrincipal SecurityMember securityMember) {
+    public ResponseEntity<ApiResponse<MyChatPageResDto<ChatListDto>>> getMyChatRoom(@RequestParam(defaultValue = "0") Integer page,
+                                                                                   @RequestParam(defaultValue = "10") Integer size,
+                                                                                   @AuthenticationPrincipal SecurityMember securityMember) {
+        Pageable pageable = PageRequest.of(page, size);
         Long memberId = securityMember.getId();
 
-        return ApiResponse.success(SuccessStatus.SEND_MY_CHATROOMS, chatService.getMyChatRooms(memberId));
+        return ApiResponse.success(SuccessStatus.SEND_MY_CHATROOMS, chatService.getMyChatRooms(memberId, pageable));
     }
 
     @GetMapping("/totalUnreadMessage")

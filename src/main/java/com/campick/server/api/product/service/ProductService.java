@@ -42,10 +42,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -82,8 +79,8 @@ public class ProductService {
             throw new NotFoundException(ErrorStatus.CAR_NOT_FOUND.getMessage());
         }
 
-        Car car = cars.get(0);
-
+        Random random = new Random();
+        Car car = cars.get(random.nextInt(cars.size()));
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));

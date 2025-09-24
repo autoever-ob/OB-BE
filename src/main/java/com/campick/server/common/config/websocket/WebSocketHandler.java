@@ -56,6 +56,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 break;
             case "is_online":
                 webSocketService.checkIsOnline(session, memberId, data);
+                break;
             default:
                 log.warn("Unknown event: {}", event);
         }

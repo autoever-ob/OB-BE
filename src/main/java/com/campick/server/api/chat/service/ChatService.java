@@ -113,13 +113,21 @@ public class ChatService {
         return chatRoom.getId();
     }
 
-    public ChatRoomPageResDto<ChatMessage> getChatRoom(Long chatRoomId, Pageable pageable) {
+    public ChatRoomPageResDto<ChatMessageResDto> getChatRoom(Long chatRoomId, Pageable pageable) {
         ChatRoom chatRoom = chatRoomRepository.findDetailById(chatRoomId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.CHAT_NOT_FOUND.getMessage())
         );
         Page<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId, pageable);
+        Page<ChatMessageResDto> chatMessageResDtos = chatMessages.map(
+                cm -> ChatMessageResDto.builder()
+                        .message(cm.getMessage())
+                        .senderId(cm.getMember().getId())
+                        .sendAt(TimeUtil.getTimeAgo(cm.getCreatedAt()))
+                        .isRead(cm.getIsRead())
+                        .build()
+        );
 
-        return convertToChatRoomResDto(chatRoom, chatMessages);
+        return convertToChatRoomResDto(chatRoom, chatMessageResDtos);
     }
 
     public void readChatRoom(Long chatRoomId, Long memberId) {
@@ -258,14 +266,14 @@ public class ChatService {
         }
     }
 
-    private ChatRoomPageResDto<ChatMessage> convertToChatRoomResDto(ChatRoom chatRoom, Page<ChatMessage> chatMessages) {
+    private ChatRoomPageResDto<ChatMessageResDto> convertToChatRoomResDto(ChatRoom chatRoom, Page<ChatMessageResDto> chatMessages) {
         String thumbnailImage = chatRoom.getProduct().getImages().stream()
                 .filter(ProductImage::getIsThumbnail)
                 .map(ProductImage::getImageUrl)
                 .findFirst()
                 .orElse(null);
 
-        ChatRoomPageResDto<ChatMessage> chatRoomPageResDto = new ChatRoomPageResDto<>(chatMessages);
+        ChatRoomPageResDto<ChatMessageResDto> chatRoomPageResDto = new ChatRoomPageResDto<>(chatMessages);
 
         chatRoomPageResDto.setSellerId(chatRoom.getSeller().getId());
         chatRoomPageResDto.setSellerNickname(chatRoom.getSeller().getNickname());

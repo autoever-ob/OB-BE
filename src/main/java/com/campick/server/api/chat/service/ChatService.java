@@ -75,7 +75,10 @@ public class ChatService {
             if  (otherSession != null)
                 chatSocketDto.getSessions().add(webSocketService.getActiveSession(otherId));
             chatRoomMap.put(chatId, chatSocketDto);
-        }
+        } else
+            room.getSessions().add(session);
+
+        System.out.println(chatRoomMap.get(chatId).getSessions());
 
         return chatRoomMap.get(chatId);
     }

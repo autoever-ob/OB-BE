@@ -460,8 +460,8 @@ public class ProductService {
                 .collect(Collectors.toSet());
 
         RecommendResDto recommendResDto = new RecommendResDto();
-        recommendResDto.setHotVehicle(productToDto(newVehicle, likedProductIds));
-        recommendResDto.setNewVehicle(productToDto(hotVehicle, likedProductIds));
+        recommendResDto.setHotVehicle(productToDto(hotVehicle, likedProductIds));
+        recommendResDto.setNewVehicle(productToDto(newVehicle, likedProductIds));
 
         return recommendResDto;
     }

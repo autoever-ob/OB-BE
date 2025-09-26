@@ -123,6 +123,7 @@ public class ChatService {
         Page<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId, pageable);
         Page<ChatMessageResDto> chatMessageResDtos = chatMessages.map(
                 cm -> ChatMessageResDto.builder()
+                        .chatId(chatRoomId)
                         .message(cm.getMessage())
                         .senderId(cm.getMember().getId())
                         .sendAt(TimeUtil.getTimeAgo(cm.getCreatedAt()))

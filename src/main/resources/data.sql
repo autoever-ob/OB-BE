@@ -28,6 +28,9 @@ INSERT INTO model (type_id, model_name) VALUES ((SELECT type_id FROM `type` WHER
 -- TRUCK_CAMPER
 INSERT INTO model (type_id, model_name) VALUES ((SELECT type_id FROM `type` WHERE type_name = 'TRUCK_CAMPER'), '그외');
 
+-- ETC
+INSERT INTO model (type_id, model_name) VALUES ((SELECT type_id FROM `type` WHERE type_name = 'ETC'), '기타');
+
 -- Engines
 INSERT INTO `engine` (feul_type, transmission, horse_power, fuel_efficiency) VALUES ('GASOLINE', 'MANUAL', 150, 10.0);
 INSERT INTO `engine` (feul_type, transmission, horse_power, fuel_efficiency) VALUES ('GASOLINE', 'AUTOMATIC', 150, 10.0);

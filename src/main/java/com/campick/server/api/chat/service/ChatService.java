@@ -182,6 +182,7 @@ public class ChatService {
 
     private ChatMessageResDto convertToChatMessageResDto(ChatMessage chatMessage, Long chatRoomId) {
         return ChatMessageResDto.builder()
+                .chatId(chatRoomId)
                 .message(chatMessage.getMessage())
                 .chatId(chatRoomId)
                 .senderId(chatMessage.getMember().getId())
@@ -274,7 +275,8 @@ public class ChatService {
         chatRoomResDto.setIsActive(!chatRoom.getIsSellerOut() && !chatRoom.getIsBuyerOut());
 
         List<ChatMessageResDto> chatMessageResDto = chatMessages.stream()
-                .map(this::convertToChatMessageResDto
+                .map(
+                        cm -> convertToChatMessageResDto(cm, chatRoom.getId())
                 ).toList();
         chatRoomResDto.setChatData(chatMessageResDto);
 

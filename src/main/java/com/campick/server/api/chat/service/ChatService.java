@@ -173,12 +173,13 @@ public class ChatService {
         System.out.println(chatMessageReqDto);
 
         ChatMessage chatMessage = saveMessage(chatMessageReqDto);
-        ChatMessageResDto chatMessageResDto = convertToChatMessageResDto(chatMessage);
+        ChatMessageResDto chatMessageResDto = convertToChatMessageResDto(chatMessage, chatMessageReqDto.getChatId());
         sendMessage(chatMessageReqDto.getChatId(), chatMessageResDto, session);
     }
 
-    private ChatMessageResDto convertToChatMessageResDto(ChatMessage chatMessage) {
+    private ChatMessageResDto convertToChatMessageResDto(ChatMessage chatMessage, Long chatRoomId) {
         return ChatMessageResDto.builder()
+                .chatId(chatRoomId)
                 .message(chatMessage.getMessage())
                 .senderId(chatMessage.getMember().getId())
                 .sendAt(TimeUtil.getTimeAgo(chatMessage.getCreatedAt()))
@@ -219,6 +220,7 @@ public class ChatService {
                     payload.put("senderId", message.getSenderId());
                     payload.put("sendAt", message.getSendAt());
                     payload.put("isRead", message.getIsRead());
+                    payload.put("chatId", message.getChatId());
 
                     Map<String, Object> wrapper = new HashMap<>();
                     wrapper.put("type", "chat_message");
@@ -269,7 +271,8 @@ public class ChatService {
         chatRoomResDto.setIsActive(!chatRoom.getIsSellerOut() && !chatRoom.getIsBuyerOut());
 
         List<ChatMessageResDto> chatMessageResDto = chatMessages.stream()
-                .map(this::convertToChatMessageResDto
+                .map(
+                        cm -> convertToChatMessageResDto(cm, chatRoom.getId())
                 ).toList();
         chatRoomResDto.setChatData(chatMessageResDto);
 

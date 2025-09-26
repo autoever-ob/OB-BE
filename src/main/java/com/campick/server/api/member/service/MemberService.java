@@ -139,10 +139,16 @@ public class MemberService {
 
     @Transactional
     public void deleteMember(Long memberId) {
+        // 멤버 지우기
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MEMBER_NOT_FOUND.getMessage()));
         member.delete();
         memberRepository.save(member);
+
+        // product is_deleted를 true로
+        List<Product> productsToDelete = productRepository.findProductsBySeller(member);
+        productsToDelete.forEach(product -> product.setIsDeleted(true));
+        productRepository.saveAll(productsToDelete);
     }
 
     public boolean isEmailDuplicate(String email) {
